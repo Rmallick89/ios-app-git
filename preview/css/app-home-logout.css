@@ -307,3 +307,14 @@ body{background-image:linear-gradient(to top,var(--surface-brand-brand-subtle) 0
 .bub.dim{border-color:var(--stroke-neutral-faded);box-shadow:var(--elevation-neutral-subtle)}
 .bub.dim .face{opacity:.42;filter:grayscale(.9)}
 .bub.dim .face.out{opacity:0}
+/* Explore jobs = DS A.02 Primary · Brand (the search CTA) with a breathing brand glow — user pick 2026-10-09 (sample 2);
+   the white disc + nudging arrow stay. The glow swells/settles every 2.8 s; stops on press and under reduced motion. */
+.pill-explore.pill-dark{background:var(--surface-brand-brand-intense);border-color:transparent;color:var(--content-on-fill-dark-base);
+  box-shadow:var(--elevation-brand-raised);transition:transform .14s ease,background-color .15s ease;animation:exBreathe 2.8s ease-in-out infinite}
+.pill-explore.pill-dark .arr{background:var(--surface-neutral-raised);color:var(--content-neutral-brand)}
+.pill-explore.pill-dark:hover{background:var(--surface-brand-brand-intense)}
+.pill-explore.pill-dark:active{background:var(--surface-brand-brand-intense-pressed);transform:scale(.97);animation:none;box-shadow:var(--elevation-brand-subtle)}
+.pill-explore.pill-dark:focus-visible{outline:2px solid var(--stroke-neutral-focus);outline-offset:3px}
+@media (hover:hover){.pill-explore.pill-dark:hover{background:var(--surface-brand-brand-intense-hover)}}
+@keyframes exBreathe{0%,100%{box-shadow:var(--elevation-brand-raised)}50%{box-shadow:0 10px 26px -6px var(--c-brand-500-op45),0 0 0 6px var(--c-brand-500-op10)}}
+@media (prefers-reduced-motion:reduce){.pill-explore.pill-dark{animation:none}}

@@ -636,9 +636,17 @@ body{background:var(--surface-neutral-base)}
 .pill-explore .arr{width:var(--unit-24);height:var(--unit-24);border-radius:var(--size-radius-full);display:grid;place-items:center;flex:none;overflow:hidden}
 .pill-explore .arr .ic{display:inline-flex;width:var(--size-icon-xs);height:var(--size-icon-xs);animation:nudge 1.8s cubic-bezier(.5,0,.3,1) infinite}
 .pill-explore .arr .ic svg{width:100%;height:100%}
-.pill-dark{background:var(--surface-inverse-base);border-color:transparent;color:var(--content-on-fill-dark-base);box-shadow:var(--elevation-neutral-raised);transition:transform .12s ease}
-.pill-dark .arr{background:var(--surface-neutral-raised);color:var(--content-neutral-base)}
-.pill-dark:active{transform:scale(.97)}
+/* Explore jobs = DS A.02 Primary · Brand (the search CTA) with a breathing brand glow — user pick 2026-10-09 (sample 2);
+   the white disc + nudging arrow stay. The glow swells/settles every 2.8 s; stops on press and under reduced motion. */
+.pill-explore.pill-dark{background:var(--surface-brand-brand-intense);border-color:transparent;color:var(--content-on-fill-dark-base);
+  box-shadow:var(--elevation-brand-raised);transition:transform .14s ease,background-color .15s ease;animation:exBreathe 2.8s ease-in-out infinite}
+.pill-explore.pill-dark .arr{background:var(--surface-neutral-raised);color:var(--content-neutral-brand)}
+.pill-explore.pill-dark:hover{background:var(--surface-brand-brand-intense)}
+.pill-explore.pill-dark:active{background:var(--surface-brand-brand-intense-pressed);transform:scale(.97);animation:none;box-shadow:var(--elevation-brand-subtle)}
+.pill-explore.pill-dark:focus-visible{outline:2px solid var(--stroke-neutral-focus);outline-offset:3px}
+@media (hover:hover){.pill-explore.pill-dark:hover{background:var(--surface-brand-brand-intense-hover)}}
+@keyframes exBreathe{0%,100%{box-shadow:var(--elevation-brand-raised)}50%{box-shadow:0 10px 26px -6px var(--c-brand-500-op45),0 0 0 6px var(--c-brand-500-op10)}}
+@media (prefers-reduced-motion:reduce){.pill-explore.pill-dark{animation:none}}
 .scene{--fh:max(140px,calc(var(--w) * .40))}
 /* whole animation (folder + pills) drawn at 90%, anchored to the bottom centre */
 .scene{transform:scale(.9);transform-origin:50% 100%}
