@@ -712,8 +712,8 @@ html,body{height:auto;overflow:visible;overscroll-behavior:auto}
 @media (prefers-reduced-motion:reduce){.otp--complete .otp-seg,.otp--invalid .otp{animation:none}
 }
 .splash{position:fixed;inset:0;z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:linear-gradient(rgba(13,17,23,.94),rgba(13,17,23,.94));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  color:var(--content-on-fill-dark-base);font-family:var(--typeface-family-brand);text-align:center;animation:splashIn .28s ease both}
+  background-color:var(--surface-inverse-base);
+  color:var(--content-on-fill-dark-base);font-family:var(--typeface-family-brand);text-align:center}
 .splash[hidden]{display:none}
 .splash-c{display:flex;flex-direction:column;align-items:center;padding:0 var(--unit-32)}
 .splash-spin{width:var(--unit-48);height:var(--unit-48);border-radius:50%;border:3px solid rgba(255,255,255,.18);border-top-color:var(--c-brand-400);
@@ -733,15 +733,15 @@ html,body{height:auto;overflow:visible;overscroll-behavior:auto}
 .splash-reset:focus-visible{outline:2px solid var(--c-brand-300);outline-offset:2px}
 @media (hover:hover){.splash-reset:hover{color:var(--content-on-fill-dark-base);border-color:rgba(255,255,255,.28)}
 }
-@keyframes splashIn{from{opacity:0}to{opacity:1}}
 @keyframes splashUp{from{opacity:0;transform:translateY(8px)}}
 @keyframes splashFade{from{opacity:0}to{opacity:1}}
-@media (prefers-reduced-motion:reduce){.splash,.splash-h,.splash-sub,.splash-reset{animation:none}
+@media (prefers-reduced-motion:reduce){.splash-h,.splash-sub,.splash-reset{animation:none}
 .splash-spin{animation:auSpin 1.6s linear infinite}
 }
 .kb-proxy{position:fixed;top:0;left:0;width:1px;height:1px;margin:0;padding:0;border:0;opacity:0;font-size:16px;
   pointer-events:none;caret-color:transparent;background:transparent;z-index:-1}
 .btn--primary[aria-busy="true"][disabled]{background:var(--surface-inverse-base);color:var(--content-on-fill-dark-base);cursor:progress}
+h1[tabindex="-1"]:focus{outline:none}
 
 
 </style>
@@ -1043,7 +1043,7 @@ window.ShineLoginConfig = (function () {
   function route(name, opts) {
     opts = opts || {};
     window.ShineSheet.closeAll('route');
-    var under = name === 'done' ? current : null;            // the splash sits over the blurred screen it came from
+    var under = name === 'done' ? current : null;            // the screen it came from stays mounted under the splash
     $$('.view').forEach(function (v) { var n = v.getAttribute('data-view'); v.hidden = n !== name && n !== under; });
     doc.documentElement.classList.toggle('is-done', name === 'done');
     statusTint(name === 'done' ? SPLASH_TINT : '');
@@ -1446,7 +1446,7 @@ window.ShineLoginConfig = (function () {
   }
 
   /* ── success ──────────────────────────────────────────────────────── */
-  var SPLASH_TINT = '#1B1F24';    // splash scrim (cn-black @ 94 %) over the warm page → the status bar colour while it shows
+  var SPLASH_TINT = '#0D1117';    // = the splash's solid surface.inverse.base → status bar colour while it shows (iOS body bg · Android/Chrome theme-color)
   function loginSuccess(acc, via) {
     $('#doneTitle').textContent = 'Welcome back, ' + acc.name + '.';
     $('#doneSub').textContent = CFG && CFG.next ? 'Taking you back…' : 'Loading your dashboard…';
