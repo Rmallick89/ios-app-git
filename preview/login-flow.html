@@ -706,13 +706,6 @@ html,body{height:auto;overflow:visible;overscroll-behavior:auto}
 .otp--complete .otp-seg:nth-child(4){animation-delay:.09s}
 .otp--complete .otp-seg:nth-child(5){animation-delay:.12s}
 .otp--complete .otp-seg:nth-child(6){animation-delay:.15s}
-.otp--valid .otp-seg{border-color:var(--stroke-status-positive);background:var(--surface-status-positive-subtle);color:var(--content-status-positive);
-  transition:border-color .18s ease,background-color .18s ease,color .18s ease}
-.otp--valid .otp-seg:nth-child(2){transition-delay:.03s}
-.otp--valid .otp-seg:nth-child(3){transition-delay:.06s}
-.otp--valid .otp-seg:nth-child(4){transition-delay:.09s}
-.otp--valid .otp-seg:nth-child(5){transition-delay:.12s}
-.otp--valid .otp-seg:nth-child(6){transition-delay:.15s}
 .otp--invalid .otp{animation:otpShake .36s cubic-bezier(.36,.07,.19,.97) both}
 @keyframes otpPop{0%{transform:scale(1)}45%{transform:scale(1.08)}100%{transform:scale(1)}}
 @keyframes otpShake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(3px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(6px)}}
@@ -746,6 +739,9 @@ html,body{height:auto;overflow:visible;overscroll-behavior:auto}
 @media (prefers-reduced-motion:reduce){.splash,.splash-h,.splash-sub,.splash-reset{animation:none}
 .splash-spin{animation:auSpin 1.6s linear infinite}
 }
+.kb-proxy{position:fixed;top:0;left:0;width:1px;height:1px;margin:0;padding:0;border:0;opacity:0;font-size:16px;
+  pointer-events:none;caret-color:transparent;background:transparent;z-index:-1}
+.btn--primary[aria-busy="true"][disabled]{background:var(--surface-inverse-base);color:var(--content-on-fill-dark-base);cursor:progress}
 
 
 </style>
@@ -886,7 +882,7 @@ html,body{height:auto;overflow:visible;overscroll-behavior:auto}
     <h2 class="nudge-h" id="otpTitle">Enter OTP to <span class="accent">log in.</span></h2>
     <p class="nudge-msg otp-label">Sent to <strong class="num" id="otpTo"></strong><a href="#" data-act="otp-change">Change</a></p>
     <div class="otp-wrap">
-      <input class="otp-input" id="otpInput" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" aria-label="6-digit OTP" aria-describedby="otpMeta">
+      <input class="otp-input" id="otpInput" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" aria-label="6-digit OTP" aria-describedby="otpMeta" data-bs-autofocus>
       <div class="otp" id="otpBoxes" aria-hidden="true"><span class="otp-seg"></span><span class="otp-seg"></span><span class="otp-seg"></span><span class="otp-seg"></span><span class="otp-seg"></span><span class="otp-seg"></span></div>
     </div>
     <div class="otp-meta" id="otpMeta" aria-live="polite"></div>
@@ -907,6 +903,9 @@ html,body{height:auto;overflow:visible;overscroll-behavior:auto}
   </div>
   <div class="bs-foot"><div class="bs-actions"><button class="btn btn--lg btn--block btn--primary" type="button" id="acctBtn" disabled>Send OTP</button></div></div>
 </div>
+
+<!-- keyboard bridge: holds the (numeric) keyboard open between the Get OTP tap and the OTP sheet — see kbHold() -->
+<input class="kb-proxy" id="kbProxy" type="text" inputmode="numeric" autocomplete="off" tabindex="-1" aria-hidden="true">
 
 <!-- ═══════════ DEMO GUIDE (prototype only) ═══════════ -->
 <button class="demo-fab" type="button" data-bs-open="#guideSheet" aria-label="Open demo data" title="Demo data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3L20 3M16 7l3 3M14 9l2 2"/></svg></button>
@@ -1063,6 +1062,23 @@ window.ShineLoginConfig = (function () {
     route(v, { silent: true });
   });
 
+  /* ── keyboard bridge (user, 2026-10-09: "bottom sheet will appear with the keyboard") ──
+     iOS (and Android WebView) only raise the keyboard when a field is focused inside a tap. The OTP sheet
+     opens after "Sending OTP…", outside the tap, so focusing the OTP field then would not bring the keyboard.
+     Instead the tap moves focus field → hidden numeric proxy (keyboard stays up / switches to digits), and
+     the sheet's OTP field takes focus from the proxy as it slides in (data-bs-autofocus) — sheet + keyboard
+     arrive together. Errors hand focus back to the field; the account picker lets the keyboard go. */
+  var kbProxy = $('#kbProxy');
+  function kbHold() { try { kbProxy.focus({ preventScroll: true }); } catch (e) { kbProxy.focus(); } }
+  function kbRelease(back) {
+    if (doc.activeElement !== kbProxy) return;
+    if (back) { try { back.focus({ preventScroll: true }); } catch (e) { back.focus(); } } else kbProxy.blur();
+  }
+  /* tapping Get OTP / Send OTP must not pull focus out of the field first (that would drop the keyboard) */
+  ['#otpBtn', '#fpBtn'].forEach(function (s) {
+    $(s).addEventListener('mousedown', function (e) { var a = doc.activeElement; if (a && a.tagName === 'INPUT') e.preventDefault(); });
+  });
+
   /* ── smart field: mobile number or email ──────────────────────────── */
   function smartField(input, btn, helperFor) {
     var field = input.closest('.field'), prefix = field.querySelector('.field-prefix');
@@ -1144,17 +1160,19 @@ window.ShineLoginConfig = (function () {
     var input = $('#idInput'); idSF.parse();
     if (!idSF.valid()) { setField(input, 'invalid', idSF.mode === 'empty' ? 'Enter your mobile number or email' : idSF.errorText()); input.focus(); return; }
     var done = busy($('#otpBtn'), 'Sending OTP…');
+    kbHold();
     later(function () {
       done();
-      if (SIM.server) { serverAlert('Couldn’t send OTP'); return; }
+      if (SIM.server) { kbRelease(input); serverAlert('Couldn’t send OTP'); return; }
       var acc = lookup(idSF);
       if (!acc.length) {
+        kbRelease(input);
         setField(input, 'invalid', (idSF.mode === 'phone' ? 'No Shine account uses this number.' : 'No account found with this email.') + ' <a href="#" data-act="register">Register instead</a>');
         return;
       }
-      if (acc[0].locked) { setField(input, 'invalid', 'This account is temporarily locked. Try again in 10 min.'); return; }
-      if (acc.length > 1) return openAccounts(acc, 'login');
-      openOtp({ to: idSF.mode === 'phone' ? idSF.display() : idSF.value, account: acc[0], purpose: 'login', back: input });
+      if (acc[0].locked) { kbRelease(input); setField(input, 'invalid', 'This account is temporarily locked. Try again in 10 min.'); return; }
+      if (acc.length > 1) { kbRelease(); return openAccounts(acc, 'login'); }
+      openOtp({ to: idSF.mode === 'phone' ? idSF.display() : idSF.value, account: acc[0], purpose: 'login', back: input, trigger: $('#otpBtn') });
     });
   });
 
@@ -1202,17 +1220,19 @@ window.ShineLoginConfig = (function () {
     $('#otpTitle').innerHTML = opts.purpose === 'reset' ? 'Enter OTP to <span class="accent">reset password.</span>' : 'Enter OTP to <span class="accent">log in.</span>';
     otpBtn.textContent = opts.purpose === 'reset' ? 'Verify OTP' : 'Verify & log in';
     $('#otpTo').textContent = opts.to;
-    otpInput.value = ''; otpWrap.classList.remove('otp--invalid', 'otp--complete', 'otp--valid'); otpBtn.disabled = true;
+    otpInput.value = ''; otpWrap.classList.remove('otp--invalid', 'otp--complete'); otpBtn.disabled = true; otpBtn.removeAttribute('aria-busy'); otp.busy = false;
     startTimer(); lockState(); renderBoxes();
-    window.ShineSheet.open('#otpSheet', { trigger: opts.trigger });
-    setTimeout(function () { if (!otpInput.disabled) otpInput.focus(); }, 60);
+    // the OTP field (data-bs-autofocus) takes focus from the keyboard proxy as the sheet opens → keyboard + sheet together
+    window.ShineSheet.open('#otpSheet', { trigger: opts.trigger || $(opts.purpose === 'reset' ? '#fpBtn' : '#otpBtn') });
+    if (otpInput.disabled) kbRelease();                        // paused after wrong OTPs: no keyboard needed
+    setTimeout(function () { if (!otpInput.disabled && doc.activeElement !== otpInput) otpInput.focus(); }, 60);   // desktop / fallback
   }
   otpInput.addEventListener('input', function () {
     var d = otpInput.value.replace(/\D/g, '').slice(0, 6);
     if (otpInput.value !== d) otpInput.value = d;
     if (otpWrap.classList.contains('otp--invalid')) { otpWrap.classList.remove('otp--invalid'); otpMeta(); }
     otpBtn.disabled = d.length !== 6; renderBoxes();
-    /* auto-submit (user, 2026-10-09): the last digit verifies on its own — boxes ripple, then Verifying… */
+    /* auto-submit (user, 2026-10-09): the last digit verifies on its own — boxes ripple, then "Validating OTP" + spinner */
     clearTimeout(otp.auto); otpWrap.classList.remove('otp--complete');
     if (d.length === 6 && !otp.busy) {
       void otpWrap.offsetWidth; otpWrap.classList.add('otp--complete');
@@ -1224,23 +1244,24 @@ window.ShineLoginConfig = (function () {
   otpBtn.addEventListener('click', function () {
     if (otpInput.value.length !== 6 || otp.busy) return;
     clearTimeout(otp.auto); otp.busy = true;
-    var done = busy(otpBtn, 'Verifying…');
+    var done = busy(otpBtn, 'Validating OTP');
     later(function () {
-      done(); otp.busy = false; otpWrap.classList.remove('otp--complete');
-      if (SIM.server && otp.opts && otp.opts.purpose === 'login') { serverAlert('Couldn’t log you in'); otpInput.focus(); try { otpInput.select(); } catch (e) {} return; }
-      if (otpInput.value === DB.otp) {
+      otpWrap.classList.remove('otp--complete');
+      if (otpInput.value === DB.otp && !(SIM.server && otp.opts && otp.opts.purpose === 'login')) {
+        /* verified (user, 2026-10-09): no green "verified" state — straight on to the next screen
+           (log in → "Welcome back" splash · reset → Create a new password); the button keeps
+           "Validating OTP" while the sheet slides away */
         clearInterval(otp.timer);
         var o = otp.opts;
-        otpWrap.classList.add('otp--valid'); otpBtn.disabled = true; otp.busy = true;   // boxes turn green, then the sheet leaves
-        try { otpInput.blur(); } catch (e) {}
-        setTimeout(function () {
-          otp.busy = false; otpWrap.classList.remove('otp--valid');
-          window.ShineSheet.close('#otpSheet', 'verified');
-          if (o.purpose === 'login') loginSuccess(o.account, 'OTP');
-          else { reset = { account: o.account, at: Date.now() }; startNewPassword(); }
-        }, 520);
+        if (o.purpose === 'login') { try { otpInput.blur(); } catch (e) {} }
+        window.ShineSheet.close('#otpSheet', 'verified');
+        if (o.purpose === 'login') loginSuccess(o.account, 'OTP');
+        else { reset = { account: o.account, at: Date.now() }; startNewPassword(); }
+        setTimeout(function () { done(); otp.busy = false; }, 420);
         return;
       }
+      done(); otp.busy = false;
+      if (SIM.server && otp.opts && otp.opts.purpose === 'login') { serverAlert('Couldn’t log you in'); otpInput.focus(); return; }
       otp.tries++;
       if (otp.tries >= 4) { otpLockUntil = Date.now() + 10 * 60000; lockState(); return; }
       /* wrong: the boxes empty out at once and shake red for a beat, so the next OTP can be typed straight away
@@ -1278,6 +1299,7 @@ window.ShineLoginConfig = (function () {
   $('#acctBtn').addEventListener('click', function () {
     if (picker.sel < 0) return;
     var a = picker.list[picker.sel], done = busy($('#acctBtn'), 'Sending OTP…');
+    kbHold();                                                    // the tap raises the keyboard; the OTP field inherits it
     later(function () {
       done(); window.ShineSheet.close('#acctSheet', 'picked');
       setTimeout(function () { openOtp({ to: maskEmail(a.email), account: a, purpose: picker.purpose }); }, 300);
@@ -1355,15 +1377,17 @@ window.ShineLoginConfig = (function () {
     var input = $('#fpInput'); fpSF.parse();
     if (!fpSF.valid()) { setField(input, 'invalid', fpSF.mode === 'empty' ? 'Enter your mobile number or email' : fpSF.errorText()); input.focus(); return; }
     var done = busy($('#fpBtn'), 'Sending OTP…');
+    kbHold();
     later(function () {
       done();
       var acc = lookup(fpSF);
       if (!acc.length) {
+        kbRelease(input);
         setField(input, 'invalid', 'This ' + (fpSF.mode === 'phone' ? 'number' : 'email') + ' isn’t on Shine. Check it or <a href="#" data-act="register">register</a>.');
         return;
       }
-      if (acc.length > 1) return openAccounts(acc, 'reset');
-      openOtp({ to: fpSF.mode === 'phone' ? fpSF.display() : fpSF.value, account: acc[0], purpose: 'reset' });
+      if (acc.length > 1) { kbRelease(); return openAccounts(acc, 'reset'); }
+      openOtp({ to: fpSF.mode === 'phone' ? fpSF.display() : fpSF.value, account: acc[0], purpose: 'reset', trigger: $('#fpBtn') });
     });
   });
 
