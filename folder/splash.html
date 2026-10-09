@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script data-ios-nozoom>
+  /* iOS Safari auto-zooms the page when a focused field's text is under 16px
+     (search modal, filter search). Adding maximum-scale=1 on iOS / iPadOS only
+     stops that auto-zoom without touching the design. Pinch-to-zoom still works
+     (iOS ignores scale limits for user gestures since iOS 10), and Android —
+     which never auto-zooms — keeps its viewport untouched. */
+  (function () {
+    var iOS = /iP(hone|ad|od)/.test(navigator.userAgent) ||
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);   // iPadOS "desktop" mode
+    var m = document.querySelector('meta[name="viewport"]');
+    if (iOS && m && !/maximum-scale/.test(m.content)) m.content += ', maximum-scale=1';
+  })();
+</script>
+<meta name="theme-color" content="#0D1117">
+<meta name="color-scheme" content="dark">
+<!-- SHINE APP · SPLASH · Crossing paths — a blue and a yellow shooting star cross the screen and meet at the logo.
+     App bundle (APK / iPhone app) · opens index.html. Plays once (≈ 2 s), then replaces itself with ?to=<same-site URL> or "index.html".
+     Dark (#0D1117) from the first paint so the phone status bar matches; ?loop=1 replays (review). -->
+<title>Shine</title>
+<link rel="preload" href="fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="fonts/fonts.css"><script src="native.js"></script>
+
+
+<style>
+
+/* ════════════════════════════════════════════════════════════════
+   SHINE DESIGN SYSTEM — TOKENS
+   Source: design-system/DESIGN-SYSTEM.md · design-system/component-system.md
+   Mobile-only build → the §2.1 / §2.3 mobile column is the :root default.
+   Layer 1: primitives (definitions only — never consumed by components)
+   ════════════════════════════════════════════════════════════════ */
+:root{
+  --c-brand-50:#F0F5FF; --c-brand-100:#EBF0FF; --c-brand-200:#C9DBFF; --c-brand-300:#7EA3FF;
+  --c-brand-400:#4D7CFF; --c-brand-500:#1A56FF; --c-brand-600:#0B3FCC; --c-brand-700:#0A33A6;
+  --c-brand-500-op10:rgba(26,86,255,.10); --c-brand-500-op18:rgba(26,86,255,.18);
+  --c-brand-500-op40:rgba(26,86,255,.40); --c-brand-500-op45:rgba(26,86,255,.45);
+  --c-cn-50:#F7F9FB; --c-cn-100:#EEF1F5; --c-cn-200:#E4E7EC; --c-cn-300:#C8CED7; --c-cn-400:#98A2B3;
+  --c-cn-500:#667085; --c-cn-600:#4A5260; --c-cn-700:#344054; --c-cn-800:#232A38; --c-cn-900:#161B22;
+  --c-cn-black:#0D1117; --c-cn-white:#FFFFFF;
+  --c-cn-black-04:rgba(13,17,23,.04); --c-cn-black-06:rgba(13,17,23,.06); --c-cn-black-08:rgba(13,17,23,.08);
+  --c-cn-black-10:rgba(13,17,23,.10); --c-cn-black-20:rgba(13,17,23,.20); --c-cn-black-30:rgba(13,17,23,.30);
+  --c-cn-black-75:rgba(13,17,23,.36);
+  --c-wn-50:#FFFDF8; --c-wn-100:#FAF9F6; --c-wn-200:#F5F1E8; --c-wn-300:#E8E5DD;
+  --c-green-50:#EAFAF0; --c-green-500:#12B76A; --c-green-500-op30:rgba(18,183,106,.30); --c-green-600:#0E9A5A; --c-green-700:#027A48;
+  --c-red-600:#B42318; --c-red-700:#8B1A14; --c-amber-100:#FFF4ED; --c-amber-400:#FAB663; --c-amber-700:#A35A04;
+  --c-pink-100:#FCE7F3; --c-pink-600:#BE185D;
+  --c-violet-100:#F3EEFE; --c-violet-200:#DAC9FF; --c-violet-500:#7A5AF8; --c-violet-600:#6F46E0;
+  --c-aqua-100:#CCFBEE; --c-aqua-500:#14B8A6; --c-aqua-700:#0F766A;
+  --c-cyan-100:#CFFAFE; --c-cyan-700:#0E7490;
+  --c-lime-100:#EBFFB0; --c-lime-300:#C4FF38; --c-lime-700:#56770B;
+  --c-ey-100:#FFFCC0; --c-ey-400:#FFE419; --c-ey-800:#5F5200;
+  /* Shine logo artwork yellow — sampled from shine-logo-light.svg, outside the DS ramps */
+  --c-logo-yellow:#FACA22;
+
+  --unit-0:0; --unit-1:1px; --unit-1-5:1.5px; --unit-2:2px; --unit-4:4px; --unit-6:6px; --unit-8:8px;
+  --unit-10:10px; --unit-12:12px; --unit-14:14px; --unit-16:16px; --unit-18:18px; --unit-20:20px;
+  --unit-22:22px; --unit-24:24px; --unit-26:26px; --unit-28:28px; --unit-32:32px; --unit-36:36px; --unit-40:40px;
+  --unit-44:44px; --unit-48:48px; --unit-56:56px; --unit-64:64px; --unit-72:72px; --unit-96:96px;
+  --unit-240:240px; --unit-360:360px; --unit-480:480px; --unit-1024:1024px;
+
+  --typeface-family-brand:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
+  --typeface-weight-regular:400; --typeface-weight-medium:500; --typeface-weight-semibold:600;
+  --typeface-weight-bold:700; --typeface-weight-extrabold:800;
+}
+/* Layer 2: SEMANTIC TOKENS — the only layer components consume */
+:root{
+  /* §2.1 Typography · mobile */
+  --type-display-lg-size:var(--unit-40); --type-display-lg-lh:var(--unit-40); --type-display-lg-ls:-1px;
+  --type-display-md-size:var(--unit-32); --type-display-md-lh:var(--unit-36); --type-display-md-ls:-0.4px;
+  --type-display-sm-size:var(--unit-24); --type-display-sm-lh:var(--unit-28); --type-display-sm-ls:-0.3px;
+  --type-heading-lg-size:var(--unit-22); --type-heading-lg-lh:var(--unit-26);
+  --type-heading-md-size:var(--unit-18); --type-heading-md-lh:var(--unit-22); --type-heading-md-ls:-0.2px;
+  --type-heading-sm-size:var(--unit-16); --type-heading-sm-lh:var(--unit-20);
+  --type-body-lg-size:var(--unit-16); --type-body-lg-lh:var(--unit-24);
+  --type-body-md-size:var(--unit-14); --type-body-md-lh:var(--unit-20);
+  --type-body-sm-size:var(--unit-12); --type-body-sm-lh:var(--unit-18);
+  --type-label-lg-size:var(--unit-14); --type-label-lg-lh:var(--unit-14);
+  --type-label-md-size:var(--unit-12); --type-label-md-lh:var(--unit-12);
+  --type-label-sm-size:var(--unit-10); --type-label-sm-lh:var(--unit-10);
+  --type-eyebrow-md-size:var(--unit-12); --type-eyebrow-md-lh:var(--unit-12); --type-eyebrow-md-ls:var(--unit-1-5);
+  --type-eyebrow-sm-size:var(--unit-10); --type-eyebrow-sm-lh:var(--unit-10); --type-eyebrow-sm-ls:var(--unit-1);
+
+  /* §2.2 Content */
+  --content-neutral-base:var(--c-cn-black); --content-neutral-muted:var(--c-cn-700);
+  --content-neutral-faded:var(--c-cn-500); --content-neutral-disabled:var(--c-cn-black-75);
+  --content-neutral-brand:var(--c-brand-600); --content-neutral-brand-hover:var(--c-brand-700);
+  --content-on-fill-dark-base:var(--c-cn-white); --content-on-fill-dark-muted:var(--c-cn-300);
+  --content-status-positive:var(--c-green-700); --content-status-notice:var(--c-amber-700);
+  --content-decorative-violet:var(--c-violet-600); --content-decorative-pink:var(--c-pink-600);
+  --content-decorative-aqua:var(--c-aqua-700); --content-decorative-cyan:var(--c-cyan-700);
+  --content-decorative-lime:var(--c-lime-700); --content-decorative-electric-yellow:var(--c-ey-800);
+
+  /* §2.2 Surface */
+  --surface-neutral-base:var(--c-wn-100); --surface-neutral-raised:var(--c-cn-white);
+  --surface-neutral-muted:var(--c-cn-100); --surface-neutral-sunken:var(--c-cn-200);
+  --surface-neutral-state-hover:var(--c-cn-100); --surface-neutral-state-pressed:var(--c-cn-200);
+  --surface-neutral-state-selected:var(--c-brand-50);
+  --surface-inverse-base:var(--c-cn-black); --surface-inverse-raised:var(--c-cn-800);
+  --surface-inverse-state-hover:var(--c-cn-700); --surface-inverse-state-pressed:var(--c-cn-600);
+  --surface-brand-brand-intense:var(--c-brand-500); --surface-brand-brand-intense-hover:var(--c-brand-600);
+  --surface-brand-brand-intense-pressed:var(--c-brand-700); --surface-brand-brand-subtle:var(--c-brand-100);
+  --surface-status-positive-intense:var(--c-green-700); --surface-status-positive-subtle:var(--c-green-50);
+  --surface-status-notice-subtle:var(--c-amber-100);
+  --surface-decorative-violet-subtle:var(--c-violet-100); --surface-decorative-pink-subtle:var(--c-pink-100);
+  --surface-decorative-aqua-subtle:var(--c-aqua-100); --surface-decorative-cyan-subtle:var(--c-cyan-100);
+  --surface-decorative-lime-subtle:var(--c-lime-100); --surface-decorative-lime-intense:var(--c-lime-300);
+  --surface-decorative-electric-yellow-subtle:var(--c-ey-100); --surface-decorative-electric-yellow-intense:var(--c-ey-400);
+  --surface-decorative-violet-intense:var(--c-violet-600);
+  /* alias — warm-neutral/200, the canvas tint used on Shine's warm pages */
+  --surface-neutral-warm:var(--c-wn-200);
+  /* alias — brand/50 wash for glows behind hero visuals */
+  --surface-brand-wash:var(--c-brand-50);
+
+  /* §2.2 Stroke */
+  --stroke-neutral-base:var(--c-cn-200); --stroke-neutral-muted:var(--c-cn-100);
+  --stroke-neutral-faded:var(--c-cn-50); --stroke-neutral-focus:var(--c-brand-500);
+  --stroke-neutral-strong:var(--c-cn-300); /* alias — JSRP hover border */
+  --stroke-status-positive:var(--c-green-600); --stroke-decorative-violet:var(--c-violet-500);
+
+  /* §2.3 Spacing · mobile */
+  --spacing-inset-xs:var(--unit-4); --spacing-inset-sm:var(--unit-6); --spacing-inset-md:var(--unit-8);
+  --spacing-inset-lg:var(--unit-12); --spacing-inset-xl:var(--unit-16); --spacing-inset-xxl:var(--unit-22);
+  --spacing-inline-xs:var(--unit-2); --spacing-inline-sm:var(--unit-4); --spacing-inline-md:var(--unit-8);
+  --spacing-inline-lg:var(--unit-12); --spacing-inline-xl:var(--unit-18);
+  --spacing-stack-3xs:var(--unit-2); --spacing-stack-xxs:var(--unit-4); --spacing-stack-xs:var(--unit-8);
+  --spacing-stack-md:var(--unit-12); --spacing-stack-lg:var(--unit-14); --spacing-stack-xl:var(--unit-20);
+  --spacing-stack-xxl:var(--unit-24);
+  --spacing-section-xs:var(--unit-16); --spacing-section-sm:var(--unit-20); --spacing-section-md:var(--unit-24);
+  --spacing-section-lg:var(--unit-32);
+  --spacing-layout-xs:var(--unit-16); --spacing-layout-sm:var(--unit-24);
+
+  /* §2.4 Size */
+  --size-stroke-thin:var(--unit-1); --size-stroke-default:var(--unit-1-5); --size-stroke-thick:var(--unit-2);
+  --size-radius-xs:var(--unit-2); --size-radius-sm:var(--unit-4); --size-radius-md:var(--unit-8);
+  --size-radius-lg:var(--unit-12); --size-radius-xl:var(--unit-16); --size-radius-2xl:var(--unit-24);
+  --size-radius-3xl:var(--unit-32); --size-radius-full:var(--unit-1024);
+  --size-icon-xs:var(--unit-12); --size-icon-sm:var(--unit-14); --size-icon-md:var(--unit-16);
+  --size-icon-lg:var(--unit-20); --size-icon-xl:var(--unit-24); --size-icon-2xl:var(--unit-32); --size-icon-3xl:var(--unit-40);
+  /* alias — mobile artboard cap so the prototype stays phone-shaped on wide windows */
+  --size-layout-mobile-max:var(--unit-480);
+  /* A.02.9 proposed — hover-lift offset */
+  --motion-lift-up:calc(-1 * var(--unit-1));
+  --size-control-sm:var(--unit-40); --size-control-md:var(--unit-44); --size-control-lg:var(--unit-48); --size-control-xl:var(--unit-56);
+
+  /* §2.5 Elevation · light */
+  --elevation-neutral-subtle:0 1px 2px var(--c-cn-black-04);
+  --elevation-neutral-raised:0 1px 3px var(--c-cn-black-08),0 1px 2px var(--c-cn-black-04);
+  --elevation-neutral-lifted:0 4px 12px var(--c-cn-black-08),0 2px 4px var(--c-cn-black-04);
+  --elevation-neutral-overlay:0 16px 36px -10px var(--c-cn-black-30),0 4px 10px -2px var(--c-cn-black-10);
+  --elevation-neutral-modal:0 24px 60px -12px var(--c-cn-black-20),0 6px 16px -6px var(--c-cn-black-10);
+  --elevation-brand-subtle:0 8px 24px -10px var(--c-brand-500-op18);
+  --elevation-brand-raised:0 6px 14px -4px var(--c-brand-500-op45);
+  --elevation-brand-lifted:0 16px 40px -12px var(--c-brand-500-op40);
+  --elevation-focus-default:0 0 0 4px var(--c-brand-500-op10);
+}
+
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{background:var(--surface-neutral-base);color:var(--content-neutral-base);font-family:var(--typeface-family-brand);
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+/* ── The whole homepage is one hero: exactly one viewport tall, never scrolls ── */
+.screen{height:100vh;height:100dvh;width:100%;max-width:var(--size-layout-mobile-max);margin:0 auto;display:flex;flex-direction:column;
+  position:relative;overflow:hidden;padding-top:env(safe-area-inset-top)}
+.stage{flex:1 1 auto;min-height:0;position:relative;container-type:size}
+/* App bar */
+.appbar{flex:none;height:var(--size-control-xl);display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--spacing-layout-xs);position:relative;z-index:5}
+.shine-logo{height:var(--unit-36);width:auto;color:var(--content-neutral-base);display:block}
+.ic{display:inline-flex;width:var(--size-icon-md);height:var(--size-icon-md);flex:none}
+.ic svg{width:100%;height:100%}
+.ic-lg{width:var(--size-icon-lg);height:var(--size-icon-lg)}
+.link-explore{display:inline-flex;align-items:center;gap:var(--spacing-inline-sm);height:var(--size-control-sm);padding:0 var(--spacing-inset-md);
+  margin-right:calc(-1 * var(--spacing-inset-md));border-radius:var(--size-radius-lg);
+  font-size:var(--type-label-lg-size);line-height:var(--type-label-lg-lh);font-weight:var(--typeface-weight-bold);color:var(--content-neutral-muted)}
+.link-explore:active{background:var(--surface-neutral-state-hover)}
+/* A.02 Button */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--spacing-inline-md);white-space:nowrap;
+  font-family:var(--typeface-family-brand);font-weight:var(--typeface-weight-bold);letter-spacing:0;
+  border-radius:var(--size-radius-lg);transition:transform .15s ease,box-shadow .15s ease,background-color .15s ease;
+  -webkit-user-select:none;user-select:none}
+.btn:focus-visible{outline:var(--size-stroke-default) solid var(--stroke-neutral-focus);box-shadow:var(--elevation-focus-default)}
+.btn--xl{height:var(--size-control-xl);padding:0 var(--spacing-inset-xxl);font-size:var(--type-label-lg-size);line-height:var(--type-label-lg-lh)}
+.btn--lg{height:var(--size-control-lg);padding:0 var(--spacing-inset-xxl);font-size:var(--type-label-lg-size);line-height:var(--type-label-lg-lh)}
+.btn--md{height:var(--size-control-md);padding:0 var(--spacing-inset-xl);font-size:var(--type-label-md-size);line-height:var(--type-label-md-lh)}
+.btn--block{width:100%}
+.btn--primary{background:var(--surface-inverse-base);color:var(--content-on-fill-dark-base)}
+.btn--primary:active{background:var(--surface-inverse-state-pressed);box-shadow:var(--elevation-neutral-raised)}
+.btn--brand{background:var(--surface-brand-brand-intense);color:var(--content-on-fill-dark-base);box-shadow:var(--elevation-brand-raised)}
+.btn--brand:active{background:var(--surface-brand-brand-intense-pressed);box-shadow:var(--elevation-brand-subtle)}
+.btn--secondary{background:var(--surface-neutral-raised);color:var(--content-neutral-base);border:var(--size-stroke-default) solid var(--stroke-neutral-base)}
+.btn--secondary:active{background:var(--surface-neutral-state-pressed)}
+.btn--tertiary{color:var(--content-neutral-brand);padding:0 var(--spacing-inset-sm);height:auto}
+@media (hover:hover){
+  .btn--primary:hover{background:var(--surface-inverse-state-hover);box-shadow:var(--elevation-neutral-lifted);transform:translateY(var(--motion-lift-up))}
+  .btn--brand:hover{background:var(--surface-brand-brand-intense-hover);box-shadow:var(--elevation-brand-lifted);transform:translateY(var(--motion-lift-up))}
+  .btn--secondary:hover{background:var(--surface-neutral-state-hover)}
+}
+.cta-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--spacing-inline-lg)}
+.cta-row .btn{padding:0 var(--spacing-inset-lg)}
+.legal{font-size:var(--type-body-sm-size);line-height:var(--type-body-sm-lh);color:var(--content-neutral-faded);text-align:center}
+.legal a{color:var(--content-neutral-muted);font-weight:var(--typeface-weight-semibold);text-decoration:underline;text-underline-offset:var(--unit-2)}
+.foot{flex:none;padding:0 var(--spacing-layout-xs) max(var(--spacing-stack-xl), env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;gap:var(--spacing-stack-md);position:relative;z-index:4}
+/* Hero copy */
+.h1{font-size:var(--type-display-lg-size);line-height:var(--type-display-lg-lh);letter-spacing:var(--type-display-lg-ls);
+  font-weight:var(--typeface-weight-extrabold);text-wrap:balance}
+.sub{font-size:var(--type-body-lg-size);line-height:var(--type-body-lg-lh);color:var(--content-neutral-muted);
+  font-weight:var(--typeface-weight-medium);text-wrap:balance}
+.sub b{color:var(--content-neutral-brand);font-weight:var(--typeface-weight-bold)}
+.eyebrow{font-size:var(--type-eyebrow-md-size);line-height:var(--type-eyebrow-md-lh);letter-spacing:var(--type-eyebrow-md-ls);
+  font-weight:var(--typeface-weight-bold);text-transform:uppercase;color:var(--content-neutral-faded)}
+/* Logos */
+.logo{display:block;background:center/contain no-repeat;aspect-ratio:var(--ar);flex:none}
+/* Marquee */
+@keyframes marquee{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+.marquee{display:flex;width:max-content;animation:marquee var(--dur,40s) linear infinite}
+.marquee.rev{animation-direction:reverse}
+/* Short phones (iPhone SE / 8, Android 16:9): step the hero headline down one tier */
+@media (max-height:720px){
+  .h1{font-size:var(--type-display-md-size);line-height:var(--type-display-md-lh);letter-spacing:var(--type-display-md-ls)}
+  .sub{font-size:var(--type-body-md-size);line-height:var(--type-body-md-lh)}
+  .hide-short{display:none!important}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0s!important;animation-iteration-count:1!important;transition:none!important}}
+
+/* ── Logo sprites (each embedded once) ── */
+
+/* ── Page ── */
+
+html,body{background:var(--surface-inverse-base)}
+.sp{position:fixed;inset:0;overflow:hidden;background:var(--surface-inverse-base);color:var(--content-on-fill-dark-base)}
+.sp-stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;isolation:isolate;
+  padding:env(safe-area-inset-top) var(--spacing-layout-sm) env(safe-area-inset-bottom)}
+/* animated background layers: always fade to plain ink under the status bar */
+.fx{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 calc(env(safe-area-inset-top) + var(--unit-64)));
+          mask-image:linear-gradient(to bottom,transparent 0,#000 calc(env(safe-area-inset-top) + var(--unit-64)))}
+.fx>*{position:absolute}
+.grain{inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27160%27 height=%27160%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%27.85%27 numOctaves=%272%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27 opacity=%27.55%27/%3E%3C/svg%3E");background-size:160px;opacity:.07;mix-blend-mode:overlay}
+.sp-logo{width:min(50vw,196px);height:auto;color:var(--content-on-fill-dark-base);position:relative}
+.tag{margin:var(--spacing-stack-xl) 0 0;font-size:var(--type-body-md-size);line-height:var(--type-body-md-lh);font-weight:var(--typeface-weight-medium);
+  color:var(--content-on-fill-dark-muted);text-align:center;opacity:0;animation:rise .6s cubic-bezier(.22,1,.36,1) var(--td,1.3s) forwards}
+/* hand-over: content and background settle into plain ink, then the homepage replaces the page */
+html.out .sp-stage{animation:spOut .42s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes spOut{to{opacity:0;transform:scale(1.02)}}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01s!important;animation-delay:0s!important;animation-iteration-count:1!important}
+  html.out .sp-stage{animation:spOut .01s forwards}}
+
+.sm .bg{inset:0;background:linear-gradient(to top,color-mix(in srgb,var(--c-brand-700) 34%,transparent),transparent 55%);opacity:0;animation:fadeIn .8s ease forwards}
+.sm svg.stars{inset:0;width:100%;height:100%;fill:var(--c-cn-white);opacity:0;animation:fadeIn 1s ease .05s forwards}
+.sm svg.met{inset:0;width:100%;height:100%;overflow:visible}
+.sm .met path{fill:none;stroke-linecap:round}
+.sm .m-b{--tail:var(--c-brand-300);--core:var(--c-brand-100);--glow:var(--c-brand-400)}
+.sm .m-y{--tail:var(--c-logo-yellow);--core:color-mix(in srgb,var(--c-logo-yellow) 45%,var(--c-cn-white));--glow:var(--c-logo-yellow)}
+.sm .met .t1{stroke:var(--tail);stroke-width:2.4;opacity:.95}
+.sm .met .t2{stroke:var(--tail);stroke-width:1.5;opacity:.45}
+.sm .met .t3{stroke:var(--tail);stroke-width:1;opacity:.2}
+.sm .met .hd{fill:var(--core)}
+.sm .met .gl{opacity:.9}
+.sm .met stop{stop-color:var(--glow)}
+.sm .met .m{transition:opacity .25s ease}
+.sm .hit .met .m{opacity:0}
+/* arrival */
+.sm .halo{left:var(--mx,50%);top:var(--my,50%);width:min(100vw,400px);aspect-ratio:1;margin:calc(min(100vw,400px) / -2) 0 0 calc(min(100vw,400px) / -2);border-radius:50%;
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--c-brand-300) 30%,transparent),color-mix(in srgb,var(--c-brand-500) 10%,transparent) 45%,transparent 72%);opacity:0;transform:scale(.35)}
+.sm .hit .halo{animation:halo .85s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes halo{30%{opacity:.8}to{opacity:.3;transform:none}}
+.sm .spark{left:var(--mx,50%);top:var(--my,50%);width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--c-cn-white);
+  box-shadow:0 0 18px 6px color-mix(in srgb,var(--c-brand-200) 70%,transparent);opacity:0}
+.sm .hit .spark{animation:spark .45s ease-out forwards}
+@keyframes spark{0%{opacity:1;transform:scale(.6)}100%{opacity:0;transform:scale(2.2)}}
+.sm .sp-logo{width:min(44vw,172px);opacity:0;transform:scale(.97);filter:blur(4px)}
+.sm .hit .sp-logo{animation:focus .45s cubic-bezier(.16,1,.3,1) .04s forwards}
+@keyframes focus{to{opacity:1;transform:none;filter:blur(0)}}
+.sm .tag{margin-top:var(--spacing-stack-lg);letter-spacing:.01em;animation:none}
+.sm .hit .tag{animation:rise .45s cubic-bezier(.22,1,.36,1) .26s forwards}
+html.out .sp-stage{animation-duration:.32s}
+@media (prefers-reduced-motion:reduce){.sm .met{display:none}}
+
+</style>
+<link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shine Folder"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})</script>
+</head>
+<body>
+<div class="sp sm"><div class="sp-stage"><div class="fx" aria-hidden="true"><i class="bg"></i><svg class="stars"><circle cx="33.1%" cy="21.5%" r="1.1" opacity="0.18"/><circle cx="9.0%" cy="53.5%" r="0.8" opacity="0.34"/><circle cx="7.6%" cy="51.1%" r="0.7" opacity="0.18"/><circle cx="43.6%" cy="14.8%" r="0.7" opacity="0.34"/><circle cx="42.8%" cy="77.6%" r="0.7" opacity="0.18"/><circle cx="62.5%" cy="57.4%" r="0.7" opacity="0.34"/><circle cx="58.2%" cy="13.1%" r="0.7" opacity="0.18"/><circle cx="55.4%" cy="20.1%" r="0.8" opacity="0.18"/><circle cx="53.9%" cy="56.4%" r="1.1" opacity="0.34"/><circle cx="19.3%" cy="57.3%" r="1.1" opacity="0.18"/><circle cx="37.8%" cy="54.5%" r="0.7" opacity="0.34"/><circle cx="7.7%" cy="26.1%" r="1.1" opacity="0.34"/><circle cx="43.0%" cy="35.1%" r="1.1" opacity="0.26"/><circle cx="36.7%" cy="29.6%" r="0.7" opacity="0.34"/><circle cx="76.9%" cy="15.8%" r="0.8" opacity="0.34"/><circle cx="49.5%" cy="37.5%" r="0.8" opacity="0.26"/><circle cx="60.5%" cy="15.1%" r="1.1" opacity="0.26"/><circle cx="17.8%" cy="37.4%" r="0.8" opacity="0.26"/><circle cx="5.8%" cy="64.5%" r="1.1" opacity="0.34"/><circle cx="77.8%" cy="76.9%" r="0.8" opacity="0.34"/><circle cx="35.6%" cy="50.2%" r="0.8" opacity="0.18"/><circle cx="82.6%" cy="87.4%" r="0.8" opacity="0.34"/><circle cx="65.8%" cy="14.0%" r="1.1" opacity="0.26"/><circle cx="64.1%" cy="91.4%" r="0.8" opacity="0.26"/><circle cx="70.8%" cy="82.6%" r="0.8" opacity="0.18"/><circle cx="92.3%" cy="38.5%" r="1.1" opacity="0.18"/><circle cx="49.4%" cy="27.1%" r="0.8" opacity="0.18"/><circle cx="72.9%" cy="42.0%" r="0.8" opacity="0.18"/><circle cx="18.0%" cy="42.3%" r="0.8" opacity="0.18"/><circle cx="80.7%" cy="80.7%" r="0.8" opacity="0.34"/><circle cx="41.9%" cy="38.8%" r="0.8" opacity="0.18"/><circle cx="16.5%" cy="23.6%" r="0.7" opacity="0.34"/><circle cx="24.4%" cy="49.3%" r="1.1" opacity="0.18"/><circle cx="27.2%" cy="9.3%" r="0.8" opacity="0.34"/></svg><svg class="met"></svg><i class="halo"></i><i class="spark"></i></div><svg class="shine-logo sp-logo" viewBox="13 25 214 130" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shine">
+<path class="w w1" d="M38.8164 104.079C43.392 104.079 47.3954 105.167 50.8271 107.341C54.3162 109.458 56.7761 112.462 58.2061 116.353L48.6826 120.815C47.9963 118.87 46.7375 117.325 44.9072 116.181C43.1343 114.979 41.104 114.378 38.8164 114.378C37.1577 114.378 35.8415 114.722 34.8691 115.408C33.9542 116.095 33.4972 117.039 33.4971 118.24C33.4971 118.87 33.6685 119.442 34.0117 119.957C34.3549 120.472 34.8981 120.93 35.6416 121.33C36.4424 121.731 37.4147 122.103 38.5586 122.446L46.0225 124.678C49.9118 125.822 52.8862 127.567 54.9453 129.913C57.0043 132.202 58.0341 135.034 58.0342 138.409C58.0342 141.327 57.262 143.874 55.7178 146.048C54.2307 148.222 52.1431 149.939 49.4551 151.197C46.7669 152.399 43.5922 153 39.9316 153C34.7841 153 30.294 151.798 26.4619 149.396C22.6869 146.935 20.113 143.645 18.7402 139.525L28.1777 135.062C29.3788 137.58 31.0085 139.554 33.0674 140.984C35.1265 142.415 37.415 143.13 39.9316 143.13C41.7618 143.13 43.1634 142.758 44.1357 142.015C45.108 141.271 45.5937 140.241 45.5938 138.925C45.5938 138.238 45.4223 137.666 45.0791 137.208C44.736 136.693 44.2213 136.235 43.5352 135.835C42.8488 135.434 41.9905 135.091 40.9609 134.805L32.9824 132.573C29.1503 131.486 26.2046 129.741 24.1455 127.338C22.0865 124.878 21.0567 121.988 21.0566 118.67C21.0566 115.752 21.8 113.206 23.2871 111.031C24.7742 108.857 26.8617 107.169 29.5498 105.968C32.2381 104.709 35.3274 104.079 38.8164 104.079Z" fill="currentColor"/>
+<path class="w w2" fill-rule="evenodd" clip-rule="evenodd" d="M201.976 104.079C205.693 104.079 208.982 104.68 211.842 105.882C214.702 107.026 217.104 108.656 219.049 110.773C221.051 112.89 222.566 115.351 223.596 118.154C224.625 120.901 225.14 123.905 225.14 127.166C225.14 128.081 225.083 128.998 224.969 129.913C224.912 130.771 224.768 131.515 224.539 132.145H191.731C191.885 133.344 192.181 134.459 192.623 135.491C193.481 137.494 194.797 139.068 196.57 140.212C198.343 141.299 200.488 141.843 203.005 141.843C205.293 141.843 207.237 141.385 208.839 140.47C210.497 139.554 211.784 138.295 212.699 136.693L222.995 141.585C222.08 143.874 220.621 145.876 218.619 147.593C216.674 149.309 214.358 150.654 211.67 151.627C208.982 152.542 206.036 153 202.833 153C197.857 153 193.539 151.913 189.878 149.738C186.217 147.507 183.386 144.532 181.384 140.812C179.382 137.094 178.381 132.974 178.381 128.454C178.381 123.762 179.411 119.585 181.47 115.923C183.586 112.261 186.418 109.372 189.964 107.255C193.51 105.138 197.514 104.079 201.976 104.079ZM201.976 114.378C199.745 114.378 197.828 114.922 196.227 116.009C194.625 117.096 193.424 118.698 192.623 120.815C192.399 121.409 192.214 122.038 192.066 122.703H211.505C211.431 121.983 211.287 121.296 211.069 120.644C210.44 118.698 209.325 117.182 207.724 116.095C206.179 114.95 204.263 114.378 201.976 114.378Z" fill="currentColor"/>
+<path class="w w3" d="M75.6787 109.418C76.6593 108.043 77.8885 106.949 79.3682 106.139C81.8276 104.765 84.688 104.079 87.9482 104.079C91.4943 104.079 94.5829 104.823 97.2139 106.311C99.9021 107.798 101.989 109.887 103.477 112.576C104.964 115.208 105.708 118.298 105.708 121.846V151.97H92.8379V124.592C92.8379 122.761 92.4662 121.187 91.7227 119.871C91.0363 118.555 90.0352 117.525 88.7197 116.781C87.4615 116.038 85.9745 115.666 84.2588 115.666C82.6001 115.666 81.1124 116.037 79.7969 116.781C78.4815 117.525 77.4525 118.555 76.709 119.871C76.0226 121.187 75.6787 122.761 75.6787 124.592V151.97H62.8096V87H75.6787V109.418Z" fill="currentColor"/>
+<path class="w w4" d="M124.123 151.97H111.254V105.109H124.123V151.97Z" fill="currentColor"/>
+<path class="w w5" d="M155.763 104.079C159.309 104.079 162.397 104.823 165.028 106.311C167.717 107.798 169.805 109.887 171.292 112.576C172.779 115.208 173.522 118.298 173.522 121.846V151.97H160.653V124.592C160.653 122.761 160.282 121.187 159.538 119.871C158.852 118.555 157.851 117.525 156.535 116.781C155.277 116.037 153.789 115.666 152.073 115.666C150.415 115.666 148.928 116.038 147.612 116.781C146.297 117.525 145.267 118.555 144.523 119.871C143.837 121.187 143.494 122.761 143.494 124.592V151.97H130.625V105.109H142.636V110.811C143.719 108.764 145.235 107.206 147.184 106.139C149.643 104.766 152.503 104.079 155.763 104.079Z" fill="currentColor"/>
+<path class="w w6" d="M117.353 88C120.936 88.0002 123.84 90.8936 123.84 94.4883C123.84 98.0791 120.936 100.972 117.353 100.973C113.767 100.973 110.867 98.0793 110.867 94.4883C110.867 90.8934 113.767 88 117.353 88Z" fill="currentColor"/>
+<path class="a-y" d="M111.367 38C151.563 38 186.076 62.3239 200.993 97.0547C196.523 97.1799 192.397 98.1007 188.614 99.8174C174.186 68.2516 142.335 46.3175 105.36 46.3174C61.9889 46.3174 25.6667 76.4962 16.2451 117H15.6201C24.2635 71.9991 63.8449 38 111.367 38Z" fill="var(--c-logo-yellow)"/>
+<path class="a-b" d="M119.367 27C167.02 27 207.291 58.5937 220.382 101.977C218.896 101.024 217.289 100.2 215.559 99.5078C212.244 98.1144 208.508 97.3131 204.352 97.0996C189.475 61.2298 154.118 36 112.867 36C64.338 36 23.9658 70.918 15.501 117H15C22.497 66.0825 66.3669 27 119.367 27Z" fill="var(--c-brand-500)"/>
+</svg>
+<p class="tag">Your skills. The right job.</p></div></div>
+<script>
+function PATHS(W, H, cx, cy) {
+  return [{ d: 'M' + (-.08 * W) + ' ' + (cy - .3 * H) + ' L' + cx + ' ' + cy, cls: 'm-b', delay: 120, dur: 620 },
+          { d: 'M' + (1.08 * W) + ' ' + (cy + .3 * H) + ' L' + cx + ' ' + cy, cls: 'm-y', delay: 170, dur: 570 }];
+}
+window.SP_START = function (st, reduce) {
+  var svg = st.querySelector('.met'), lg = st.querySelector('.sp-logo');
+  var sr = st.getBoundingClientRect(), r = lg.getBoundingClientRect();
+  var W = st.offsetWidth, H = st.offsetHeight, k = sr.width / W || 1;            // layout px, even inside a scaled frame
+  var cx = (r.left - sr.left + r.width / 2) / k, cy = (r.top - sr.top + r.height * .5) / k;
+  st.style.setProperty('--cx', cx + 'px'); st.style.setProperty('--cy', cy + 'px');
+  if (reduce) { st.classList.add('hit'); return; }
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  var NS = 'http://www.w3.org/2000/svg', list = PATHS(W, H, cx, cy), t0 = null, arrived = 0;
+  function el(n, a, p) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; }
+  var defs = el('defs', {}, svg);
+  ['m-b', 'm-y'].forEach(function (c) { var rg = el('radialGradient', { id: c + '-g', 'class': c }, defs);
+    el('stop', { offset: '0', 'stop-opacity': '.65' }, rg); el('stop', { offset: '.45', 'stop-opacity': '.18' }, rg); el('stop', { offset: '1', 'stop-opacity': '0' }, rg); });
+  list.forEach(function (m, i) { m.i = i;
+    var gr = el('g', { 'class': 'm ' + m.cls }, svg);
+    m.t = [el('path', { d: m.d, 'class': 't3' }, gr), el('path', { d: m.d, 'class': 't2' }, gr), el('path', { d: m.d, 'class': 't1' }, gr)];
+    m.gl = el('circle', { r: 14, 'class': 'gl', fill: 'url(#' + m.cls + '-g)' }, gr); m.hd = el('circle', { r: 2.4, 'class': 'hd' }, gr);
+    m.L = m.t[0].getTotalLength(); m.done = false;
+    if (!m.i) { var e = m.t[0].getPointAtLength(m.L); st.style.setProperty('--mx', e.x + 'px'); st.style.setProperty('--my', e.y + 'px'); }
+    m.t.forEach(function (p) { p.style.strokeDasharray = '0 ' + (m.L * 2); });
+    gr.style.opacity = 0;
+  });
+  function ease(p) { return 1 - Math.pow(1 - p, 2.6); }                         // quick entry, soft landing
+  function pos(m, t) { var p = Math.min(1, Math.max(0, (t - m.delay) / m.dur)); return ease(p) * m.L; }
+  function frame(now) {
+    if (!t0) t0 = now; var t = now - t0;
+    list.forEach(function (m) {
+      if (m.done || t < m.delay) return;
+      var s = pos(m, t), back = pos(m, t - 140), tl = Math.max(0, s - back) * 1.6;   // tail follows the speed
+      var pt = m.t[0].getPointAtLength(s);
+      m.hd.setAttribute('cx', pt.x); m.hd.setAttribute('cy', pt.y); m.gl.setAttribute('cx', pt.x); m.gl.setAttribute('cy', pt.y);
+      m.hd.parentNode.style.opacity = Math.min(1, (t - m.delay) / 90);
+      [1, .55, .22].forEach(function (f, i) { var len = tl * f, p = m.t[i];   // t3 longest/faintest → t1 shortest/brightest
+        p.style.strokeDasharray = len.toFixed(1) + ' ' + (m.L * 2); p.style.strokeDashoffset = (len - s).toFixed(1); });
+      if (t >= m.delay + m.dur) { m.done = true; if (++arrived === list.length) { st.classList.add('hit'); list.forEach(function (q) { q.hd.parentNode.style.opacity = 0; }); } }
+    });
+    if (arrived < list.length) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+};
+
+/* hand-over: play (≤ 1700 ms) → fade to ink → location.replace(next).  next = ?to=<same-site URL> or the default.
+   ?loop=1 replays instead of leaving (review only). */
+(function () {
+  var DEFAULT = 'index.html', root = document.documentElement, LOOP = /[?&]loop=1/.test(location.search);
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var T = reduce ? 1000 : 1700, END = reduce ? 1100 : 2050, TPL = null, next = DEFAULT;
+  try {
+    var to = new URLSearchParams(location.search).get('to');
+    if (to) { var u = new URL(to, location.href);                     // same site only, never another splash
+      if (u.protocol === location.protocol && u.host === location.host && !/splash/i.test(u.pathname)) next = u.href; }
+  } catch (e) {}
+  // the homepage we hand over to must not send the user back here in this session
+  try { sessionStorage.setItem('shine-splash:' + new URL(next, location.href).pathname, '1'); } catch (e) {}
+  try { var l = document.createElement('link'); l.rel = 'prefetch'; l.href = next; document.head.appendChild(l); } catch (e) {}
+  function run() {
+    var s = document.querySelector('.sp-stage');
+    if (!TPL) TPL = s.cloneNode(true);
+    var n = TPL.cloneNode(true);
+    s.parentNode.replaceChild(n, s);
+    root.classList.remove('out');
+    if (window.SP_START) window.SP_START(n, reduce);
+    setTimeout(function () { root.classList.add('out'); }, T);
+    setTimeout(function () { if (LOOP) setTimeout(run, 650); else location.replace(next); }, END);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+})();
+
+</script>
+</body>
+</html>
