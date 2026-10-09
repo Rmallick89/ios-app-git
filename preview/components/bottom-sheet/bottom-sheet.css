@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · BOTTOM SHEET  (app component)                        v1.2.0
+   SHINE · BOTTOM SHEET  (app component)                        v1.2.1
    The one sheet primitive behind every slide-up panel in the app:
    Sort, Filter (+ its "See all" sub-sheet), Share, Save, Feedback…
    ───────────────────────────────────────────────────────────────────────
@@ -14,8 +14,12 @@
    • Closed sheets are `[hidden]` → display:none. Nothing parked off-screen
      can cast a shadow into the viewport (the JSRP bottom-band bug).
    • v1.2 · keyboard-aware: while a sheet is open ShineSheet tracks the
-     on-screen keyboard (visualViewport) and lifts the sheet above it
-     (--bs-kb), capping its height to the visible area (--bs-vvh).
+     on-screen keyboard (visualViewport). v1.2.1: the sheet stays anchored to
+     the screen bottom and its surface runs on behind the keyboard (like a
+     native iOS sheet) — its CONTENT is padded up by the keyboard height
+     (--bs-kb) and the sheet is capped to the visible area (--bs-vvh). v1.2.0
+     lifted the whole sheet, which on iOS 26 left a dimmed gap around the
+     floating keyboard and its accessory bar.
    • v1.2 · status bar: scrims paint with background-image (no background-
      color) and are display:none once faded out, so iOS 26 Safari tints the
      status bar from body — which ShineSheet dims to match while a scrim
@@ -87,7 +91,7 @@
 
 /* ── Sheet ─────────────────────────────────────────────────────────── */
 .bs {
-  position: fixed; left: 0; right: 0; bottom: var(--bs-kb, 0px);   /* lifted above the on-screen keyboard (v1.2) */
+  position: fixed; left: 0; right: 0; bottom: 0;
   z-index: calc(var(--bs-z) + 1);
   display: flex; flex-direction: column;
   max-height: var(--bs-max-h); max-height: min(var(--bs-max-h), 90dvh);
@@ -98,7 +102,7 @@
   overflow: hidden;
   outline: none;
   transform: translate3d(0, 100%, 0);
-  transition: transform var(--bs-dur-out) var(--bs-ease), bottom var(--bs-dur-kb) var(--bs-ease), max-height var(--bs-dur-kb) var(--bs-ease);
+  transition: transform var(--bs-dur-out) var(--bs-ease), padding-bottom var(--bs-dur-kb) var(--bs-ease), max-height var(--bs-dur-kb) var(--bs-ease);
   will-change: transform;
   touch-action: pan-y;
 }
@@ -200,14 +204,17 @@
 /* sheets without a footer still clear the home indicator */
 .bs--pad-bottom { padding-bottom: calc(var(--bs-gutter) + env(safe-area-inset-bottom, 0px)); }
 
-/* ── On-screen keyboard (v1.2) — ShineSheet sets html.bs-kb + --bs-kb / --bs-vvh ──
-   The sheet rides on top of the keyboard and never grows past the visible area
-   (16 px clear of the top). The home indicator sits under the keyboard, so the
-   safe-area padding is dropped while it is up. */
-.bs-kb .bs:not(.bs--nested) { max-height: calc(var(--bs-vvh, 100vh) - 16px); }
+/* ── On-screen keyboard (v1.2.1) — ShineSheet sets html.bs-kb + --bs-kb / --bs-vvh ──
+   The sheet keeps its place at the bottom edge and its white surface continues
+   behind the keyboard (and iOS 26's floating accessory bar), the way a native
+   sheet does; the content is padded up by the keyboard height, so the last
+   control sits a gutter above it. Its visible part never grows past the visible
+   area (16 px clear of the top). The home indicator sits under the keyboard,
+   so the safe-area padding is dropped while it is up. */
+.bs-kb .bs:not(.bs--nested) { padding-bottom: var(--bs-kb, 0px); max-height: calc(var(--bs-vvh, 100vh) - 16px + var(--bs-kb, 0px)); }
 .bs-kb .bs-body > .bs-actions { padding-bottom: var(--bs-gutter); }
 .bs-kb .bs-foot { padding-bottom: 16px; }
-.bs-kb .bs--pad-bottom { padding-bottom: var(--bs-gutter); }
+.bs-kb .bs--pad-bottom:not(.bs--nested) { padding-bottom: calc(var(--bs-gutter) + var(--bs-kb, 0px)); }
 
 /* page scroll lock (set on <html> by ShineSheet) */
 .bs-lock, .bs-lock body { overflow: hidden !important; }

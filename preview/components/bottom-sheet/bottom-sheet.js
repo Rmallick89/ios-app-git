@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · BOTTOM SHEET  (app component)                        v1.2.0
+   SHINE · BOTTOM SHEET  (app component)                        v1.2.1
    Pair with bottom-sheet.css. Zero dependencies, no build step.
 
    Markup (any element with .bs — it starts closed via [hidden]):
@@ -53,8 +53,8 @@
      (a sheet over a sheet gets its own scrim level) · drag the handle or
      header down to dismiss (velocity- or distance-based) · trigger gets
      aria-expanded · reduced motion respected · closed = [hidden].
-     v1.2 · keyboard-aware (rides above the on-screen keyboard, height capped
-     to the visible area) · status-bar tint: while a scrim is up html/body
+     v1.2 · keyboard-aware (content padded above the on-screen keyboard while
+     the sheet surface runs on behind it — v1.2.1; height capped to the visible area) · status-bar tint: while a scrim is up html/body
      get the dimmed page colour, so iOS 26 Safari's status bar dims with it.
    ═══════════════════════════════════════════════════════════════════════ */
 (function (global) {
@@ -234,7 +234,8 @@
   /* ── on-screen keyboard (v1.2) ────────────────────────────────────
      iOS Safari never resizes the page for the keyboard — it slides over fixed
      content, so a bottom sheet ends up underneath it. While any sheet is open we
-     follow visualViewport and lift the sheet to the keyboard's top edge:
+     follow visualViewport; the CSS pads the sheet's content up by the keyboard
+     height (the surface itself stays on the bottom edge, behind the keyboard):
        --bs-kb   = layout-viewport bottom − visible-area bottom   (keyboard height)
        --bs-vvh  = visible height (caps the sheet so its head never hides)
      Android WebView/Chrome resize the page instead → --bs-kb stays 0 there. */
@@ -420,5 +421,5 @@
   // re-measure an auto sheet after the page swaps its content (optional — a MutationObserver already does this)
   function refresh(target) { var el = $(target); if (el && el.__bs) { syncCta(el); syncScroll(el); } }
 
-  global.ShineSheet = { open: open, close: close, toggle: toggle, isOpen: isOpen, top: top, closeAll: closeAll, init: init, refresh: refresh, version: '1.2.0' };
+  global.ShineSheet = { open: open, close: close, toggle: toggle, isOpen: isOpen, top: top, closeAll: closeAll, init: init, refresh: refresh, version: '1.2.1' };
 })(window);
