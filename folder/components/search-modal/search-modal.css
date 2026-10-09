@@ -1,0 +1,297 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · SEARCH MODAL  (app component)                       v1.3.0
+   "What's next for you?" — keyword · location · experience → Search Jobs
+   ───────────────────────────────────────────────────────────────────────
+   Ported from the JSRP "Edit search" overlay (jsrp/JSRP-Index.html,
+   .li-search-*) and rebuilt as a reusable, page-agnostic component.
+
+   • Every class is prefixed `ssm-` so it can drop into any page (homepage,
+     JSRP, JD, profile…) without colliding with that page's own classes.
+   • The component carries its OWN scoped token layer (below) so it renders
+     identically whatever token vocabulary the host page uses (JSRP uses
+     shorthand names like --content-base; the homepage uses canonical ones).
+     Values mirror design-system/DESIGN-SYSTEM.md — light theme, mobile
+     column of §2.1 / §2.3 (app-only component).
+   • Anatomy maps 1:1 to DS atoms: field = A.01 Input (search + select
+     variants) · CTA = A.02 Button (Primary · Brand — search is the one
+     place brand blue is allowed) · error = A.07 Alert (negative) ·
+     toast = A.09 Toast.
+   • v1.1.0 — fields use the same A.01 Input spec as the login flow
+     (md 44 · white fill · 12px inset · medium-weight placeholder ·
+     brand-600 border + 3px brand ring on focus).
+   • v1.2.0 — the validation alert sits OUTSIDE the card, 12px below it,
+     as a solid floating alert (readable on the scrim); shorter copy.
+   • v1.3.0 — toasts go through ShineNotify (app-components/notify) when the
+     page has it; .ssm-toast below is only the stand-alone fallback.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Scoped tokens ─────────────────────────────────────────────────── */
+.ssm, .ssm-toast {
+  /* primitives (definitions only) */
+  --ssm-c-brand-500: #1A56FF; --ssm-c-brand-600: #0B3FCC; --ssm-c-brand-700: #0A33A6; --ssm-c-brand-100: #EBF0FF;
+  --ssm-c-brand-500-op10: rgba(26,86,255,.10); --ssm-c-brand-500-op12: rgba(26,86,255,.12);
+  --ssm-c-brand-500-op18: rgba(26,86,255,.18); --ssm-c-brand-500-op40: rgba(26,86,255,.40); --ssm-c-brand-500-op45: rgba(26,86,255,.45);
+  --ssm-c-cn-black: #0D1117; --ssm-c-cn-white: #FFFFFF; --ssm-c-cn-50: #F7F9FB; --ssm-c-cn-100: #EEF1F5; --ssm-c-cn-200: #E4E7EC;
+  --ssm-c-cn-300: #C8CED7; --ssm-c-cn-500: #667085; --ssm-c-cn-700: #344054;
+  --ssm-c-black-04: rgba(13,17,23,.04); --ssm-c-black-08: rgba(13,17,23,.08); --ssm-c-black-10: rgba(13,17,23,.10);
+  --ssm-c-black-20: rgba(13,17,23,.20); --ssm-c-black-30: rgba(13,17,23,.30);
+  /* scrim — JSRP's 55% black + 8px blur; deeper than surface.neutral-state.overlay (24%)
+     because the modal sits over busy content (logo walls, job cards) */
+  --ssm-c-black-55: rgba(13,17,23,.55);
+  --ssm-c-wn-50: #FFFDF8; --ssm-c-wn-100: #FAF9F6;
+  --ssm-c-red-50: #FEF2F2; --ssm-c-red-200: #FECDCA; --ssm-c-red-600: #B42318; --ssm-c-green-300: #5DD4A1;
+
+  /* semantic (DESIGN-SYSTEM.md §2.2) */
+  --ssm-content-base: var(--ssm-c-cn-black);
+  --ssm-content-muted: var(--ssm-c-cn-700);
+  --ssm-content-faded: var(--ssm-c-cn-500);
+  --ssm-content-brand: var(--ssm-c-brand-600);
+  --ssm-content-on-fill-dark: var(--ssm-c-cn-white);
+  --ssm-content-negative: var(--ssm-c-red-600);
+  --ssm-surface-base: var(--ssm-c-wn-100);           /* surface.neutral.base — search-field fill */
+  --ssm-surface-raised: var(--ssm-c-cn-white);       /* surface.neutral.raised — card / dropdown */
+  --ssm-surface-hover: var(--ssm-c-wn-50);           /* field hover — warm-neutral/50 */
+  --ssm-surface-brand: var(--ssm-c-brand-500);
+  --ssm-surface-brand-hover: var(--ssm-c-brand-600);
+  --ssm-surface-brand-pressed: var(--ssm-c-brand-700);
+  --ssm-surface-inverse: var(--ssm-c-cn-black);
+  --ssm-surface-negative-subtle: var(--ssm-c-red-50);
+  --ssm-surface-scrim: var(--ssm-c-black-55);
+  --ssm-stroke-base: var(--ssm-c-cn-200);
+  --ssm-stroke-muted: var(--ssm-c-cn-100);
+  --ssm-stroke-strong: var(--ssm-c-cn-300);
+  --ssm-stroke-focus: var(--ssm-c-brand-500);
+  --ssm-stroke-negative: var(--ssm-c-red-200);
+
+  /* typography (§2.1 · mobile) */
+  --ssm-font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --ssm-w-regular: 400; --ssm-w-medium: 500; --ssm-w-semibold: 600; --ssm-w-bold: 700; --ssm-w-extrabold: 800;
+  --ssm-heading-lg-size: 22px; --ssm-heading-lg-lh: 26px; --ssm-heading-lg-ls: -0.3px;
+  --ssm-body-md-size: 14px; --ssm-body-md-lh: 20px;
+  --ssm-body-sm-size: 12px; --ssm-body-sm-lh: 18px;
+  --ssm-label-lg-size: 14px; --ssm-label-lg-lh: 14px;
+  --ssm-eyebrow-sm-size: 10px; --ssm-eyebrow-sm-lh: 10px; --ssm-eyebrow-sm-ls: 1.5px;
+
+  /* spacing (§2.3 · mobile) */
+  --ssm-inset-xs: 4px; --ssm-inset-sm: 6px; --ssm-inset-md: 8px; --ssm-inset-lg: 12px; --ssm-inset-xl: 16px;
+  --ssm-inline-sm: 4px; --ssm-inline-md: 8px; --ssm-inline-lg: 12px;
+  --ssm-stack-xxs: 4px; --ssm-stack-xs: 8px; --ssm-stack-md: 12px; --ssm-stack-lg: 14px; --ssm-stack-xl: 20px;
+  --ssm-section-sm: 20px; --ssm-section-md: 24px; --ssm-section-lg: 32px;
+  --ssm-layout-xs: 16px;
+
+  /* size (§2.4) */
+  --ssm-stroke-thin: 1px; --ssm-stroke-default: 1.5px;
+  --ssm-radius-xs: 2px; --ssm-radius-md: 8px; --ssm-radius-lg: 12px; --ssm-radius-2xl: 24px; --ssm-radius-full: 1024px;
+  --ssm-icon-xs: 12px; --ssm-icon-sm: 14px; --ssm-icon-md: 16px;
+  --ssm-control-close: 32px;                       /* close disc — matches JSRP mobile */
+  --ssm-control-sm: 40px; --ssm-control-md: 44px; --ssm-control-lg: 48px;
+  --ssm-dropdown-max: 260px;                       /* keeps the list clear of the on-screen keyboard */
+
+  /* elevation (§2.5 · light) */
+  --ssm-elev-subtle: 0 1px 2px var(--ssm-c-black-04);
+  --ssm-elev-overlay: 0 16px 36px -10px var(--ssm-c-black-30), 0 4px 10px -2px var(--ssm-c-black-10);
+  --ssm-elev-modal: 0 24px 60px -12px var(--ssm-c-black-20), 0 6px 16px -6px var(--ssm-c-black-10);
+  --ssm-elev-brand-subtle: 0 8px 24px -10px var(--ssm-c-brand-500-op18);
+  --ssm-elev-brand-raised: 0 6px 14px -4px var(--ssm-c-brand-500-op45);
+  --ssm-elev-brand-lifted: 0 16px 40px -12px var(--ssm-c-brand-500-op40);
+  --ssm-elev-focus: 0 0 0 4px var(--ssm-c-brand-500-op10);
+  --ssm-elev-field-focus: 0 0 0 3px var(--ssm-c-brand-500-op18);   /* A.01 Input focus ring — same as the login flow */
+
+  /* motion */
+  --ssm-ease-out: cubic-bezier(.22,1,.36,1);
+  --ssm-dur-fast: 150ms; --ssm-dur: 250ms; --ssm-dur-slow: 320ms;
+}
+
+/* ── Overlay (scrim) ───────────────────────────────────────────────── */
+.ssm {
+  position: fixed; inset: 0; z-index: 9997;
+  display: none; flex-direction: column; align-items: center;
+  /* card anchors to the TOP so the on-screen keyboard never covers the fields */
+  justify-content: flex-start;
+  padding: max(var(--ssm-layout-xs), env(safe-area-inset-top)) var(--ssm-layout-xs) var(--ssm-layout-xs);
+  background: var(--ssm-surface-scrim);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  opacity: 0; transition: opacity var(--ssm-dur) ease;
+  font-family: var(--ssm-font); color: var(--ssm-content-base);
+  -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+  overflow-y: auto; overscroll-behavior: contain;
+}
+.ssm *, .ssm *::before, .ssm *::after { box-sizing: border-box; }
+.ssm.is-mounted { display: flex; }
+.ssm.is-open { opacity: 1; }
+html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
+
+/* ── Dialog = card + the alert that floats below it ────────────────── */
+.ssm-dialog { position: relative; width: 100%; max-width: 480px; flex: none; }
+
+/* ── Card ──────────────────────────────────────────────────────────── */
+.ssm-card {
+  position: relative; width: 100%;
+  background: var(--ssm-surface-raised);
+  border-radius: var(--ssm-radius-2xl);
+  padding: var(--ssm-section-md) var(--ssm-section-sm) var(--ssm-section-sm);
+  box-shadow: var(--ssm-elev-modal);
+  transform: translateY(calc(-1 * var(--ssm-inset-md)));
+  transition: transform var(--ssm-dur-slow) var(--ssm-ease-out);
+}
+.ssm.is-open .ssm-card { transform: none; }
+/* brand glow in the top-right corner */
+.ssm-card::before {
+  content: ""; position: absolute; top: 0; right: 0; width: 160px; height: 130px; pointer-events: none;
+  border-top-right-radius: var(--ssm-radius-2xl);
+  background: radial-gradient(ellipse at top right, var(--ssm-c-brand-500-op12), transparent 65%);
+}
+@keyframes ssm-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 50%{transform:translateX(6px)} 75%{transform:translateX(-3px)} }
+.ssm-dialog.is-shaking { animation: ssm-shake 360ms ease; }
+
+/* Close — circular, warm well (Button · icon-only, compact) */
+.ssm-close {
+  position: absolute; top: var(--ssm-stack-lg); right: var(--ssm-stack-lg); z-index: 2;
+  width: var(--ssm-control-close); height: var(--ssm-control-close); padding: 0;
+  display: grid; place-items: center; border-radius: var(--ssm-radius-full);
+  background: var(--ssm-surface-base); color: var(--ssm-content-muted);
+  border: var(--ssm-stroke-thin) solid var(--ssm-stroke-muted);
+  cursor: pointer; transition: background var(--ssm-dur-fast), color var(--ssm-dur-fast), border-color var(--ssm-dur-fast);
+}
+.ssm-close svg { width: var(--ssm-icon-xs); height: var(--ssm-icon-xs); }
+.ssm-close:active { background: var(--ssm-c-cn-100); }
+.ssm-close:focus-visible { outline: var(--ssm-stroke-default) solid var(--ssm-stroke-focus); box-shadow: var(--ssm-elev-focus); }
+
+/* Eyebrow + heading */
+.ssm-eyebrow {
+  position: relative; display: inline-flex; align-items: center; gap: var(--ssm-inline-md);
+  margin: 0 0 var(--ssm-inset-sm);
+  font-size: var(--ssm-eyebrow-sm-size); line-height: var(--ssm-eyebrow-sm-lh); letter-spacing: var(--ssm-eyebrow-sm-ls);
+  font-weight: var(--ssm-w-bold); text-transform: uppercase; color: var(--ssm-content-brand);
+}
+.ssm-eyebrow-dot { width: 6px; height: 6px; border-radius: var(--ssm-radius-full); background: var(--ssm-surface-brand);
+  box-shadow: 0 0 0 3px var(--ssm-c-brand-500-op18); flex: none; }
+.ssm-title {
+  position: relative; margin: 0 0 var(--ssm-stack-xl); padding-right: calc(var(--ssm-control-close) + var(--ssm-inline-md));
+  font-size: var(--ssm-heading-lg-size); line-height: var(--ssm-heading-lg-lh); letter-spacing: var(--ssm-heading-lg-ls);
+  font-weight: var(--ssm-w-extrabold); color: var(--ssm-content-base);
+}
+.ssm-title .ssm-accent { color: var(--ssm-content-brand); }
+
+.ssm-form { position: relative; }
+/* ── Fields (A.01 Input · search + select variants · md 44 — same spec as the login flow) ── */
+.ssm-fields { position: relative; display: flex; flex-direction: column; gap: var(--ssm-stack-md); }
+.ssm-field {
+  position: relative; min-width: 0;
+  display: flex; align-items: center; gap: var(--ssm-inline-md);
+  height: var(--ssm-control-md); padding: 0 var(--ssm-inset-lg);
+  background: var(--ssm-surface-raised);
+  border: var(--ssm-stroke-thin) solid var(--ssm-stroke-base);
+  border-radius: var(--ssm-radius-lg);
+  cursor: text;
+  transition: background var(--ssm-dur-fast) ease, border-color var(--ssm-dur-fast) ease, box-shadow var(--ssm-dur-fast) ease;
+}
+.ssm-field:focus-within, .ssm-field.is-open {
+  border-color: var(--ssm-content-brand); box-shadow: var(--ssm-elev-field-focus);
+}
+.ssm-field-icon { display: inline-flex; flex: none; color: var(--ssm-content-faded); transition: color var(--ssm-dur-fast); }
+.ssm-field:focus-within .ssm-field-icon, .ssm-field.is-open .ssm-field-icon { color: var(--ssm-content-base); }
+.ssm-field-icon svg { width: var(--ssm-icon-md); height: var(--ssm-icon-md); }
+.ssm-input, .ssm-value {
+  flex: 1; min-width: 0; margin: 0; padding: 0; border: 0; outline: 0; background: transparent;
+  font-family: var(--ssm-font); font-size: var(--ssm-body-md-size); line-height: var(--ssm-body-md-lh);
+  font-weight: var(--ssm-w-medium); color: var(--ssm-content-base);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  -webkit-appearance: none; appearance: none;
+}
+.ssm-input::placeholder { color: var(--ssm-content-faded); font-weight: var(--ssm-w-medium); opacity: 1; }
+.ssm-value.is-empty { color: var(--ssm-content-faded); }
+.ssm-field--select { cursor: pointer; -webkit-user-select: none; user-select: none; }
+.ssm-field--select:focus-visible { outline: none; }
+.ssm-caret { display: inline-flex; flex: none; color: var(--ssm-content-faded); transition: transform 200ms ease; }
+.ssm-caret svg { width: var(--ssm-icon-sm); height: var(--ssm-icon-sm); }
+.ssm-field.is-open .ssm-caret { transform: rotate(180deg); }
+
+/* Suggestion dropdown — reads as an extension of its field */
+.ssm-dropdown {
+  position: absolute; top: calc(100% + var(--ssm-inset-sm)); left: 0; right: 0; z-index: 5;
+  max-height: var(--ssm-dropdown-max); overflow-y: auto; overscroll-behavior: contain;
+  padding: var(--ssm-inset-sm);
+  background: var(--ssm-surface-raised);
+  border: var(--ssm-stroke-thin) solid var(--ssm-stroke-muted);
+  border-radius: var(--ssm-radius-lg);
+  box-shadow: var(--ssm-elev-overlay);
+  opacity: 0; transform: translateY(calc(-1 * var(--ssm-inset-xs))); pointer-events: none; visibility: hidden;
+  transition: opacity 180ms ease, transform 180ms ease, visibility 0s linear 180ms;
+}
+.ssm-field.is-open .ssm-dropdown { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
+.ssm-dropdown-eyebrow {
+  display: block; padding: var(--ssm-inset-md) var(--ssm-inset-lg) var(--ssm-inset-xs);
+  font-size: var(--ssm-eyebrow-sm-size); line-height: var(--ssm-eyebrow-sm-lh); letter-spacing: var(--ssm-eyebrow-sm-ls);
+  font-weight: var(--ssm-w-bold); text-transform: uppercase; color: var(--ssm-content-faded);
+}
+.ssm-option {
+  display: flex; align-items: center; gap: var(--ssm-inline-lg);
+  min-height: var(--ssm-control-sm); padding: 0 var(--ssm-inset-lg);
+  border-radius: var(--ssm-radius-md); cursor: pointer;
+  font-size: var(--ssm-body-md-size); line-height: var(--ssm-body-md-lh); font-weight: var(--ssm-w-medium); color: var(--ssm-content-base);
+  transition: background var(--ssm-dur-fast) ease;
+}
+.ssm-option:active, .ssm-option.is-active { background: var(--ssm-surface-base); }
+@media (hover: hover) { .ssm-option:hover { background: var(--ssm-surface-base); } }
+.ssm-option[aria-selected="true"] { color: var(--ssm-content-brand); font-weight: var(--ssm-w-semibold); }
+.ssm-option[aria-selected="true"] .ssm-option-icon { color: var(--ssm-content-brand); }
+.ssm-option b { color: var(--ssm-content-brand); font-weight: var(--ssm-w-bold); }
+.ssm-option-icon { display: inline-flex; flex: none; color: var(--ssm-content-faded); }
+.ssm-option-icon svg { width: var(--ssm-icon-sm); height: var(--ssm-icon-sm); }
+.ssm-option-empty { padding: var(--ssm-inset-xl) var(--ssm-inset-lg); text-align: center;
+  font-size: var(--ssm-body-sm-size); line-height: var(--ssm-body-sm-lh); color: var(--ssm-content-faded); }
+.ssm-option-empty b { color: var(--ssm-content-base); font-weight: var(--ssm-w-bold); }
+
+/* ── Error (A.07 Alert · negative) — floats 12px below the card, outside it (v1.2.0) ──
+   solid fill + overlay shadow so it reads clearly on the dimmed, blurred scrim */
+.ssm-error-wrap {
+  margin-top: var(--ssm-stack-md); pointer-events: none;
+  opacity: 0; visibility: hidden; transform: translateY(calc(-1 * var(--ssm-inset-sm)));
+  transition: opacity 200ms ease, transform 260ms var(--ssm-ease-out), visibility 0s linear 260ms;
+}
+.ssm-error-wrap.is-shown { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.ssm-error {
+  display: flex; align-items: center; gap: var(--ssm-inline-md); margin: 0;
+  padding: var(--ssm-inset-lg) var(--ssm-inset-xl);
+  background: var(--ssm-surface-negative-subtle); border: var(--ssm-stroke-thin) solid var(--ssm-stroke-negative);
+  border-radius: var(--ssm-radius-lg); color: var(--ssm-content-negative); box-shadow: var(--ssm-elev-overlay);
+  font-size: var(--ssm-body-md-size); line-height: var(--ssm-body-md-lh); font-weight: var(--ssm-w-semibold);
+}
+.ssm-error svg { width: var(--ssm-icon-md); height: var(--ssm-icon-md); flex: none; }
+
+/* ── Submit (A.02 Button · Primary · Brand · lg 48 · block) ─────────── */
+.ssm-submit {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--ssm-inline-md);
+  width: 100%; height: var(--ssm-control-lg); margin-top: var(--ssm-stack-md); padding: 0 var(--ssm-inset-xl);
+  border: 0; border-radius: var(--ssm-radius-lg); cursor: pointer;
+  background: var(--ssm-surface-brand); color: var(--ssm-content-on-fill-dark);
+  font-family: var(--ssm-font); font-size: var(--ssm-label-lg-size); line-height: var(--ssm-label-lg-lh); font-weight: var(--ssm-w-bold);
+  box-shadow: var(--ssm-elev-brand-raised);
+  transition: background var(--ssm-dur-fast) ease, box-shadow var(--ssm-dur-fast) ease, transform var(--ssm-dur-fast) ease;
+}
+.ssm-submit svg { width: var(--ssm-icon-md); height: var(--ssm-icon-md); }
+.ssm-submit:active { background: var(--ssm-surface-brand-pressed); box-shadow: var(--ssm-elev-brand-subtle); transform: scale(.99); }
+.ssm-submit:focus-visible { outline: var(--ssm-stroke-default) solid var(--ssm-stroke-focus); outline-offset: 2px; }
+@media (hover: hover) { .ssm-submit:hover { background: var(--ssm-surface-brand-hover); box-shadow: var(--ssm-elev-brand-lifted); } }
+
+/* visually-hidden labels (fields are labelled for screen readers; the icon + placeholder carry it visually) */
+.ssm-sr { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ── Toast (A.09) — default confirmation when the host page doesn't handle submit ── */
+.ssm-toast {
+  position: fixed; left: 50%; bottom: max(32px, env(safe-area-inset-bottom)); z-index: 9998;
+  display: inline-flex; align-items: center; gap: var(--ssm-inline-md); max-width: calc(100% - 2 * var(--ssm-layout-xs));
+  padding: var(--ssm-inset-md) var(--ssm-inset-xl); border-radius: var(--ssm-radius-full);
+  background: var(--ssm-surface-inverse); color: var(--ssm-content-on-fill-dark); box-shadow: var(--ssm-elev-overlay);
+  font-family: var(--ssm-font); font-size: var(--ssm-body-md-size); line-height: var(--ssm-body-md-lh); font-weight: var(--ssm-w-semibold);
+  opacity: 0; transform: translate(-50%, 12px); pointer-events: none; transition: opacity 200ms ease, transform 260ms var(--ssm-ease-out);
+}
+.ssm-toast svg { width: var(--ssm-icon-md); height: var(--ssm-icon-md); flex: none; color: var(--ssm-c-green-300); }
+.ssm-toast span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ssm-toast.is-shown { opacity: 1; transform: translate(-50%, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ssm, .ssm-card, .ssm-dropdown, .ssm-error-wrap, .ssm-toast { transition: none !important; }
+  .ssm-dialog.is-shaking { animation: none; }
+}

@@ -1,0 +1,309 @@
+/* ════════════════════════════════════════════════════════════════
+   SHINE DESIGN SYSTEM — TOKENS
+   Source: design-system/DESIGN-SYSTEM.md · design-system/component-system.md
+   Mobile-only build → the §2.1 / §2.3 mobile column is the :root default.
+   Layer 1: primitives (definitions only — never consumed by components)
+   ════════════════════════════════════════════════════════════════ */
+:root{
+  --c-brand-50:#F0F5FF; --c-brand-100:#EBF0FF; --c-brand-200:#C9DBFF; --c-brand-300:#7EA3FF;
+  --c-brand-400:#4D7CFF; --c-brand-500:#1A56FF; --c-brand-600:#0B3FCC; --c-brand-700:#0A33A6;
+  --c-brand-500-op10:rgba(26,86,255,.10); --c-brand-500-op18:rgba(26,86,255,.18);
+  --c-brand-500-op40:rgba(26,86,255,.40); --c-brand-500-op45:rgba(26,86,255,.45);
+  --c-cn-50:#F7F9FB; --c-cn-100:#EEF1F5; --c-cn-200:#E4E7EC; --c-cn-300:#C8CED7; --c-cn-400:#98A2B3;
+  --c-cn-500:#667085; --c-cn-600:#4A5260; --c-cn-700:#344054; --c-cn-800:#232A38; --c-cn-900:#161B22;
+  --c-cn-black:#0D1117; --c-cn-white:#FFFFFF;
+  --c-cn-black-04:rgba(13,17,23,.04); --c-cn-black-06:rgba(13,17,23,.06); --c-cn-black-08:rgba(13,17,23,.08);
+  --c-cn-black-10:rgba(13,17,23,.10); --c-cn-black-20:rgba(13,17,23,.20); --c-cn-black-30:rgba(13,17,23,.30);
+  --c-cn-black-75:rgba(13,17,23,.36);
+  --c-wn-50:#FFFDF8; --c-wn-100:#FAF9F6; --c-wn-200:#F5F1E8; --c-wn-300:#E8E5DD;
+  --c-green-50:#EAFAF0; --c-green-500:#12B76A; --c-green-500-op30:rgba(18,183,106,.30); --c-green-600:#0E9A5A; --c-green-700:#027A48;
+  --c-red-600:#B42318; --c-red-700:#8B1A14; --c-amber-100:#FFF4ED; --c-amber-400:#FAB663; --c-amber-700:#A35A04;
+  --c-pink-100:#FCE7F3; --c-pink-600:#BE185D;
+  --c-violet-100:#F3EEFE; --c-violet-200:#DAC9FF; --c-violet-500:#7A5AF8; --c-violet-600:#6F46E0;
+  --c-aqua-100:#CCFBEE; --c-aqua-500:#14B8A6; --c-aqua-700:#0F766A;
+  --c-cyan-100:#CFFAFE; --c-cyan-700:#0E7490;
+  --c-lime-100:#EBFFB0; --c-lime-300:#C4FF38; --c-lime-700:#56770B;
+  --c-ey-100:#FFFCC0; --c-ey-400:#FFE419; --c-ey-800:#5F5200;
+  /* Shine logo artwork yellow — sampled from shine-logo-light.svg, outside the DS ramps */
+  --c-logo-yellow:#FACA22;
+
+  --unit-0:0; --unit-1:1px; --unit-1-5:1.5px; --unit-2:2px; --unit-4:4px; --unit-6:6px; --unit-8:8px;
+  --unit-10:10px; --unit-12:12px; --unit-14:14px; --unit-16:16px; --unit-18:18px; --unit-20:20px;
+  --unit-22:22px; --unit-24:24px; --unit-26:26px; --unit-28:28px; --unit-32:32px; --unit-36:36px; --unit-40:40px;
+  --unit-44:44px; --unit-48:48px; --unit-56:56px; --unit-64:64px; --unit-72:72px; --unit-96:96px;
+  --unit-240:240px; --unit-360:360px; --unit-480:480px; --unit-1024:1024px;
+
+  --typeface-family-brand:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
+  --typeface-weight-regular:400; --typeface-weight-medium:500; --typeface-weight-semibold:600;
+  --typeface-weight-bold:700; --typeface-weight-extrabold:800;
+}
+/* Layer 2: SEMANTIC TOKENS — the only layer components consume */
+:root{
+  /* §2.1 Typography · mobile */
+  --type-display-lg-size:var(--unit-40); --type-display-lg-lh:var(--unit-40); --type-display-lg-ls:-1px;
+  --type-display-md-size:var(--unit-32); --type-display-md-lh:var(--unit-36); --type-display-md-ls:-0.4px;
+  --type-display-sm-size:var(--unit-24); --type-display-sm-lh:var(--unit-28); --type-display-sm-ls:-0.3px;
+  --type-heading-lg-size:var(--unit-22); --type-heading-lg-lh:var(--unit-26);
+  --type-heading-md-size:var(--unit-18); --type-heading-md-lh:var(--unit-22); --type-heading-md-ls:-0.2px;
+  --type-heading-sm-size:var(--unit-16); --type-heading-sm-lh:var(--unit-20);
+  --type-body-lg-size:var(--unit-16); --type-body-lg-lh:var(--unit-24);
+  --type-body-md-size:var(--unit-14); --type-body-md-lh:var(--unit-20);
+  --type-body-sm-size:var(--unit-12); --type-body-sm-lh:var(--unit-18);
+  --type-label-lg-size:var(--unit-14); --type-label-lg-lh:var(--unit-14);
+  --type-label-md-size:var(--unit-12); --type-label-md-lh:var(--unit-12);
+  --type-label-sm-size:var(--unit-10); --type-label-sm-lh:var(--unit-10);
+  --type-eyebrow-md-size:var(--unit-12); --type-eyebrow-md-lh:var(--unit-12); --type-eyebrow-md-ls:var(--unit-1-5);
+  --type-eyebrow-sm-size:var(--unit-10); --type-eyebrow-sm-lh:var(--unit-10); --type-eyebrow-sm-ls:var(--unit-1);
+
+  /* §2.2 Content */
+  --content-neutral-base:var(--c-cn-black); --content-neutral-muted:var(--c-cn-700);
+  --content-neutral-faded:var(--c-cn-500); --content-neutral-disabled:var(--c-cn-black-75);
+  --content-neutral-brand:var(--c-brand-600); --content-neutral-brand-hover:var(--c-brand-700);
+  --content-on-fill-dark-base:var(--c-cn-white); --content-on-fill-dark-muted:var(--c-cn-300);
+  --content-status-positive:var(--c-green-700); --content-status-notice:var(--c-amber-700);
+  --content-decorative-violet:var(--c-violet-600); --content-decorative-pink:var(--c-pink-600);
+  --content-decorative-aqua:var(--c-aqua-700); --content-decorative-cyan:var(--c-cyan-700);
+  --content-decorative-lime:var(--c-lime-700); --content-decorative-electric-yellow:var(--c-ey-800);
+
+  /* §2.2 Surface */
+  --surface-neutral-base:var(--c-wn-100); --surface-neutral-raised:var(--c-cn-white);
+  --surface-neutral-muted:var(--c-cn-100); --surface-neutral-sunken:var(--c-cn-200);
+  --surface-neutral-state-hover:var(--c-cn-100); --surface-neutral-state-pressed:var(--c-cn-200);
+  --surface-neutral-state-selected:var(--c-brand-50);
+  --surface-inverse-base:var(--c-cn-black); --surface-inverse-raised:var(--c-cn-800);
+  --surface-inverse-state-hover:var(--c-cn-700); --surface-inverse-state-pressed:var(--c-cn-600);
+  --surface-brand-brand-intense:var(--c-brand-500); --surface-brand-brand-intense-hover:var(--c-brand-600);
+  --surface-brand-brand-intense-pressed:var(--c-brand-700); --surface-brand-brand-subtle:var(--c-brand-100);
+  --surface-status-positive-intense:var(--c-green-700); --surface-status-positive-subtle:var(--c-green-50);
+  --surface-status-notice-subtle:var(--c-amber-100);
+  --surface-decorative-violet-subtle:var(--c-violet-100); --surface-decorative-pink-subtle:var(--c-pink-100);
+  --surface-decorative-aqua-subtle:var(--c-aqua-100); --surface-decorative-cyan-subtle:var(--c-cyan-100);
+  --surface-decorative-lime-subtle:var(--c-lime-100); --surface-decorative-lime-intense:var(--c-lime-300);
+  --surface-decorative-electric-yellow-subtle:var(--c-ey-100); --surface-decorative-electric-yellow-intense:var(--c-ey-400);
+  --surface-decorative-violet-intense:var(--c-violet-600);
+  /* alias — warm-neutral/200, the canvas tint used on Shine's warm pages */
+  --surface-neutral-warm:var(--c-wn-200);
+  /* alias — brand/50 wash for glows behind hero visuals */
+  --surface-brand-wash:var(--c-brand-50);
+
+  /* §2.2 Stroke */
+  --stroke-neutral-base:var(--c-cn-200); --stroke-neutral-muted:var(--c-cn-100);
+  --stroke-neutral-faded:var(--c-cn-50); --stroke-neutral-focus:var(--c-brand-500);
+  --stroke-neutral-strong:var(--c-cn-300); /* alias — JSRP hover border */
+  --stroke-status-positive:var(--c-green-600); --stroke-decorative-violet:var(--c-violet-500);
+
+  /* §2.3 Spacing · mobile */
+  --spacing-inset-xs:var(--unit-4); --spacing-inset-sm:var(--unit-6); --spacing-inset-md:var(--unit-8);
+  --spacing-inset-lg:var(--unit-12); --spacing-inset-xl:var(--unit-16); --spacing-inset-xxl:var(--unit-22);
+  --spacing-inline-xs:var(--unit-2); --spacing-inline-sm:var(--unit-4); --spacing-inline-md:var(--unit-8);
+  --spacing-inline-lg:var(--unit-12); --spacing-inline-xl:var(--unit-18);
+  --spacing-stack-3xs:var(--unit-2); --spacing-stack-xxs:var(--unit-4); --spacing-stack-xs:var(--unit-8);
+  --spacing-stack-md:var(--unit-12); --spacing-stack-lg:var(--unit-14); --spacing-stack-xl:var(--unit-20);
+  --spacing-stack-xxl:var(--unit-24);
+  --spacing-section-xs:var(--unit-16); --spacing-section-sm:var(--unit-20); --spacing-section-md:var(--unit-24);
+  --spacing-section-lg:var(--unit-32);
+  --spacing-layout-xs:var(--unit-16); --spacing-layout-sm:var(--unit-24);
+
+  /* §2.4 Size */
+  --size-stroke-thin:var(--unit-1); --size-stroke-default:var(--unit-1-5); --size-stroke-thick:var(--unit-2);
+  --size-radius-xs:var(--unit-2); --size-radius-sm:var(--unit-4); --size-radius-md:var(--unit-8);
+  --size-radius-lg:var(--unit-12); --size-radius-xl:var(--unit-16); --size-radius-2xl:var(--unit-24);
+  --size-radius-3xl:var(--unit-32); --size-radius-full:var(--unit-1024);
+  --size-icon-xs:var(--unit-12); --size-icon-sm:var(--unit-14); --size-icon-md:var(--unit-16);
+  --size-icon-lg:var(--unit-20); --size-icon-xl:var(--unit-24); --size-icon-2xl:var(--unit-32); --size-icon-3xl:var(--unit-40);
+  /* alias — mobile artboard cap so the prototype stays phone-shaped on wide windows */
+  --size-layout-mobile-max:var(--unit-480);
+  /* A.02.9 proposed — hover-lift offset */
+  --motion-lift-up:calc(-1 * var(--unit-1));
+  --size-control-sm:var(--unit-40); --size-control-md:var(--unit-44); --size-control-lg:var(--unit-48); --size-control-xl:var(--unit-56);
+
+  /* §2.5 Elevation · light */
+  --elevation-neutral-subtle:0 1px 2px var(--c-cn-black-04);
+  --elevation-neutral-raised:0 1px 3px var(--c-cn-black-08),0 1px 2px var(--c-cn-black-04);
+  --elevation-neutral-lifted:0 4px 12px var(--c-cn-black-08),0 2px 4px var(--c-cn-black-04);
+  --elevation-neutral-overlay:0 16px 36px -10px var(--c-cn-black-30),0 4px 10px -2px var(--c-cn-black-10);
+  --elevation-neutral-modal:0 24px 60px -12px var(--c-cn-black-20),0 6px 16px -6px var(--c-cn-black-10);
+  --elevation-brand-subtle:0 8px 24px -10px var(--c-brand-500-op18);
+  --elevation-brand-raised:0 6px 14px -4px var(--c-brand-500-op45);
+  --elevation-brand-lifted:0 16px 40px -12px var(--c-brand-500-op40);
+  --elevation-focus-default:0 0 0 4px var(--c-brand-500-op10);
+}
+
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{background:var(--surface-neutral-base);color:var(--content-neutral-base);font-family:var(--typeface-family-brand);
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+/* ── The whole homepage is one hero: exactly one viewport tall, never scrolls ── */
+.screen{height:100vh;height:100dvh;width:100%;max-width:var(--size-layout-mobile-max);margin:0 auto;display:flex;flex-direction:column;
+  position:relative;overflow:hidden;padding-top:env(safe-area-inset-top)}
+.stage{flex:1 1 auto;min-height:0;position:relative;container-type:size}
+/* App bar */
+.appbar{flex:none;height:var(--size-control-xl);display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--spacing-layout-xs);position:relative;z-index:5}
+.shine-logo{height:var(--unit-36);width:auto;color:var(--content-neutral-base);display:block}
+.ic{display:inline-flex;width:var(--size-icon-md);height:var(--size-icon-md);flex:none}
+.ic svg{width:100%;height:100%}
+.ic-lg{width:var(--size-icon-lg);height:var(--size-icon-lg)}
+.link-explore{display:inline-flex;align-items:center;gap:var(--spacing-inline-sm);height:var(--size-control-sm);padding:0 var(--spacing-inset-md);
+  margin-right:calc(-1 * var(--spacing-inset-md));border-radius:var(--size-radius-lg);
+  font-size:var(--type-label-lg-size);line-height:var(--type-label-lg-lh);font-weight:var(--typeface-weight-bold);color:var(--content-neutral-muted)}
+.link-explore:active{background:var(--surface-neutral-state-hover)}
+/* A.02 Button */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--spacing-inline-md);white-space:nowrap;
+  font-family:var(--typeface-family-brand);font-weight:var(--typeface-weight-bold);letter-spacing:0;
+  border-radius:var(--size-radius-lg);transition:transform .15s ease,box-shadow .15s ease,background-color .15s ease;
+  -webkit-user-select:none;user-select:none}
+.btn:focus-visible{outline:var(--size-stroke-default) solid var(--stroke-neutral-focus);box-shadow:var(--elevation-focus-default)}
+.btn--xl{height:var(--size-control-xl);padding:0 var(--spacing-inset-xxl);font-size:var(--type-label-lg-size);line-height:var(--type-label-lg-lh)}
+.btn--lg{height:var(--size-control-lg);padding:0 var(--spacing-inset-xxl);font-size:var(--type-label-lg-size);line-height:var(--type-label-lg-lh)}
+.btn--md{height:var(--size-control-md);padding:0 var(--spacing-inset-xl);font-size:var(--type-label-md-size);line-height:var(--type-label-md-lh)}
+.btn--block{width:100%}
+.btn--primary{background:var(--surface-inverse-base);color:var(--content-on-fill-dark-base)}
+.btn--primary:active{background:var(--surface-inverse-state-pressed);box-shadow:var(--elevation-neutral-raised)}
+.btn--brand{background:var(--surface-brand-brand-intense);color:var(--content-on-fill-dark-base);box-shadow:var(--elevation-brand-raised)}
+.btn--brand:active{background:var(--surface-brand-brand-intense-pressed);box-shadow:var(--elevation-brand-subtle)}
+.btn--secondary{background:var(--surface-neutral-raised);color:var(--content-neutral-base);border:var(--size-stroke-default) solid var(--stroke-neutral-base)}
+.btn--secondary:active{background:var(--surface-neutral-state-pressed)}
+.btn--tertiary{color:var(--content-neutral-brand);padding:0 var(--spacing-inset-sm);height:auto}
+@media (hover:hover){
+  .btn--primary:hover{background:var(--surface-inverse-state-hover);box-shadow:var(--elevation-neutral-lifted);transform:translateY(var(--motion-lift-up))}
+  .btn--brand:hover{background:var(--surface-brand-brand-intense-hover);box-shadow:var(--elevation-brand-lifted);transform:translateY(var(--motion-lift-up))}
+  .btn--secondary:hover{background:var(--surface-neutral-state-hover)}
+}
+.cta-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--spacing-inline-lg)}
+.cta-row .btn{padding:0 var(--spacing-inset-lg)}
+.legal{font-size:var(--type-body-sm-size);line-height:var(--type-body-sm-lh);color:var(--content-neutral-faded);text-align:center}
+.legal a{color:var(--content-neutral-muted);font-weight:var(--typeface-weight-semibold);text-decoration:underline;text-underline-offset:var(--unit-2)}
+.foot{flex:none;padding:0 var(--spacing-layout-xs) max(var(--spacing-stack-xl), env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;gap:var(--spacing-stack-md);position:relative;z-index:4}
+/* Hero copy */
+.h1{font-size:var(--type-display-lg-size);line-height:var(--type-display-lg-lh);letter-spacing:var(--type-display-lg-ls);
+  font-weight:var(--typeface-weight-extrabold);text-wrap:balance}
+.sub{font-size:var(--type-body-lg-size);line-height:var(--type-body-lg-lh);color:var(--content-neutral-muted);
+  font-weight:var(--typeface-weight-medium);text-wrap:balance}
+.sub b{color:var(--content-neutral-brand);font-weight:var(--typeface-weight-bold)}
+.eyebrow{font-size:var(--type-eyebrow-md-size);line-height:var(--type-eyebrow-md-lh);letter-spacing:var(--type-eyebrow-md-ls);
+  font-weight:var(--typeface-weight-bold);text-transform:uppercase;color:var(--content-neutral-faded)}
+/* Logos */
+.logo{display:block;background:center/contain no-repeat;aspect-ratio:var(--ar);flex:none}
+/* Marquee */
+@keyframes marquee{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+.marquee{display:flex;width:max-content;animation:marquee var(--dur,40s) linear infinite}
+.marquee.rev{animation-direction:reverse}
+/* Short phones (iPhone SE / 8, Android 16:9): step the hero headline down one tier */
+@media (max-height:720px){
+  .h1{font-size:var(--type-display-md-size);line-height:var(--type-display-md-lh);letter-spacing:var(--type-display-md-ls)}
+  .sub{font-size:var(--type-body-md-size);line-height:var(--type-body-md-lh)}
+  .hide-short{display:none!important}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0s!important;animation-iteration-count:1!important;transition:none!important}}
+
+/* ── Company logos (assets/logos/*.svg) ── */
+.lg-accenture{background-image:url("../assets/logos/accenture.svg");--ar:0.946;--lh:0.780}
+.lg-amazon{background-image:url("../assets/logos/amazon.svg");--ar:0.971;--lh:0.780}
+.lg-barclays{background-image:url("../assets/logos/barclays.svg");--ar:0.937;--lh:0.780}
+.lg-byjus{background-image:url("../assets/logos/byjus.svg");--ar:1.008;--lh:0.780}
+.lg-capgemini{background-image:url("../assets/logos/capgemini.svg");--ar:1.078;--lh:0.780}
+.lg-cognizant{background-image:url("../assets/logos/cognizant.svg");--ar:1.180;--lh:0.780}
+.lg-deloitte{background-image:url("../assets/logos/deloitte.svg");--ar:4.934;--lh:0.428}
+.lg-ey{background-image:url("../assets/logos/ey.svg");--ar:0.993;--lh:0.780}
+.lg-google{background-image:url("../assets/logos/google.svg");--ar:0.984;--lh:0.780}
+.lg-groww{background-image:url("../assets/logos/groww.svg");--ar:1.000;--lh:0.780}
+.lg-hcl{background-image:url("../assets/logos/hcl.svg");--ar:6.244;--lh:0.380}
+.lg-hsbc{background-image:url("../assets/logos/hsbc.svg");--ar:1.962;--lh:0.560}
+.lg-icici_bank{background-image:url("../assets/logos/icici_bank.svg");--ar:4.864;--lh:0.431}
+.lg-infosys{background-image:url("../assets/logos/infosys.svg");--ar:2.613;--lh:0.560}
+.lg-jpmorgan{background-image:url("../assets/logos/jpmorgan.svg");--ar:4.566;--lh:0.445}
+.lg-novartis{background-image:url("../assets/logos/novartis.svg");--ar:6.000;--lh:0.388}
+.lg-ola{background-image:url("../assets/logos/ola.svg");--ar:2.553;--lh:0.560}
+.lg-phonepe{background-image:url("../assets/logos/phonepe.svg");--ar:1.000;--lh:0.780}
+.lg-postman{background-image:url("../assets/logos/postman.svg");--ar:0.998;--lh:0.780}
+.lg-rapido{background-image:url("../assets/logos/rapido.svg");--ar:2.294;--lh:0.560}
+.lg-razorpay{background-image:url("../assets/logos/razorpay.svg");--ar:0.872;--lh:0.780}
+.lg-swiggy{background-image:url("../assets/logos/swiggy.svg");--ar:0.681;--lh:0.780}
+.lg-tcs{background-image:url("../assets/logos/tcs.svg");--ar:1.087;--lh:0.780}
+.lg-wipro{background-image:url("../assets/logos/wipro.svg");--ar:1.264;--lh:0.780}
+.lg-zerodha{background-image:url("../assets/logos/zerodha.svg");--ar:1.000;--lh:0.780}
+.lg-zomato{background-image:url("../assets/logos/zomato.svg");--ar:4.378;--lh:0.454}
+/* ── Page ── */
+
+.stage{overflow:hidden}
+.field{position:absolute;inset:0;
+  -webkit-mask-image:radial-gradient(ellipse 62% 58% at 50% 50%,#000 55%,transparent 100%);
+          mask-image:radial-gradient(ellipse 62% 58% at 50% 50%,#000 55%,transparent 100%)}
+.bub{position:absolute;left:var(--x);top:var(--y);width:var(--s);height:var(--s);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  border-radius:var(--size-radius-full);background:var(--surface-neutral-raised);border:var(--size-stroke-thin) solid var(--stroke-neutral-muted);
+  box-shadow:var(--elevation-neutral-lifted);display:grid;place-items:center;
+  /* each bubble drifts on its own slow path — a few px, never in sync, so the grid breathes without drawing the eye */
+  animation:drift var(--fd) ease-in-out var(--dl) infinite alternate;
+  transition:box-shadow .45s,border-color .45s,scale .45s cubic-bezier(.3,1.4,.5,1)}
+@keyframes drift{0%{transform:translate(0,0)}50%{transform:translate(calc(var(--fx) * -.6),var(--fy))}100%{transform:translate(var(--fx),calc(var(--fy) * -.4))}}
+.face{width:100%;height:100%;display:grid;place-items:center;transition:opacity .6s ease,scale .6s ease,filter .6s ease}
+.face .logo{width:56%;height:56%;aspect-ratio:auto}
+.face.wide .logo{width:74%}
+/* logo shuffle — a soft dissolve inside a still bubble */
+.face.out{opacity:0;scale:.86;filter:blur(var(--unit-2))}
+.bub.big{box-shadow:var(--elevation-neutral-overlay)}
+.bub.hot{scale:1.12;border-color:var(--stroke-neutral-focus);box-shadow:var(--elevation-brand-lifted),0 0 0 var(--unit-6) var(--c-brand-500-op10);z-index:3}
+/* roles tooltip — lives outside the mask, follows its bubble every frame */
+.tip{position:absolute;left:0;top:0;z-index:4;padding:var(--spacing-inset-md) var(--spacing-inset-lg);white-space:nowrap;will-change:transform;
+  background:var(--surface-inverse-base);color:var(--content-on-fill-dark-base);border-radius:var(--size-radius-lg);box-shadow:var(--elevation-neutral-overlay);
+  font-size:var(--type-label-md-size);line-height:var(--type-label-md-lh);font-weight:var(--typeface-weight-bold);opacity:0;transition:opacity .3s ease;pointer-events:none}
+.tip::after{content:"";position:absolute;left:var(--ax,50%);bottom:calc(-1 * var(--unit-4));width:var(--unit-10);height:var(--unit-10);background:inherit;
+  transform:translateX(-50%) rotate(45deg);border-radius:var(--size-radius-xs)}
+.tip.below::after{bottom:auto;top:calc(-1 * var(--unit-4))}
+.tip.on{opacity:1}
+.tip b{color:var(--surface-decorative-lime-intense);font-weight:var(--typeface-weight-bold)}
+/* header sits lower — extra top inset above the logo + pill */
+.appbar{margin-top:var(--spacing-stack-md)}
+@media (max-height:720px){.appbar{margin-top:var(--spacing-stack-xs)}}
+/* 1 · Shine logo one step down (36 → 28) */
+.appbar .shine-logo{height:var(--unit-28)}
+/* 5 · warm-white canvas with a soft brand wash rising from the bottom */
+html,body{background:var(--surface-neutral-base)}
+body{background-image:linear-gradient(to top,var(--surface-brand-brand-subtle) 0%,var(--surface-brand-wash) 18%,var(--surface-neutral-base) 46%)}
+/* breathing room between app bar · bubbles · copy · CTAs */
+.stage{margin:var(--spacing-section-md) 0 var(--spacing-stack-md)}
+@media (max-height:720px){.stage{margin-top:var(--spacing-section-sm)}}
+/* A.02 Button · sm · shape-full · secondary — the nav pill, with a nudging arrow */
+.pill-explore{display:inline-flex;align-items:center;gap:var(--spacing-inline-md);height:var(--unit-32);
+  /* disc is 24px in a 32px pill → 4px inset top / right / bottom keeps it concentric; text gets the 12px inset */
+  padding:0 var(--spacing-inset-xs) 0 var(--spacing-inset-lg);
+  border-radius:var(--size-radius-full);background:var(--surface-neutral-raised);border:var(--size-stroke-thin) solid var(--stroke-neutral-base);
+  box-shadow:var(--elevation-neutral-subtle);color:var(--content-neutral-base);font-size:var(--type-label-md-size);line-height:var(--type-label-md-lh);
+  font-weight:var(--typeface-weight-bold);transition:background-color .15s,box-shadow .15s}
+.pill-explore .arr{width:var(--unit-24);height:var(--unit-24);border-radius:var(--size-radius-full);display:grid;place-items:center;flex:none;
+  background:var(--surface-inverse-base);color:var(--content-on-fill-dark-base);overflow:hidden}
+.pill-explore .arr .ic{width:var(--size-icon-xs);height:var(--size-icon-xs);animation:nudge 1.8s cubic-bezier(.5,0,.3,1) infinite}
+/* arrow slides out to the right and re-enters from the left, then rests */
+@keyframes nudge{0%,45%{transform:translateX(0);opacity:1}62%{transform:translateX(var(--unit-14));opacity:0}63%{transform:translateX(calc(-1 * var(--unit-14)));opacity:0}80%,100%{transform:translateX(0);opacity:1}}
+.pill-explore:active{background:var(--surface-neutral-state-pressed)}
+@media (hover:hover){.pill-explore:hover{background:var(--surface-neutral-state-hover);box-shadow:var(--elevation-neutral-raised)}}
+/* copy — one tier smaller than the default hero, fluid to the layout gutters */
+.copy{flex:none;width:100%;text-align:center;padding:var(--spacing-section-sm) var(--spacing-layout-xs) var(--spacing-section-lg);
+  display:flex;flex-direction:column;gap:var(--spacing-stack-xs)}
+.copy .h1,.copy .sub{width:100%;text-wrap:pretty}
+.copy .h1{--reel-lh:var(--type-display-md-lh);font-size:var(--type-display-md-size);line-height:var(--type-display-md-lh);letter-spacing:var(--type-display-md-ls)}
+.copy .sub{font-size:var(--type-body-md-size);line-height:var(--type-body-md-lh);color:var(--content-neutral-faded)}
+.h1 .line{display:block}
+/* reel window carries extra room below the baseline so descenders (the "j" in job) are not clipped */
+.reel{display:block;height:calc(var(--reel-lh) + var(--unit-8));overflow:hidden;color:var(--content-neutral-brand)}
+.reel-in{display:flex;flex-direction:column;transition:transform .6s cubic-bezier(.7,0,.2,1)}
+.reel-in span{height:calc(var(--reel-lh) + var(--unit-8));display:block}
+@media (max-height:720px){
+  .copy{padding:var(--spacing-stack-xl) var(--spacing-layout-xs) var(--spacing-section-md)}
+  /* keep Display-md / Body-md on short phones too — the base short-screen rule would shrink them further */
+  .copy .h1{font-size:var(--type-display-md-size);line-height:var(--type-display-md-lh);letter-spacing:var(--type-display-md-ls)}
+  .copy .sub{font-size:var(--type-body-md-size);line-height:var(--type-body-md-lh)}
+}
+.foot{gap:var(--spacing-stack-lg)}
+
+/* A · grey accents — a few bubbles sit back in greyscale; which ones slowly rotates, independent of the headline */
+.face{transition:opacity .9s ease,scale .6s ease,filter .9s ease}
+.bub{transition:box-shadow .9s,border-color .9s,scale .45s cubic-bezier(.3,1.4,.5,1)}
+.bub.dim{border-color:var(--stroke-neutral-faded);box-shadow:var(--elevation-neutral-subtle)}
+.bub.dim .face{opacity:.42;filter:grayscale(.9)}
+.bub.dim .face.out{opacity:0}

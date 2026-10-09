@@ -1,0 +1,197 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · BOTTOM SHEET  (app component)                        v1.1.0
+   The one sheet primitive behind every slide-up panel in the app:
+   Sort, Filter (+ its "See all" sub-sheet), Share, Save, Feedback…
+   ───────────────────────────────────────────────────────────────────────
+   • Pair with bottom-sheet.js (ShineSheet). Zero dependencies.
+   • Classes are prefixed `bs-`. The component owns ONLY the container:
+     position, surface, radius, elevation, handle, header, scrolling body,
+     footer, scrim, motion and the closed state. Content inside the sheet
+     is styled by whoever owns it (sort-filter, a page…).
+   • Scoped token layer below mirrors design-system/DESIGN-SYSTEM.md
+     (light theme, mobile column) so the sheet renders the same on any
+     page whatever token names that page uses.
+   • Closed sheets are `[hidden]` → display:none. Nothing parked off-screen
+     can cast a shadow into the viewport (the JSRP bottom-band bug).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Scoped tokens ─────────────────────────────────────────────────── */
+.bs, .bs-scrim {
+  /* primitives */
+  --bs-c-cn-black: #0D1117; --bs-c-cn-white: #FFFFFF; --bs-c-cn-200: #E4E7EC;
+  --bs-c-cn-500: #667085; --bs-c-cn-700: #344054; --bs-c-wn-200: #F5F1E8;
+
+  /* semantic (§2.2) */
+  --bs-surface: var(--bs-c-cn-white);                 /* surface.neutral.raised  */
+  --bs-surface-inverse: var(--bs-c-cn-black);         /* surface.inverse.base    */
+  --bs-content: var(--bs-c-cn-black);                 /* content.neutral.base    */
+  --bs-content-muted: var(--bs-c-cn-700);
+  --bs-content-on-dark: var(--bs-c-cn-white);
+  --bs-stroke: var(--bs-c-cn-200);                    /* stroke.neutral.base     */
+  --bs-close-fill: var(--bs-c-wn-200);                /* warm-neutral/200 disc   */
+
+  /* scrim — surface.neutral-state.overlay family */
+  --bs-scrim: rgba(13,17,23,.30);
+  --bs-scrim-strong: rgba(13,17,23,.45);              /* auth / share nudges      */
+  --bs-scrim-strong-blur: 4px;
+  --bs-scrim-nested: rgba(13,17,23,.40);              /* sub-sheet over a sheet   */
+
+  /* elevation — proposed `elevation.neutral.sheet` (upward-cast modal) */
+  --bs-elevation: 0 -16px 48px -8px rgba(13,17,23,.30);
+  --bs-elevation-inverse: 0 -16px 48px -8px rgba(0,0,0,.50);
+  --bs-divider-shadow: 0 6px 12px -8px rgba(13,17,23,.18);   /* head / foot on scroll */
+
+  /* typography */
+  --bs-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --bs-title-size: 16px; --bs-title-weight: 800;
+
+  /* size + spacing (§2.3 / §2.4 · mobile) */
+  --bs-radius: 32px;                                  /* size.radius.3xl         */
+  --bs-radius-full: 1024px;
+  --bs-gutter: 24px;                                  /* spacing.layout.sm       */
+  --bs-head-pad-top: 16px; --bs-head-pad-bottom: 20px;
+  --bs-close: 28px; --bs-close-icon: 12px;            /* size.icon.xs            */
+  --bs-handle-w: 40px; --bs-handle-h: 4px;
+  --bs-max-h: 90vh;
+
+  /* motion */
+  --bs-ease: cubic-bezier(.32,.72,0,1);
+  --bs-dur-in: 320ms; --bs-dur-out: 260ms; --bs-dur-scrim: 240ms;
+
+  /* stacking — ShineSheet assigns z = --bs-z + 2·depth (+1 for the sheet) */
+  --bs-z: 100;
+}
+
+/* ── Scrim (one per stack level, created by ShineSheet) ───────────── */
+.bs-scrim {
+  position: fixed; inset: 0;
+  background: var(--bs-scrim);
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--bs-dur-scrim) ease, background var(--bs-dur-scrim) ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.bs-scrim.is-open { opacity: 1; pointer-events: auto; }
+.bs-scrim--strong { background: var(--bs-scrim-strong); -webkit-backdrop-filter: blur(var(--bs-scrim-strong-blur)); backdrop-filter: blur(var(--bs-scrim-strong-blur)); }
+.bs-scrim--nested { position: absolute; background: var(--bs-scrim-nested); border-radius: var(--bs-radius) var(--bs-radius) 0 0; }
+
+/* ── Sheet ─────────────────────────────────────────────────────────── */
+.bs {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  z-index: calc(var(--bs-z) + 1);
+  display: flex; flex-direction: column;
+  max-height: var(--bs-max-h); max-height: min(var(--bs-max-h), 90dvh);
+  background: var(--bs-surface); color: var(--bs-content);
+  border-radius: var(--bs-radius) var(--bs-radius) 0 0;
+  box-shadow: var(--bs-elevation);
+  font-family: var(--bs-font);
+  overflow: hidden;
+  outline: none;
+  transform: translate3d(0, 100%, 0);
+  transition: transform var(--bs-dur-out) var(--bs-ease);
+  will-change: transform;
+  touch-action: pan-y;
+}
+.bs[hidden] { display: none !important; }
+.bs.is-open { transform: translate3d(0, 0, 0); transition-duration: var(--bs-dur-in); }
+.bs.is-dragging { transition: none; }
+
+/* inverse (dark) — feedback / quick-check sheets */
+.bs--inverse {
+  background: var(--bs-surface-inverse); color: var(--bs-content-on-dark);
+  border-top: 1px solid rgba(255,255,255,.10);
+  box-shadow: var(--bs-elevation-inverse);
+}
+.bs--inverse .bs-handle { background: rgba(255,255,255,.25); }
+
+/* nested — a sheet that opens INSIDE another sheet and covers it (See all) */
+.bs--nested {
+  position: absolute; top: 0; max-height: none; height: 100%;
+  box-shadow: none;
+  transform: translate3d(0, 110%, 0);
+  transition: transform 280ms ease;
+}
+.bs--nested.is-open { transition-duration: 280ms; }
+
+/* ── Anatomy ───────────────────────────────────────────────────────── */
+.bs-handle {
+  flex-shrink: 0;
+  width: var(--bs-handle-w); height: var(--bs-handle-h);
+  margin: 10px auto 0;
+  border-radius: var(--bs-radius-full);
+  background: var(--bs-stroke);
+  cursor: grab; touch-action: none;
+}
+.bs-handle::before { content: ""; display: block; height: 24px; margin: -10px -24px 0; }  /* 44px-wide drag target */
+
+.bs-head {
+  flex-shrink: 0;
+  position: relative; z-index: 2;
+  display: flex; align-items: center; gap: 8px;
+  padding: var(--bs-head-pad-top) var(--bs-gutter) var(--bs-head-pad-bottom);
+  touch-action: none;
+  transition: box-shadow 160ms ease;
+}
+.bs-title {
+  flex: 1; min-width: 0; margin: 0;
+  font: var(--bs-title-weight) var(--bs-title-size)/1.25 var(--bs-font);
+  color: inherit; letter-spacing: 0;
+}
+.bs-close {
+  flex-shrink: 0;
+  width: var(--bs-close); height: var(--bs-close);
+  display: grid; place-items: center;
+  border: none; border-radius: 50%;
+  background: var(--bs-close-fill); color: var(--bs-content);
+  cursor: pointer; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.bs-close svg { width: var(--bs-close-icon); height: var(--bs-close-icon); }
+.bs-close:focus-visible, .bs :focus-visible { outline: 2px solid rgba(26,86,255,.55); outline-offset: 2px; }   /* elevation.focus ring */
+
+.bs-body {
+  flex: 1 1 auto; min-height: 0;
+  overflow-y: auto; overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.bs-foot {
+  flex-shrink: 0;
+  position: relative; z-index: 2;
+  padding: 16px var(--bs-gutter) calc(16px + env(safe-area-inset-bottom, 0px));
+  transition: box-shadow 160ms ease;
+}
+/* ── Call to action · two behaviours (v1.1) ─────────────────────────────
+   One CTA group per sheet: .bs-actions. Where it lives decides how it behaves.
+     INLINE  — last child of .bs-body. Follows the content and scrolls with it.
+               For short, read-then-act sheets: nudges, confirmations, OTP entry.
+     STICKY  — inside .bs-foot, after .bs-body. Pinned while the body scrolls under
+               it; divider only while more content sits below. For scrolling or
+               editable content: filters, pickers, lists, long forms.
+     data-bs-cta="inline" | "sticky" | "auto" on .bs makes ShineSheet place it;
+     "auto" = inline while everything fits, sticky as soon as the body overflows.
+     ShineSheet mirrors the live state in data-bs-cta-state on the sheet.        */
+.bs-body--gutter { padding-left: var(--bs-gutter); padding-right: var(--bs-gutter); }
+.bs-actions { display: flex; flex-direction: column; gap: 10px; }
+.bs-actions--row { flex-direction: row; }
+.bs-actions--row > * { flex: 1 1 0; min-width: 0; }
+/* inline: 24 above (spacing.layout.sm), gutter + home indicator below */
+.bs-body > .bs-actions {
+  margin-top: var(--bs-gutter);
+  padding-bottom: calc(var(--bs-gutter) + env(safe-area-inset-bottom, 0px));
+}
+/* sticky: the footer supplies the padding + scroll divider */
+.bs-foot > .bs-actions { margin: 0; padding: 0; }
+.bs-foot[hidden] { display: none !important; }
+
+/* elevation appears only when content actually scrolls under head / foot */
+.bs.is-scrolled .bs-head { box-shadow: var(--bs-divider-shadow); }
+.bs.has-more .bs-foot { box-shadow: 0 -6px 12px -8px rgba(13,17,23,.18); }
+
+/* sheets without a footer still clear the home indicator */
+.bs--pad-bottom { padding-bottom: calc(var(--bs-gutter) + env(safe-area-inset-bottom, 0px)); }
+
+/* page scroll lock (set on <html> by ShineSheet) */
+.bs-lock, .bs-lock body { overflow: hidden !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bs, .bs--nested, .bs-scrim { transition-duration: 1ms !important; }
+}

@@ -1,0 +1,156 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · NOTIFY  (app component)                              v1.0.0
+   Two floating nudges for every screen of the Shine app:
+
+     Toast   — small dark pill at the BOTTOM. One background (inverse black);
+               the tone shows only in the icon colour (DS A.09 Toast).
+               "Resume uploaded", "Link copied", "Job saved".
+     Alert   — contextual card at the TOP (the "Account not found" look:
+               icon disc · title · text · optional action), coloured by tone.
+               For results that need a moment of attention: server errors,
+               "Couldn't send OTP", "Profile updated", "Session expiring".
+
+   Tones (both): success · warning · error · brand · neutral
+     (DS intents positive · notice · negative · info · neutral)
+
+   • Every class is prefixed `sn-`; the component carries its OWN scoped token
+     layer (values from design-system/DESIGN-SYSTEM.md, light) so it renders
+     the same on any page, whatever token vocabulary the host uses.
+   • Floating Alert is a deliberate extension of DS A.07 (which is inline-only):
+     same anatomy and intent colours, delivered as an overlay that auto-dismisses.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Scoped tokens ─────────────────────────────────────────────────── */
+.sn-layer {
+  /* palette */
+  --sn-black: #0D1117; --sn-white: #FFFFFF;
+  --sn-cn-200: #E4E7EC; --sn-cn-500: #667085; --sn-cn-700: #344054;
+  --sn-green-50: #EAFAF0; --sn-green-300: #5DD4A1; --sn-green-600: #0E9A5A; --sn-green-700: #027A48;
+  --sn-amber-100: #FFF4ED; --sn-amber-400: #FAB663; --sn-amber-600: #D97706; --sn-amber-700: #A35A04;
+  --sn-red-50: #FEF2F2; --sn-red-200: #FECDCA; --sn-red-300: #FCA5A0; --sn-red-600: #B42318;
+  --sn-brand-100: #EBF0FF; --sn-brand-200: #C9DBFF; --sn-brand-300: #7EA3FF; --sn-brand-600: #0B3FCC;
+
+  /* semantic */
+  --sn-content-base: var(--sn-black);
+  --sn-content-muted: var(--sn-cn-700);
+  --sn-content-on-dark: var(--sn-white);
+  --sn-surface-raised: var(--sn-white);
+  --sn-surface-inverse: var(--sn-black);
+  --sn-stroke-base: var(--sn-cn-200);
+
+  /* type · size · space · motion */
+  --sn-font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --sn-body-md: 14px; --sn-body-md-lh: 20px;
+  --sn-body-sm: 12px; --sn-body-sm-lh: 18px;
+  --sn-w-medium: 500; --sn-w-semibold: 600; --sn-w-bold: 700;
+  --sn-gutter: 16px;                                  /* spacing.layout.xs — screen edge gap */
+  --sn-radius-lg: 12px; --sn-radius-full: 1024px;
+  --sn-icon-sm: 14px; --sn-icon-md: 16px;
+  --sn-disc: 32px; --sn-cta-h: 32px;
+  --sn-elev-overlay: 0 16px 36px -10px rgba(13,17,23,.30), 0 4px 10px -2px rgba(13,17,23,.10);
+  --sn-elev-toast: 0 10px 24px rgba(16,24,40,.20);
+  --sn-ease-out: cubic-bezier(.22,1,.36,1);
+  --sn-ease-in: cubic-bezier(.4,0,1,1);
+
+  /* placement — pages can override with ShineNotify.configure({ toastBottom, alertTop }) */
+  --sn-toast-bottom: 32px;
+  --sn-alert-top: 12px;
+  --sn-z: 10000;                                      /* above sheets (100+) and the search modal (9997) */
+}
+
+/* ── Layers (one per kind, created on first use) ───────────────────── */
+.sn-layer {
+  position: fixed; left: 0; right: 0; z-index: var(--sn-z);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0 var(--sn-gutter); pointer-events: none;
+  font-family: var(--sn-font); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+}
+.sn-layer *, .sn-layer *::before, .sn-layer *::after { box-sizing: border-box; }
+.sn-layer--toast { bottom: calc(var(--sn-toast-bottom) + env(safe-area-inset-bottom, 0px)); }
+.sn-layer--alert { top: calc(var(--sn-alert-top) + env(safe-area-inset-top, 0px)); }
+
+/* ══ Toast — dark pill, tone = icon colour (DS A.09) ══════════════════ */
+.sn-toast {
+  display: inline-flex; align-items: center; gap: 8px; max-width: min(100%, 480px);
+  padding: 12px 20px; border-radius: var(--sn-radius-full);
+  background: var(--sn-surface-inverse); color: var(--sn-content-on-dark);
+  box-shadow: var(--sn-elev-toast);
+  font-size: var(--sn-body-md); line-height: var(--sn-body-md-lh); font-weight: var(--sn-w-semibold);
+  white-space: nowrap;
+  opacity: 0; transform: translateY(12px);
+  transition: opacity 200ms ease, transform 260ms var(--sn-ease-out);
+}
+.sn-toast.is-in { opacity: 1; transform: none; }
+.sn-toast.is-out { opacity: 0; transform: translateY(8px); transition: opacity 180ms ease, transform 200ms var(--sn-ease-in); }
+.sn-toast-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }   /* one line, never wraps */
+.sn-toast-icon { display: inline-flex; flex: none; color: var(--sn-content-on-dark); }
+.sn-toast-icon svg { width: var(--sn-icon-sm); height: var(--sn-icon-sm); }
+.sn-toast[data-tone="success"] .sn-toast-icon { color: var(--sn-green-300); }
+.sn-toast[data-tone="warning"] .sn-toast-icon { color: var(--sn-amber-400); }
+.sn-toast[data-tone="error"]   .sn-toast-icon { color: var(--sn-red-300); }
+.sn-toast[data-tone="brand"]   .sn-toast-icon { color: var(--sn-brand-300); }
+
+/* ══ Alert — contextual card at the top (DS A.07 anatomy, floating) ═══ */
+.sn-alert {
+  --sn-a-bg: var(--sn-surface-raised); --sn-a-stroke: var(--sn-stroke-base);
+  --sn-a-title: var(--sn-content-base); --sn-a-icon: var(--sn-content-muted);
+  position: relative; pointer-events: auto; touch-action: pan-x;
+  display: flex; align-items: center; gap: 12px; width: 100%; max-width: 480px;
+  padding: 12px; border-radius: var(--sn-radius-lg);
+  background: var(--sn-a-bg); border: 1px solid var(--sn-a-stroke);
+  box-shadow: var(--sn-elev-overlay);
+  font-size: var(--sn-body-sm); line-height: var(--sn-body-sm-lh); color: var(--sn-content-muted);
+  opacity: 0; transform: translateY(-16px) scale(.98);
+  transition: opacity 220ms ease, transform 340ms var(--sn-ease-out);
+  cursor: default;
+}
+.sn-alert.is-in { opacity: 1; transform: none; }
+.sn-alert.is-out { opacity: 0; transform: translateY(-12px) scale(.98); transition: opacity 180ms ease, transform 220ms var(--sn-ease-in); }
+.sn-alert.is-dragging { transition: none; }
+.sn-alert[data-tone="success"] { --sn-a-bg: var(--sn-green-50);  --sn-a-stroke: rgba(14,154,90,.28);  --sn-a-title: var(--sn-green-700); --sn-a-icon: var(--sn-green-700); }
+.sn-alert[data-tone="warning"] { --sn-a-bg: var(--sn-amber-100); --sn-a-stroke: rgba(217,119,6,.30);  --sn-a-title: var(--sn-amber-700); --sn-a-icon: var(--sn-amber-700); }
+.sn-alert[data-tone="error"]   { --sn-a-bg: var(--sn-red-50);    --sn-a-stroke: var(--sn-red-200);     --sn-a-title: var(--sn-red-600);   --sn-a-icon: var(--sn-red-600); }
+.sn-alert[data-tone="brand"]   { --sn-a-bg: var(--sn-brand-100); --sn-a-stroke: var(--sn-brand-200);   --sn-a-title: var(--sn-brand-600); --sn-a-icon: var(--sn-brand-600); }
+.sn-alert[data-tone="neutral"] { --sn-a-bg: var(--sn-surface-raised); --sn-a-stroke: var(--sn-stroke-base); --sn-a-title: var(--sn-content-base); --sn-a-icon: var(--sn-content-muted); }
+
+/* icon disc — white, ringed in the tone's stroke, top-aligned with the title */
+.sn-alert-disc {
+  flex: none; align-self: flex-start; width: var(--sn-disc); height: var(--sn-disc);
+  display: grid; place-items: center; border-radius: var(--sn-radius-full);
+  background: var(--sn-surface-raised); border: 1px solid var(--sn-a-stroke); color: var(--sn-a-icon);
+}
+.sn-alert[data-tone="neutral"] .sn-alert-disc { background: #F7F9FB; }
+.sn-alert-disc svg { width: var(--sn-icon-md); height: var(--sn-icon-md); }
+.sn-alert-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sn-alert-title { font-size: var(--sn-body-md); line-height: var(--sn-body-md-lh); font-weight: var(--sn-w-bold); color: var(--sn-a-title); }
+.sn-alert-text { font-weight: var(--sn-w-medium); overflow-wrap: anywhere; }
+.sn-alert-text b, .sn-alert-text strong { color: var(--sn-content-base); font-weight: var(--sn-w-semibold); }
+
+/* action — DS A.02 Button · Secondary, compact 32 px pill */
+.sn-alert-cta {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  height: var(--sn-cta-h); padding: 0 12px; margin: 0; border-radius: var(--sn-radius-full);
+  background: var(--sn-surface-raised); color: var(--sn-content-base); border: 1px solid var(--sn-stroke-base);
+  font: var(--sn-w-bold) var(--sn-body-sm)/var(--sn-body-sm-lh) var(--sn-font); white-space: nowrap;
+  text-decoration: none; cursor: pointer; -webkit-appearance: none; appearance: none;
+  transition: transform 120ms ease, background-color 150ms ease;
+}
+.sn-alert-cta:active { transform: scale(.97); background: #EEF1F5; }
+@media (hover: hover) { .sn-alert-cta:hover { background: #F7F9FB; } }
+.sn-alert-cta:focus-visible { outline: 1.5px solid var(--sn-brand-600); outline-offset: 2px; }
+
+/* time-left hairline along the bottom edge (pauses with the timer) */
+.sn-alert-timer {
+  position: absolute; left: 12px; right: 12px; bottom: 0; height: 2px; border-radius: 2px;
+  background: var(--sn-a-stroke); transform-origin: left center; transform: scaleX(0); opacity: .9;
+}
+.sn-alert.is-running .sn-alert-timer { animation: sn-timer var(--sn-dur, 5000ms) linear forwards; }
+.sn-alert.is-paused .sn-alert-timer { animation-play-state: paused; }
+@keyframes sn-timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+.sn-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sn-toast, .sn-alert, .sn-toast.is-out, .sn-alert.is-out { transform: none !important; transition: opacity 150ms ease !important; }
+  .sn-alert.is-running .sn-alert-timer { animation: none; }
+}

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FAF9F6">
+<title>Shine — iPhone previews</title>
+<link rel="stylesheet" href="preview/fonts/fonts.css">
+<link rel="apple-touch-icon" href="preview/icons/icon-180.png">
+<style>
+:root{--ink:#0D1117;--muted:#5B6270;--faded:#8A909C;--line:#E7E8EC;--bg:#FAF9F6;--raised:#FFFFFF;--brand:#1A56FF;--brand-ink:#0B3FCC;--brand-50:#F0F5FF}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--bg)}
+body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(to top,#EBF0FF 0%,var(--brand-50) 18%,var(--bg) 46%);min-height:100vh;min-height:100dvh;
+  padding:max(24px,env(safe-area-inset-top)) 16px max(32px,env(safe-area-inset-bottom))}
+main{max-width:480px;margin:0 auto}
+.eb{font-size:11px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;color:var(--brand-ink)}
+h1{margin-top:8px;font-size:32px;line-height:36px;letter-spacing:-.4px;font-weight:800}
+.lede{margin-top:8px;font-size:15px;line-height:22px;color:var(--muted);font-weight:500}
+.apps{margin-top:24px;display:flex;flex-direction:column;gap:12px}
+.app{display:flex;align-items:center;gap:14px;padding:12px;border-radius:20px;background:var(--raised);border:1px solid var(--line);
+  box-shadow:0 10px 24px -16px rgba(13,17,23,.25);text-decoration:none;color:inherit;transition:transform .12s}
+.app:active{transform:scale(.98)}
+.app img{width:60px;height:60px;border-radius:14px;flex:none;box-shadow:0 0 0 1px rgba(13,17,23,.06)}
+.app b{display:block;font-size:16px;line-height:22px;font-weight:700}
+.app span{display:block;font-size:13px;line-height:18px;color:var(--muted);font-weight:500}
+.app i{margin-left:auto;flex:none;height:32px;padding:0 14px;border-radius:999px;background:var(--ink);color:#fff;font-style:normal;font-size:13px;font-weight:700;display:grid;place-items:center}
+h2{margin-top:32px;font-size:18px;line-height:24px;font-weight:800}
+ol{margin-top:10px;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:15px;line-height:22px;color:var(--muted);font-weight:500}
+ol b{color:var(--ink);font-weight:700}
+.note{margin-top:20px;padding:12px 14px;border-radius:14px;background:var(--brand-50);font-size:13px;line-height:19px;color:var(--brand-ink);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <p class="eb">Shine · logged-out app</p>
+  <h1>Try the 3 homepages on your iPhone</h1>
+  <p class="lede">Each one installs as its own app, so you can keep all three on one phone.</p>
+  <nav class="apps">
+    <a class="app" href="preview/"><img src="preview/icons/icon-180.png" alt=""><div><b>Shine Preview</b><span>Option 1 · animated logos</span></div><i>Open</i></a>
+    <a class="app" href="folder/"><img src="folder/icons/icon-180.png" alt=""><div><b>Shine Folder</b><span>Option 2 · career folder</span></div><i>Open</i></a>
+    <a class="app" href="cards/"><img src="cards/icons/icon-180.png" alt=""><div><b>Shine Cards</b><span>Option 3 · job cards &amp; recruiters</span></div><i>Open</i></a>
+  </nav>
+  <h2>Add to your home screen</h2>
+  <ol>
+    <li>Open this page in <b>Safari</b>.</li>
+    <li>Tap an app above to open it.</li>
+    <li>Tap <b>Share</b>, then <b>Add to Home Screen</b>, then <b>Add</b>.</li>
+    <li>Come back here and repeat for the other two.</li>
+  </ol>
+  <p class="note">Open each app once while online. After that it also works offline.</p>
+</main>
+</body>
+</html>
