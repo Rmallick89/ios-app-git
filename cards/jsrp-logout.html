@@ -1305,42 +1305,38 @@ body { background: var(--surface-base, var(--surface-base)); }
     }
     .bs.jsrp-m-fb.is-open { transition-duration: var(--bs-dur-in), 220ms, 220ms; }
 
-.jsrp-m-fb::before {
-      content: ""; position: absolute;
-      top: -40px; right: -40px;
-      width: 280px; height: 200px;
-      background: radial-gradient(circle, rgba(126,163,255,0.30) 0%, transparent 60%);
-      filter: blur(28px); pointer-events: none;
-    }
+/* No ambient glow in the light treatment — the dark version
+   had a cyan radial blur to lift the dark surface; on a white
+   sheet it reads as noise. */
 .jsrp-m-fb > * { position: relative; z-index: 1; }
 .jsrp-m-fb-handle {
       width: 36px; height: 4px; border-radius: var(--radius-sm);
-      background: rgba(255,255,255,0.25);
+      background: var(--stroke-base);
       margin: -6px auto 12px;
     }
 .jsrp-m-fb-eyebrow {
       font: 700 10px/1 var(--font-brand);
-      color: var(--content-inverse-brand, var(--content-inverse-brand));
+      color: var(--content-brand);
       letter-spacing: 0.12em; text-transform: uppercase;
       margin-bottom: var(--spacing-stack-3xs);
     }
 .jsrp-m-fb-h {
       font: 800 16px/1.3 var(--font-brand);
-      color: var(--surface-raised);
+      color: var(--content-base);
       margin: 0 0 18px;
     }
 .jsrp-m-fb-strip {
       display: flex; align-items: center; justify-content: space-between;
       gap: 8px;
-      margin-bottom: var(--spacing-stack-lg);          
+      margin-bottom: var(--spacing-stack-lg);
     }
 .jsrp-m-fb-react {
       flex: 1;
       height: 56px;
-      background: rgba(255,255,255,0.06);
-      border: var(--stroke-default) solid rgba(255,255,255,0.12);
+      background: var(--surface-muted);
+      border: var(--stroke-default) solid var(--stroke-base);
       border-radius: 14px;
-      color: var(--surface-raised); cursor: pointer;
+      color: var(--content-base); cursor: pointer;
       display: grid; place-items: center;
       font-size: 26px; line-height: 1;
       -webkit-tap-highlight-color: transparent;
@@ -1352,22 +1348,25 @@ body { background: var(--surface-base, var(--surface-base)); }
       position: absolute; bottom: -18px; left: 0; right: 0;
       text-align: center;
       font: 500 10px/1 var(--font-brand);
-      color: rgba(255,255,255,0.55);
+      color: var(--content-muted);
       text-transform: uppercase; letter-spacing: 0.06em;
     }
 .jsrp-m-fb-react:hover, .jsrp-m-fb-react:focus-visible {
-      background: rgba(255,255,255,0.14);
-      border-color: rgba(255,255,255,0.24);
+      background: var(--surface-hover);
+      border-color: var(--content-base);
     }
 .jsrp-m-fb-react:active { transform: scale(0.95); }
 .jsrp-m-fb-close {
-      position: absolute; top: 12px; right: 14px;
-      width: 28px; height: 28px;
-      background: transparent; border: none;
-      color: rgba(255,255,255,0.55); cursor: pointer;
+      position: absolute; top: 14px; right: 14px;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--color-system-warm-neutral-200, var(--surface-base));
+      border: none;
+      color: var(--content-base); cursor: pointer;
       display: grid; place-items: center;
       z-index: 2;
+      -webkit-tap-highlight-color: transparent;
     }
+.jsrp-m-fb-close svg { color: var(--content-base); }
 .jsrp-m-fb-close svg { width: var(--size-icon-sm); height: var(--size-icon-sm); }
 .jsrp-m-fb.is-thanks {
       background: var(--content-positive, var(--content-positive));
@@ -1506,9 +1505,9 @@ body { background: var(--surface-base, var(--surface-base)); }
       <div id="jsrpMList"><!-- cards rendered by JS --></div>
     </div>
 
-    <!-- Feedback — shared bottom sheet (.bs, inverse). Reveals after the 6th
+    <!-- Feedback — shared bottom sheet (.bs, light). Reveals after the 6th
          job card scrolls into view; X / backdrop / Escape / a vote dismiss it. -->
-    <div class="bs bs--inverse jsrp-m-fb" id="jsrpMFb" role="dialog" aria-label="Job relevance feedback" data-bs-drag="false" hidden>
+    <div class="bs jsrp-m-fb" id="jsrpMFb" role="dialog" aria-label="Job relevance feedback" data-bs-drag="false" hidden>
       <div class="jsrp-m-fb-handle"></div>
       <button class="jsrp-m-fb-close" id="jsrpMFbClose" aria-label="Dismiss">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
