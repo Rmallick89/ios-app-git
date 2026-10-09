@@ -932,6 +932,7 @@ window.ShineLoginConfig = (function () {
   function rel(u) { return u && !/^\s*([a-z][a-z0-9+.-]*:|\/\/)/i.test(u) ? u : null; }   // same-site relative URLs only
   return {
     homeUrl: 'index.html',        // Back fallback + the splash's Reset (logged-out home)
+    welcomeUrl: 'login-welcome.html',   // "Welcome back" page shown after log in (dark from first paint → dark status bar)
     registerUrl: null,          // Register screen (not built yet → toast)
     termsUrl: null, privacyUrl: null,
     next: rel(q.get('next')),   // e.g. jsrp-logout.html?q=… (JSRP save/apply nudge)
@@ -1452,7 +1453,13 @@ window.ShineLoginConfig = (function () {
     $('#doneSub').textContent = CFG && CFG.next ? 'Taking you back…' : 'Loading your dashboard…';
     try { if (doc.activeElement && doc.activeElement.blur) doc.activeElement.blur(); } catch (e) {}
     route('done');
-    if (CFG && CFG.next) setTimeout(function () { window.location.replace(CFG.next); }, 1400);   // ?next= → back to the screen that asked for login
+    /* app builds: hand over to the "Welcome back" PAGE (login-welcome.html) once the splash has settled. A page that
+       is dark from its first paint is what makes the phone's status bar dark (iOS home-screen apps did not repaint the
+       bar for the in-page splash). Same layout, so the hand-over is seamless; replace() keeps the OTP out of Back. */
+    if (CFG && CFG.welcomeUrl) {
+      var url = CFG.welcomeUrl + '?name=' + encodeURIComponent(acc.name) + (CFG.next ? '&next=' + encodeURIComponent(CFG.next) : '') + '&t=650';
+      setTimeout(function () { window.location.replace(url); }, 650);
+    } else if (CFG && CFG.next) setTimeout(function () { window.location.replace(CFG.next); }, 1400);   // ?next= → back to the screen that asked for login
   }
   /* leave the login flow: back to the app screen we came from, else the home page */
   function leave() {

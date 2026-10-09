@@ -1,0 +1,80 @@
+<!doctype html>
+<!--
+  SHINE APP · LOGIN · "Welcome back" transition page             login-welcome.html
+  Opened by login-flow.html right after a successful log in (location.replace, so Back never returns to the OTP).
+  It is a page of its own — not an overlay — so the phone reads its dark colour when the page LOADS:
+  theme-color + html/body background are the ink colour from the first paint (iOS home-screen apps did not
+  repaint the status bar when the in-page splash turned the background dark).
+  Query:  ?name=<first name>   &next=<relative url>  (→ "Taking you back…" and continue there after 1.2 s)
+  Reset → the logged-out home (index.html).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D1117">
+<meta name="color-scheme" content="dark">
+<title>Welcome back · Shine</title>
+<link rel="preload" href="fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="fonts/fonts.css"><script src="native.js"></script>
+
+
+<style>
+/* DS tokens used here (values from design-system/DESIGN-SYSTEM.md) */
+:root{
+  --c-cn-black:#0D1117; --c-cn-white:#FFFFFF; --c-cn-300:#C8CED7; --c-brand-300:#7EA3FF; --c-brand-400:#4D7CFF;
+  --surface-inverse-base:var(--c-cn-black); --content-on-fill-dark-base:var(--c-cn-white); --content-on-fill-dark-muted:var(--c-cn-300);
+  --typeface-family-brand:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
+  --typeface-weight-medium:500; --typeface-weight-semibold:600; --typeface-weight-extrabold:800;
+  --unit-1:1px; --unit-4:4px; --unit-6:6px; --unit-12:12px; --unit-14:14px; --unit-18:18px; --unit-20:20px; --unit-22:22px; --unit-24:24px; --unit-32:32px; --unit-48:48px;
+  --type-heading-md-size:var(--unit-18); --type-heading-md-lh:var(--unit-22); --type-body-md-size:var(--unit-14); --type-body-md-lh:var(--unit-20); --type-body-sm-size:var(--unit-12);
+  --size-icon-sm:var(--unit-14); --size-radius-full:1024px; --size-stroke-thin:var(--unit-1); --spacing-inline-sm:var(--unit-4);
+}
+/* the whole document is ink from the first paint — this is what the status bar is painted from */
+html,body{margin:0;height:100%;background-color:var(--surface-inverse-base)}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;
+  color:var(--content-on-fill-dark-base);font-family:var(--typeface-family-brand);text-align:center;-webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box}
+.c{display:flex;flex-direction:column;align-items:center;padding:0 var(--unit-32)}
+.spin{width:var(--unit-48);height:var(--unit-48);border-radius:50%;border:3px solid rgba(255,255,255,.18);border-top-color:var(--c-brand-400);
+  margin-bottom:var(--unit-18);animation:spin .9s linear infinite}
+h1{margin:0;font-size:var(--type-heading-md-size);line-height:var(--type-heading-md-lh);font-weight:var(--typeface-weight-extrabold);letter-spacing:-0.01em}
+p{margin:var(--unit-6) 0 0;font-size:var(--type-body-md-size);line-height:var(--type-body-md-lh);font-weight:var(--typeface-weight-medium);opacity:.7}
+/* same quiet Reset as the in-page splash */
+.reset{position:fixed;left:50%;bottom:calc(var(--unit-24) + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  display:inline-flex;align-items:center;gap:var(--spacing-inline-sm);height:var(--unit-32);padding:0 var(--unit-14);
+  border:var(--size-stroke-thin) solid rgba(255,255,255,.14);border-radius:var(--size-radius-full);background:transparent;
+  color:var(--content-on-fill-dark-muted);font:var(--typeface-weight-semibold) var(--type-body-sm-size)/1 var(--typeface-family-brand);
+  cursor:pointer;animation:fade .5s ease var(--reset-delay,1s) both;transition:color .15s,border-color .15s,background-color .15s}
+.reset svg{width:var(--size-icon-sm);height:var(--size-icon-sm);transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.reset:active{background:rgba(255,255,255,.06)}
+.reset.is-going svg{transform:rotate(-360deg)}
+.reset:focus-visible{outline:2px solid var(--c-brand-300);outline-offset:2px}
+@media (hover:hover){.reset:hover{color:var(--content-on-fill-dark-base);border-color:rgba(255,255,255,.28)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.spin{animation:spin 1.6s linear infinite}.reset{animation:none}}
+</style>
+<link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shine Preview"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})</script>
+</head>
+<body>
+<main class="c" aria-live="polite"><span class="spin" aria-hidden="true"></span>
+  <h1 id="t">Welcome back.</h1>
+  <p id="s">Loading your dashboard…</p></main>
+<button class="reset" type="button" id="reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.64-6.36"/><path d="M3 4v5h5"/></svg>Reset</button>
+<script>
+(function () {
+  var HOME = 'index.html';
+  var q = new URLSearchParams(location.search);
+  function rel(u) { return u && !/^\s*([a-z][a-z0-9+.-]*:|\/\/)/i.test(u) ? u : null; }   // same-site relative only
+  var name = (q.get('name') || '').trim().slice(0, 40), next = rel(q.get('next'));
+  document.getElementById('t').textContent = name ? 'Welcome back, ' + name + '.' : 'Welcome back.';
+  if (next) { document.getElementById('s').textContent = 'Taking you back…'; setTimeout(function () { location.replace(next); }, 1200); }
+  // arrived straight from the in-page splash (which already showed Reset after 1.2 s) → keep the timing continuous
+  var shown = +q.get('t') || 0; document.documentElement.style.setProperty('--reset-delay', Math.max(0, 1200 - shown) + 'ms');
+  var b = document.getElementById('reset');
+  b.addEventListener('click', function () { b.disabled = true; b.classList.add('is-going'); setTimeout(function () { location.replace(HOME); }, 220); });
+})();
+</script>
+</body>
+</html>
