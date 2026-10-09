@@ -554,6 +554,10 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 body{background:var(--surface-neutral-base)}
 .screen{background:linear-gradient(0deg,var(--c-brand-100) 0%,var(--c-brand-50) 18%,var(--surface-neutral-base) 46%);color:var(--content-neutral-base);isolation:isolate}
 .bg{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+/* status bar (2026-10-09): the glow + grid fade in from the top edge, so the very top row is the plain page colour —
+   exactly what the phone paints in the status bar (iOS: body background · Android: sampled) — and the grid reads as
+   continuing up behind the status bar instead of stopping under it */
+.bg{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--unit-64));mask-image:linear-gradient(to bottom,transparent 0,#000 var(--unit-64))}
 .bg::before{content:"";position:absolute;left:-30%;top:-18%;width:120%;height:62%;background:radial-gradient(closest-side,rgba(126,163,255,.20),rgba(126,163,255,.06) 55%,transparent);filter:blur(10px)}
 .bg::after{content:"";position:absolute;left:6%;right:6%;bottom:-4%;height:46%;background:radial-gradient(closest-side,rgba(77,124,255,.22),transparent);filter:blur(18px)}
 .grid{position:absolute;inset:0 0 45% 0;

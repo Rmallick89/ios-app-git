@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · BOTTOM SHEET  (app component)                        v1.1.0
+   SHINE · BOTTOM SHEET  (app component)                        v1.2.0
    Pair with bottom-sheet.css. Zero dependencies, no build step.
 
    Markup (any element with .bs — it starts closed via [hidden]):
@@ -53,6 +53,9 @@
      (a sheet over a sheet gets its own scrim level) · drag the handle or
      header down to dismiss (velocity- or distance-based) · trigger gets
      aria-expanded · reduced motion respected · closed = [hidden].
+     v1.2 · keyboard-aware (rides above the on-screen keyboard, height capped
+     to the visible area) · status-bar tint: while a scrim is up html/body
+     get the dimmed page colour, so iOS 26 Safari's status bar dims with it.
    ═══════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -228,6 +231,69 @@
     else if (!top.contains(a)) { e.preventDefault(); first.focus(); }
   });
 
+  /* ── on-screen keyboard (v1.2) ────────────────────────────────────
+     iOS Safari never resizes the page for the keyboard — it slides over fixed
+     content, so a bottom sheet ends up underneath it. While any sheet is open we
+     follow visualViewport and lift the sheet to the keyboard's top edge:
+       --bs-kb   = layout-viewport bottom − visible-area bottom   (keyboard height)
+       --bs-vvh  = visible height (caps the sheet so its head never hides)
+     Android WebView/Chrome resize the page instead → --bs-kb stays 0 there. */
+  var kb = { on: false, raf: 0, px: 0 };
+  function kbSet(px, h) {
+    var r = doc.documentElement;
+    if (px > 0) { r.style.setProperty('--bs-kb', px + 'px'); r.style.setProperty('--bs-vvh', Math.round(h) + 'px'); r.classList.add('bs-kb'); }
+    else { r.style.removeProperty('--bs-kb'); r.style.removeProperty('--bs-vvh'); r.classList.remove('bs-kb'); }
+    if (px !== kb.px) {
+      kb.px = px;
+      stack.forEach(function (el) { if (el.__bs && el.__bs.actions) { syncCta(el); syncScroll(el); } });
+      var a = doc.activeElement;                         // keep the focused field in view inside the sheet
+      if (px > 0 && a && a.closest && a.closest('.bs') && a.scrollIntoView) setTimeout(function () { try { a.scrollIntoView({ block: 'nearest' }); } catch (e) {} }, 260);
+    }
+  }
+  function kbMeasure() {
+    kb.raf = 0;
+    var vv = global.visualViewport; if (!vv || !stack.length) return kbSet(0);
+    var px = Math.round(global.innerHeight - vv.height - vv.offsetTop);
+    kbSet(px > 80 ? px : 0, vv.height);                  // < 80 px = browser chrome moving, not a keyboard
+  }
+  function kbSchedule() { if (!kb.raf) kb.raf = requestAnimationFrame(kbMeasure); }
+  function keyboard(on) {
+    var vv = global.visualViewport; if (!vv) return;
+    if (on && !kb.on) { vv.addEventListener('resize', kbSchedule); vv.addEventListener('scroll', kbSchedule); }
+    if (!on && kb.on) { vv.removeEventListener('resize', kbSchedule); vv.removeEventListener('scroll', kbSchedule); kbSet(0); }
+    kb.on = on; if (on) kbSchedule();
+  }
+
+  /* ── status-bar tint (v1.2) ─────────────────────────────────────────
+     iOS 26 Safari colours the status bar from body's background-color (or a
+     fixed element's background-color at the top edge). Scrims paint with an image
+     layer, so while one is up we give html/body the page colour dimmed by it —
+     the status bar dims together with the page, and is restored on close. */
+  var tintSaved = null;
+  function rgba(s) { var m = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?/.exec(s || ''); return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null; }
+  function tint() {
+    var r = doc.documentElement, b = doc.body; if (!b) return;
+    var scrims = stack.filter(function (el) { return el.__bs.scrim && !isNested(el); }).map(function (el) { return el.__bs.scrim; });
+    if (!scrims.length) {
+      if (tintSaved) { r.style.backgroundColor = tintSaved[0]; b.style.backgroundColor = tintSaved[1]; tintSaved = null; }
+      return;
+    }
+    if (!tintSaved) {
+      var base = rgba(getComputedStyle(b).backgroundColor);
+      if (!base || base[3] < 0.5) base = rgba(getComputedStyle(r).backgroundColor);
+      if (!base || base[3] < 0.5) base = [255, 255, 255, 1];
+      tintSaved = [r.style.backgroundColor, b.style.backgroundColor, base];
+    }
+    var col = tintSaved[2].slice(0, 3);
+    scrims.forEach(function (sc) {                       // stacked scrims compound
+      var c = rgba(getComputedStyle(sc).getPropertyValue('--bs-scrim-c')) || [13, 17, 23, 0.3];
+      col = [0, 1, 2].map(function (k) { return c[k] * c[3] + col[k] * (1 - c[3]); });
+    });
+    var css = 'rgb(' + col.map(Math.round).join(',') + ')';
+    r.style.backgroundColor = css; b.style.backgroundColor = css;
+  }
+  function scrimMs(sc) { var d = getComputedStyle(sc).transitionDuration; return (parseFloat(d) || 0) * (/ms/.test(d) ? 1 : 1000); }
+
   /* ── open / close ───────────────────────────────────────────────── */
   function layer() {
     stack.forEach(function (el, i) {
@@ -255,6 +321,7 @@
     stack.push(el);
     if (stack.length === 1) lock(true);
     var scrim = scrimFor(el);
+    if (scrim) { clearTimeout(scrim.__t); scrim.hidden = false; }
     el.hidden = false; el.style.transform = '';
     layer();
     watchCta(el, true);
@@ -262,6 +329,7 @@
     el.classList.add('is-open');
     if (scrim) scrim.classList.add('is-open');
     syncScroll(el);
+    tint(); keyboard(true);
 
     var af = el.querySelector('[data-bs-autofocus]');
     try { (af || el).focus({ preventScroll: true }); } catch (e) { (af || el).focus(); }
@@ -281,10 +349,13 @@
     stack.splice(stack.indexOf(el), 1);
     el.classList.remove('is-open', 'is-dragging');
     el.style.transform = '';
-    if (st.scrim) st.scrim.classList.remove('is-open');
+    if (st.scrim) {
+      var sc = st.scrim; sc.classList.remove('is-open');
+      clearTimeout(sc.__t); sc.__t = setTimeout(function () { if (!sc.classList.contains('is-open')) sc.hidden = true; }, scrimMs(sc) + 20);
+    }
     if (st.trigger && st.trigger.setAttribute) st.trigger.setAttribute('aria-expanded', 'false');
-    if (!stack.length) lock(false);
-    layer();
+    if (!stack.length) { lock(false); keyboard(false); }
+    layer(); tint();
 
     var trig = st.trigger; st.trigger = null;
     if (trig && doc.contains(trig) && typeof trig.focus === 'function' && (!stack.length || stack[stack.length - 1].contains(trig))) {
@@ -349,5 +420,5 @@
   // re-measure an auto sheet after the page swaps its content (optional — a MutationObserver already does this)
   function refresh(target) { var el = $(target); if (el && el.__bs) { syncCta(el); syncScroll(el); } }
 
-  global.ShineSheet = { open: open, close: close, toggle: toggle, isOpen: isOpen, top: top, closeAll: closeAll, init: init, refresh: refresh, version: '1.1.0' };
+  global.ShineSheet = { open: open, close: close, toggle: toggle, isOpen: isOpen, top: top, closeAll: closeAll, init: init, refresh: refresh, version: '1.2.0' };
 })(window);

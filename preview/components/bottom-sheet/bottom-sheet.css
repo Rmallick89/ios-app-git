@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · BOTTOM SHEET  (app component)                        v1.1.0
+   SHINE · BOTTOM SHEET  (app component)                        v1.2.0
    The one sheet primitive behind every slide-up panel in the app:
    Sort, Filter (+ its "See all" sub-sheet), Share, Save, Feedback…
    ───────────────────────────────────────────────────────────────────────
@@ -13,6 +13,13 @@
      page whatever token names that page uses.
    • Closed sheets are `[hidden]` → display:none. Nothing parked off-screen
      can cast a shadow into the viewport (the JSRP bottom-band bug).
+   • v1.2 · keyboard-aware: while a sheet is open ShineSheet tracks the
+     on-screen keyboard (visualViewport) and lifts the sheet above it
+     (--bs-kb), capping its height to the visible area (--bs-vvh).
+   • v1.2 · status bar: scrims paint with background-image (no background-
+     color) and are display:none once faded out, so iOS 26 Safari tints the
+     status bar from body — which ShineSheet dims to match while a scrim
+     is up. Closed scrims can no longer leave a grey status bar behind.
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* ── Scoped tokens ─────────────────────────────────────────────────── */
@@ -56,7 +63,7 @@
 
   /* motion */
   --bs-ease: cubic-bezier(.32,.72,0,1);
-  --bs-dur-in: 320ms; --bs-dur-out: 260ms; --bs-dur-scrim: 240ms;
+  --bs-dur-in: 320ms; --bs-dur-out: 260ms; --bs-dur-scrim: 240ms; --bs-dur-kb: 240ms;
 
   /* stacking — ShineSheet assigns z = --bs-z + 2·depth (+1 for the sheet) */
   --bs-z: 100;
@@ -65,18 +72,22 @@
 /* ── Scrim (one per stack level, created by ShineSheet) ───────────── */
 .bs-scrim {
   position: fixed; inset: 0;
-  background: var(--bs-scrim);
+  /* colour as an image layer, never background-color: iOS 26 Safari tints the status bar from the
+     background-color of a fixed element at the top edge (ignoring its opacity) — see v1.2 note */
+  --bs-scrim-c: var(--bs-scrim);
+  background: linear-gradient(var(--bs-scrim-c), var(--bs-scrim-c));
   opacity: 0; pointer-events: none;
-  transition: opacity var(--bs-dur-scrim) ease, background var(--bs-dur-scrim) ease;
+  transition: opacity var(--bs-dur-scrim) ease;
   -webkit-tap-highlight-color: transparent;
 }
+.bs-scrim[hidden] { display: none !important; }
 .bs-scrim.is-open { opacity: 1; pointer-events: auto; }
-.bs-scrim--strong { background: var(--bs-scrim-strong); -webkit-backdrop-filter: blur(var(--bs-scrim-strong-blur)); backdrop-filter: blur(var(--bs-scrim-strong-blur)); }
-.bs-scrim--nested { position: absolute; background: var(--bs-scrim-nested); border-radius: var(--bs-radius) var(--bs-radius) 0 0; }
+.bs-scrim--strong { --bs-scrim-c: var(--bs-scrim-strong); -webkit-backdrop-filter: blur(var(--bs-scrim-strong-blur)); backdrop-filter: blur(var(--bs-scrim-strong-blur)); }
+.bs-scrim--nested { position: absolute; --bs-scrim-c: var(--bs-scrim-nested); border-radius: var(--bs-radius) var(--bs-radius) 0 0; }
 
 /* ── Sheet ─────────────────────────────────────────────────────────── */
 .bs {
-  position: fixed; left: 0; right: 0; bottom: 0;
+  position: fixed; left: 0; right: 0; bottom: var(--bs-kb, 0px);   /* lifted above the on-screen keyboard (v1.2) */
   z-index: calc(var(--bs-z) + 1);
   display: flex; flex-direction: column;
   max-height: var(--bs-max-h); max-height: min(var(--bs-max-h), 90dvh);
@@ -87,12 +98,12 @@
   overflow: hidden;
   outline: none;
   transform: translate3d(0, 100%, 0);
-  transition: transform var(--bs-dur-out) var(--bs-ease);
+  transition: transform var(--bs-dur-out) var(--bs-ease), bottom var(--bs-dur-kb) var(--bs-ease), max-height var(--bs-dur-kb) var(--bs-ease);
   will-change: transform;
   touch-action: pan-y;
 }
 .bs[hidden] { display: none !important; }
-.bs.is-open { transform: translate3d(0, 0, 0); transition-duration: var(--bs-dur-in); }
+.bs.is-open { transform: translate3d(0, 0, 0); transition-duration: var(--bs-dur-in), var(--bs-dur-kb), var(--bs-dur-kb); }
 .bs.is-dragging { transition: none; }
 
 /* inverse (dark) — feedback / quick-check sheets */
@@ -188,6 +199,15 @@
 
 /* sheets without a footer still clear the home indicator */
 .bs--pad-bottom { padding-bottom: calc(var(--bs-gutter) + env(safe-area-inset-bottom, 0px)); }
+
+/* ── On-screen keyboard (v1.2) — ShineSheet sets html.bs-kb + --bs-kb / --bs-vvh ──
+   The sheet rides on top of the keyboard and never grows past the visible area
+   (16 px clear of the top). The home indicator sits under the keyboard, so the
+   safe-area padding is dropped while it is up. */
+.bs-kb .bs:not(.bs--nested) { max-height: calc(var(--bs-vvh, 100vh) - 16px); }
+.bs-kb .bs-body > .bs-actions { padding-bottom: var(--bs-gutter); }
+.bs-kb .bs-foot { padding-bottom: 16px; }
+.bs-kb .bs--pad-bottom { padding-bottom: var(--bs-gutter); }
 
 /* page scroll lock (set on <html> by ShineSheet) */
 .bs-lock, .bs-lock body { overflow: hidden !important; }

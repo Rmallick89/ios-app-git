@@ -4,14 +4,15 @@
   SHINE APP · LOGIN FLOW (logged out)                         login-flow.html
   Repo copy of App-logout/App login/login-flow.html (components linked, Back → index.html).
 
-  Screens  login (Dial hero · OTP | Password · Google) → OTP sheet / account
-           picker sheet → done;  Forgot password → OTP → Create a new password
-           → updating → updated → back to log in (email prefilled).
+  Screens  login (Dial hero · OTP | Password · Google) → OTP sheet (auto-
+           submits on the 6th digit) / account picker sheet → "Welcome back"
+           splash (Reset → logged-out home);  Forgot password → OTP → Create a
+           new password → back to log in (email prefilled) + success alert.
   Shared components (components/ — linked):
-           • bottom-sheet v1.1.0 (ShineSheet) — every slide-up panel here
+           • bottom-sheet v1.2.0 (ShineSheet) — every slide-up panel here
              (OTP = inline CTA, account picker = sticky CTA, demo data = list)
            • notify v1.0.0 (ShineNotify) — bottom toasts + top floating alerts
-             (server errors → error alert with Try again)
+             (server errors → informative error alert, no button)
   Page sections  DS atoms · landing (Dial + headline + switch) · page skin ·
            flow script (mock auth: replace the DB / SIM block with the API).
   Linking  login-flow.html?next=<relative url>   return there after log in
@@ -176,7 +177,7 @@
 }
 
 </style>
-<!-- COMPONENT · bottom-sheet v1.1.0 -->
+<!-- COMPONENT · bottom-sheet v1.2.0 -->
 <link rel="stylesheet" href="components/bottom-sheet/bottom-sheet.css">
 <!-- COMPONENT · notify v1.0.0 -->
 <link rel="stylesheet" href="components/notify/notify.css">
@@ -561,25 +562,18 @@ html,body{height:auto;overflow:visible;overscroll-behavior:auto}
 .np-need.is-open{grid-template-rows:1fr}
 .np-need.is-open>ul{padding-top:var(--spacing-stack-md)}
 .np-need li{display:flex;align-items:center;gap:var(--spacing-inline-sm);font-size:var(--type-body-sm-size);line-height:var(--type-body-sm-lh);font-weight:var(--typeface-weight-medium);color:var(--content-neutral-faded);transition:color .2s}
-.np-need li::before{content:"";width:6px;height:6px;margin:0 3px;border-radius:50%;background:var(--stroke-neutral-strong);flex:none}
-.np-need li svg{display:none;width:var(--unit-12);height:var(--unit-12);flex:none;color:var(--c-green-600)}
+.np-need li .np-ic{width:var(--unit-16);height:var(--unit-16);flex:none;overflow:visible}
+.np-ring{fill:none;stroke:var(--stroke-neutral-strong);stroke-width:var(--size-stroke-default)}
+.np-fill{fill:var(--c-green-600);transform-origin:8px 8px;transform:scale(0);transition:transform .32s cubic-bezier(.34,1.56,.64,1)}
+.np-tick{fill:none;stroke:var(--content-on-fill-dark-base);stroke-width:var(--unit-2);stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:10;stroke-dashoffset:10;transition:stroke-dashoffset .2s ease .1s}
 .np-need li.is-met{color:var(--content-neutral-base)}
-.np-need li.is-met::before{display:none}
-.np-need li.is-met svg{display:block}
+.np-need li.is-met .np-fill{transform:scale(1)}
+.np-need li.is-met .np-tick{stroke-dashoffset:0}
+.np-need li.is-met .np-ring{stroke:transparent;transition:stroke .1s}
+@media (prefers-reduced-motion:reduce){.np-fill,.np-tick{transition:none}
+}
 .np-strong{margin-top:var(--spacing-stack-xs);display:flex;align-items:center;gap:var(--spacing-inline-sm);font-size:var(--type-body-sm-size);line-height:var(--type-body-sm-lh);font-weight:var(--typeface-weight-semibold);color:var(--content-status-positive)}
 .np-strong svg{width:var(--size-icon-sm);height:var(--size-icon-sm);flex:none}
-.pf--center{background:var(--surface-neutral-base)}
-.pf-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:var(--spacing-stack-md);padding:0 var(--unit-32)}
-.pf-spinner{width:var(--unit-48);height:var(--unit-48);border-radius:50%;border:var(--unit-4) solid var(--stroke-neutral-base);border-top-color:var(--content-neutral-brand);animation:auSpin .9s linear infinite;margin-bottom:var(--spacing-stack-md)}
-.pf-done{width:var(--unit-72);height:var(--unit-72);border-radius:50%;display:grid;place-items:center;background:var(--surface-status-positive-subtle);color:var(--c-green-600);
-  box-shadow:0 0 0 var(--unit-10) rgba(18,183,106,.08);margin-bottom:var(--spacing-stack-md)}
-.pf-done svg{width:var(--size-icon-2xl);height:var(--size-icon-2xl)}
-.pf-note{display:inline-flex;align-items:center;gap:var(--spacing-inline-md);padding:var(--spacing-inset-sm) var(--spacing-inset-lg);border-radius:var(--size-radius-full);
-  background:var(--surface-neutral-muted);font-size:var(--type-body-sm-size);line-height:var(--type-body-sm-lh);font-weight:var(--typeface-weight-semibold);color:var(--content-neutral-muted)}
-.pf-note svg{width:var(--size-icon-sm);height:var(--size-icon-sm)}
-.pf-progress{width:var(--unit-96);height:var(--unit-4);margin-top:var(--spacing-stack-md);border-radius:var(--size-radius-full);background:var(--stroke-neutral-base);overflow:hidden}
-.pf-progress i{display:block;height:100%;width:0;border-radius:inherit;background:var(--content-neutral-brand)}
-.pf-caption{font-size:var(--type-body-sm-size);line-height:var(--type-body-sm-lh);font-weight:var(--typeface-weight-semibold);color:var(--content-neutral-faded)}
 .au-nudge .nudge-close{position:absolute;top:var(--unit-16);right:var(--unit-16);z-index:3;width:var(--unit-32);height:var(--unit-32);border-radius:var(--size-radius-full);
   display:grid;place-items:center;background:var(--c-cn-black-06);color:var(--content-neutral-muted);transition:background .15s ease,color .15s ease}
 .au-nudge .nudge-close svg{width:var(--size-icon-md);height:var(--size-icon-md)}
@@ -625,8 +619,6 @@ html,body{height:auto;overflow:visible;overscroll-behavior:auto}
 }
 .acct:focus-visible{outline:none;box-shadow:0 0 0 3px var(--c-brand-500-op18)}
 .toast{position:fixed}
-@media (prefers-reduced-motion:reduce){.pf-spinner{animation:none}
-}
 .demo-fab{right:auto;left:max(var(--unit-56),calc(50% - 240px + var(--unit-56)));top:calc(env(safe-area-inset-top) + var(--spacing-stack-xs) + var(--unit-12))}
 @media (min-width:1080px){.view,.lg.scr{min-height:calc(100vh - 2 * var(--spacing-section-lg))}
 }
@@ -704,8 +696,56 @@ html,body{height:auto;overflow:visible;overscroll-behavior:auto}
 .lg:has(.lg-alert .alert--acct) .be-foot{padding-top:var(--spacing-stack-md)}
 
 }
-
-
+@media (max-width:1079px){html,body{background:var(--surface-neutral-base)}
+}
+.demo-fab{background:linear-gradient(var(--surface-decorative-electric-yellow-subtle),var(--surface-decorative-electric-yellow-subtle))}
+.is-done .demo-fab{display:none}
+.otp--complete .otp-seg{animation:otpPop .34s cubic-bezier(.34,1.56,.64,1) both;border-color:var(--content-neutral-brand)}
+.otp--complete .otp-seg:nth-child(2){animation-delay:.03s}
+.otp--complete .otp-seg:nth-child(3){animation-delay:.06s}
+.otp--complete .otp-seg:nth-child(4){animation-delay:.09s}
+.otp--complete .otp-seg:nth-child(5){animation-delay:.12s}
+.otp--complete .otp-seg:nth-child(6){animation-delay:.15s}
+.otp--valid .otp-seg{border-color:var(--stroke-status-positive);background:var(--surface-status-positive-subtle);color:var(--content-status-positive);
+  transition:border-color .18s ease,background-color .18s ease,color .18s ease}
+.otp--valid .otp-seg:nth-child(2){transition-delay:.03s}
+.otp--valid .otp-seg:nth-child(3){transition-delay:.06s}
+.otp--valid .otp-seg:nth-child(4){transition-delay:.09s}
+.otp--valid .otp-seg:nth-child(5){transition-delay:.12s}
+.otp--valid .otp-seg:nth-child(6){transition-delay:.15s}
+.otp--invalid .otp{animation:otpShake .36s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes otpPop{0%{transform:scale(1)}45%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes otpShake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(3px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(6px)}}
+@media (prefers-reduced-motion:reduce){.otp--complete .otp-seg,.otp--invalid .otp{animation:none}
+}
+.splash{position:fixed;inset:0;z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(rgba(13,17,23,.94),rgba(13,17,23,.94));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  color:var(--content-on-fill-dark-base);font-family:var(--typeface-family-brand);text-align:center;animation:splashIn .28s ease both}
+.splash[hidden]{display:none}
+.splash-c{display:flex;flex-direction:column;align-items:center;padding:0 var(--unit-32)}
+.splash-spin{width:var(--unit-48);height:var(--unit-48);border-radius:50%;border:3px solid rgba(255,255,255,.18);border-top-color:var(--c-brand-400);
+  margin-bottom:var(--unit-18);animation:auSpin .9s linear infinite, splashFade .3s ease .04s both}
+.splash-h{font-size:var(--type-heading-md-size);line-height:var(--type-heading-md-lh);font-weight:var(--typeface-weight-extrabold);letter-spacing:-0.01em;
+  animation:splashUp .42s cubic-bezier(.2,.8,.2,1) .12s both}
+.splash-sub{margin-top:var(--unit-6);font-size:var(--type-body-md-size);line-height:var(--type-body-md-lh);font-weight:var(--typeface-weight-medium);
+  color:var(--content-on-fill-dark-base);opacity:.7;animation:splashUp .42s cubic-bezier(.2,.8,.2,1) .18s both}
+.splash-reset{position:absolute;left:50%;bottom:calc(var(--unit-24) + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  display:inline-flex;align-items:center;gap:var(--spacing-inline-sm);height:var(--unit-32);padding:0 var(--unit-14);
+  border:var(--size-stroke-thin) solid rgba(255,255,255,.14);border-radius:var(--size-radius-full);background:transparent;
+  color:var(--content-on-fill-dark-muted);font:var(--typeface-weight-semibold) var(--type-body-sm-size)/1 var(--typeface-family-brand);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;animation:splashFade .5s ease 1.2s both;transition:color .15s,border-color .15s,background-color .15s}
+.splash-reset svg{width:var(--size-icon-sm);height:var(--size-icon-sm);transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.splash-reset:active{background:rgba(255,255,255,.06)}
+.splash-reset.is-going svg{transform:rotate(-360deg)}
+.splash-reset:focus-visible{outline:2px solid var(--c-brand-300);outline-offset:2px}
+@media (hover:hover){.splash-reset:hover{color:var(--content-on-fill-dark-base);border-color:rgba(255,255,255,.28)}
+}
+@keyframes splashIn{from{opacity:0}to{opacity:1}}
+@keyframes splashUp{from{opacity:0;transform:translateY(8px)}}
+@keyframes splashFade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.splash,.splash-h,.splash-sub,.splash-reset{animation:none}
+.splash-spin{animation:auSpin 1.6s linear infinite}
+}
 
 
 </style>
@@ -809,8 +849,8 @@ html,body{height:auto;overflow:visible;overscroll-behavior:auto}
             <button class="field-trailing" type="button" data-act="eye" data-for="npInput" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
           <p class="field-message" id="npMsg" hidden></p>
           <div class="np-need is-open" id="npNeed"><ul id="npRules" aria-label="Your password needs">
-            <li data-rule="len"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>8+ characters</li><li data-rule="upper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>A capital letter</li>
-            <li data-rule="num"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>A number</li><li data-rule="special"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>A symbol like @ or #</li></ul></div>
+            <li data-rule="len"><svg class="np-ic" viewBox="0 0 16 16" aria-hidden="true"><circle class="np-ring" cx="8" cy="8" r="7.25"/><circle class="np-fill" cx="8" cy="8" r="8"/><path class="np-tick" d="M4.9 8.3l2 2 4.2-4.4"/></svg>8+ characters</li><li data-rule="upper"><svg class="np-ic" viewBox="0 0 16 16" aria-hidden="true"><circle class="np-ring" cx="8" cy="8" r="7.25"/><circle class="np-fill" cx="8" cy="8" r="8"/><path class="np-tick" d="M4.9 8.3l2 2 4.2-4.4"/></svg>A capital letter</li>
+            <li data-rule="num"><svg class="np-ic" viewBox="0 0 16 16" aria-hidden="true"><circle class="np-ring" cx="8" cy="8" r="7.25"/><circle class="np-fill" cx="8" cy="8" r="8"/><path class="np-tick" d="M4.9 8.3l2 2 4.2-4.4"/></svg>A number</li><li data-rule="special"><svg class="np-ic" viewBox="0 0 16 16" aria-hidden="true"><circle class="np-ring" cx="8" cy="8" r="7.25"/><circle class="np-fill" cx="8" cy="8" r="8"/><path class="np-tick" d="M4.9 8.3l2 2 4.2-4.4"/></svg>A symbol like @ or #</li></ul></div>
           <p class="np-strong" id="npStrong" aria-live="polite" hidden><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg>Strong password</p>
         </div>
         <div class="field" data-field="cp">
@@ -826,22 +866,12 @@ html,body{height:auto;overflow:visible;overscroll-behavior:auto}
       <button class="btn btn--lg btn--block btn--primary" type="button" id="npBtn" disabled>Update password</button></div>
   </section>
 
-  <!-- ═══════════ UPDATING / UPDATED ═══════════ -->
-  <section class="view pf pf--center" data-view="updating" hidden aria-live="polite">
-    <main class="pf-center"><span class="pf-spinner" aria-hidden="true"></span><h1 class="pf-h">Updating your <em>password</em></h1>
-      <span class="pf-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Please don’t close the app</span></main>
-  </section>
-  <section class="view pf pf--center" data-view="updated" hidden aria-live="polite">
-    <main class="pf-center"><span class="pf-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><h1 class="pf-h">Password <em>updated!</em></h1>
-      <span class="pf-progress"><i id="updProgress"></i></span><span class="pf-caption">Taking you to log in</span></main>
-    <div class="pf-foot"><button class="btn btn--lg btn--block btn--primary" type="button" data-act="updated-login">Log in now</button></div>
-  </section>
-
-  <!-- ═══════════ LOGGED IN (prototype end state) ═══════════ -->
-  <section class="view pf pf--center" data-view="done" hidden aria-live="polite">
-    <main class="pf-center"><span class="pf-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><h1 class="pf-h" id="doneTitle">Welcome back!</h1>
-      <span class="pf-note"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg><span id="doneVia">You’re logged in</span></span></main>
-    <div class="pf-foot"><button class="btn btn--lg btn--block btn--primary" type="button" data-act="continue">Continue</button></div>
+  <!-- ═══════════ LOGGED IN — dark "Welcome back" splash over the blurred screen (same as the web homepage-logout.html) ═══════════ -->
+  <section class="view splash" data-view="done" hidden aria-live="polite" aria-labelledby="doneTitle">
+    <main class="splash-c"><span class="splash-spin" aria-hidden="true"></span>
+      <h1 class="splash-h" id="doneTitle">Welcome back.</h1>
+      <p class="splash-sub" id="doneSub">Loading your dashboard…</p></main>
+    <button class="splash-reset" type="button" data-act="reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.64-6.36"/><path d="M3 4v5h5"/></svg>Reset</button>
   </section>
 </div>
 
@@ -892,7 +922,7 @@ html,body{height:auto;overflow:visible;overscroll-behavior:auto}
 
 
 
-<!-- COMPONENT · bottom-sheet v1.1.0 -->
+<!-- COMPONENT · bottom-sheet v1.2.0 -->
 <script src="components/bottom-sheet/bottom-sheet.js"></script>
 <!-- COMPONENT · notify v1.0.0 -->
 <script src="components/notify/notify.js"></script>
@@ -902,7 +932,7 @@ window.ShineLoginConfig = (function () {
   var q = new URLSearchParams(location.search);
   function rel(u) { return u && !/^\s*([a-z][a-z0-9+.-]*:|\/\/)/i.test(u) ? u : null; }   // same-site relative URLs only
   return {
-    homeUrl: 'index.html',        // Back fallback + Continue when there is no ?next
+    homeUrl: 'index.html',        // Back fallback + the splash's Reset (logged-out home)
     registerUrl: null,          // Register screen (not built yet → toast)
     termsUrl: null, privacyUrl: null,
     next: rel(q.get('next')),   // e.g. jsrp-logout.html?q=… (JSRP save/apply nudge)
@@ -915,8 +945,9 @@ window.ShineLoginConfig = (function () {
 <script>
 /* ═══════════════════════════════════════════════════════════════════════
    SHINE APP · LOGIN FLOW — behaviour + mock auth (Dial + Switch landing)
-   Views: login (OTP | password) · forgot · new-password · updating ·
-   updated · done.  Sheets (ShineSheet component): OTP · account picker · demo guide.
+   Views: login (OTP | password) · forgot · new-password · done (dark
+   "Welcome back" splash over the blurred screen).  A password reset goes
+   straight back to log in with a floating success alert.  Sheets (ShineSheet component): OTP · account picker · demo guide.
    Page hooks: window.ShineLoginConfig (optional — login-flow.html sets it):
      { homeUrl, registerUrl, termsUrl, privacyUrl, next, tab:'otp'|'password', demo }
    Without it the file behaves as the review prototype (links → toasts).
@@ -963,10 +994,15 @@ window.ShineLoginConfig = (function () {
 
   /* toasts + floating alerts come from the shared notify component (App-logout/app-components/notify) */
   function toast(msg, tone) { if (window.ShineNotify) window.ShineNotify.toast(msg, { tone: tone || 'neutral' }); }
-  /* server error = floating error alert at the top with a retry (same UI family as "Account not found") */
-  function serverAlert(title, retry) {
-    if (window.ShineNotify) window.ShineNotify.alert({ tone: 'error', title: title, text: 'Something went wrong on our side.',
-      action: retry ? { label: 'Try again', onClick: retry } : null });
+  /* server error = informative floating error alert at the top, no button (user, 2026-10-09) */
+  function serverAlert(title) {
+    if (window.ShineNotify) window.ShineNotify.alert({ tone: 'error', title: title, text: 'Something went wrong on our side. Try again.' });
+  }
+  /* status bar: iOS 26 tints it from the body background, Android/Chrome from theme-color */
+  var META_TC = doc.querySelector('meta[name="theme-color"]'), TC0 = META_TC ? META_TC.content : '';
+  function statusTint(col) {
+    doc.documentElement.style.backgroundColor = col || ''; doc.body.style.backgroundColor = col || '';
+    if (META_TC) META_TC.content = col || TC0;
   }
   function busy(btn, label) {
     var html = btn.innerHTML, dis = btn.disabled;
@@ -1008,7 +1044,10 @@ window.ShineLoginConfig = (function () {
   function route(name, opts) {
     opts = opts || {};
     window.ShineSheet.closeAll('route');
-    $$('.view').forEach(function (v) { v.hidden = v.getAttribute('data-view') !== name; });
+    var under = name === 'done' ? current : null;            // the splash sits over the blurred screen it came from
+    $$('.view').forEach(function (v) { var n = v.getAttribute('data-view'); v.hidden = n !== name && n !== under; });
+    doc.documentElement.classList.toggle('is-done', name === 'done');
+    statusTint(name === 'done' ? SPLASH_TINT : '');
     current = name;
     var url = '#' + name;
     if (opts.replace) history.replaceState({ v: name, d: depth }, '', url);
@@ -1020,7 +1059,6 @@ window.ShineLoginConfig = (function () {
   window.addEventListener('popstate', function (e) {
     var v = (e.state && e.state.v) || (location.hash || '#login').slice(1);
     depth = (e.state && e.state.d) || 0;
-    if (v === 'updating' || v === 'updated') v = 'login';
     if (v === 'new-password' && !reset) v = 'forgot';
     route(v, { silent: true });
   });
@@ -1108,7 +1146,7 @@ window.ShineLoginConfig = (function () {
     var done = busy($('#otpBtn'), 'Sending OTP…');
     later(function () {
       done();
-      if (SIM.server) { serverAlert('Couldn’t send OTP', function () { $('#otpBtn').click(); }); return; }
+      if (SIM.server) { serverAlert('Couldn’t send OTP'); return; }
       var acc = lookup(idSF);
       if (!acc.length) {
         setField(input, 'invalid', (idSF.mode === 'phone' ? 'No Shine account uses this number.' : 'No account found with this email.') + ' <a href="#" data-act="register">Register instead</a>');
@@ -1121,7 +1159,7 @@ window.ShineLoginConfig = (function () {
   });
 
   /* ── OTP sheet ────────────────────────────────────────────────────── */
-  var otp = { opts: null, timer: 0, until: 0, tries: 0, lockTick: 0 };
+  var otp = { opts: null, timer: 0, until: 0, tries: 0, lockTick: 0, busy: false, auto: 0, wrong: false, clr: 0 };
   var otpInput = $('#otpInput'), otpBtn = $('#otpBtn2'), boxes = $$('#otpBoxes .otp-seg'), otpWrap = $('#otpBoxes');
   function renderBoxes() {
     var v = otpInput.value, foc = doc.activeElement === otpInput && !otpInput.disabled && !otpWrap.classList.contains('otp--invalid');
@@ -1134,7 +1172,7 @@ window.ShineLoginConfig = (function () {
   function otpMeta() {
     var m = $('#otpMeta'), left = (otp.until - Date.now()) / 1000;
     if (otpLockUntil > Date.now()) { m.innerHTML = '<p class="otp-resend">Resend paused</p>'; return; }
-    var err = otpWrap.classList.contains('otp--invalid') ? '<p class="otp-error">Wrong OTP · ' + (4 - otp.tries) + ' tr' + (4 - otp.tries === 1 ? 'y' : 'ies') + ' left</p>' : '';
+    var err = otp.wrong ? '<p class="otp-error">Wrong OTP · ' + (4 - otp.tries) + ' tr' + (4 - otp.tries === 1 ? 'y' : 'ies') + ' left</p>' : '';
     if (left > 0) m.innerHTML = err + '<p class="otp-resend">Resend OTP in <span class="countdown">' + mmss(left) + '</span></p>';
     else m.innerHTML = err + '<p class="otp-resend">Didn’t get it?<button class="resend-btn" type="button" data-act="resend">Resend OTP</button></p>';
   }
@@ -1148,7 +1186,7 @@ window.ShineLoginConfig = (function () {
     otpWrap.classList.toggle('otp--locked', locked);
     otpInput.disabled = locked;
     if (locked) {
-      otpWrap.classList.remove('otp--invalid'); otpInput.value = ''; renderBoxes(); otpBtn.disabled = true;
+      clearTimeout(otp.clr); otp.wrong = false; otpWrap.classList.remove('otp--invalid'); otpInput.value = ''; renderBoxes(); otpBtn.disabled = true;
       var tick = function () {
         var s = (otpLockUntil - Date.now()) / 1000;
         if (s <= 0) { clearInterval(otp.lockTick); otp.tries = 0; lockState(); otpMeta(); return; }
@@ -1160,11 +1198,11 @@ window.ShineLoginConfig = (function () {
     otpMeta();
   }
   function openOtp(opts) {
-    otp.opts = opts; otp.tries = 0;
+    otp.opts = opts; otp.tries = 0; otp.wrong = false; clearTimeout(otp.clr);
     $('#otpTitle').innerHTML = opts.purpose === 'reset' ? 'Enter OTP to <span class="accent">reset password.</span>' : 'Enter OTP to <span class="accent">log in.</span>';
     otpBtn.textContent = opts.purpose === 'reset' ? 'Verify OTP' : 'Verify & log in';
     $('#otpTo').textContent = opts.to;
-    otpInput.value = ''; otpWrap.classList.remove('otp--invalid'); otpBtn.disabled = true;
+    otpInput.value = ''; otpWrap.classList.remove('otp--invalid', 'otp--complete', 'otp--valid'); otpBtn.disabled = true;
     startTimer(); lockState(); renderBoxes();
     window.ShineSheet.open('#otpSheet', { trigger: opts.trigger });
     setTimeout(function () { if (!otpInput.disabled) otpInput.focus(); }, 60);
@@ -1174,30 +1212,45 @@ window.ShineLoginConfig = (function () {
     if (otpInput.value !== d) otpInput.value = d;
     if (otpWrap.classList.contains('otp--invalid')) { otpWrap.classList.remove('otp--invalid'); otpMeta(); }
     otpBtn.disabled = d.length !== 6; renderBoxes();
+    /* auto-submit (user, 2026-10-09): the last digit verifies on its own — boxes ripple, then Verifying… */
+    clearTimeout(otp.auto); otpWrap.classList.remove('otp--complete');
+    if (d.length === 6 && !otp.busy) {
+      void otpWrap.offsetWidth; otpWrap.classList.add('otp--complete');
+      otp.auto = setTimeout(function () { if (otpInput.value.length === 6 && !otp.busy) otpBtn.click(); }, 280);
+    }
   });
   otpInput.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !otpBtn.disabled) { e.preventDefault(); otpBtn.click(); } });
   ['focus', 'blur', 'keyup', 'click', 'select'].forEach(function (ev) { otpInput.addEventListener(ev, function () { try { otpInput.setSelectionRange(otpInput.value.length, otpInput.value.length); } catch (e) {} renderBoxes(); }); });
   otpBtn.addEventListener('click', function () {
-    if (otpInput.value.length !== 6) return;
+    if (otpInput.value.length !== 6 || otp.busy) return;
+    clearTimeout(otp.auto); otp.busy = true;
     var done = busy(otpBtn, 'Verifying…');
     later(function () {
-      done();
-      if (SIM.server && otp.opts && otp.opts.purpose === 'login') { serverAlert('Couldn’t log you in', function () { otpBtn.click(); }); otpInput.focus(); return; }
+      done(); otp.busy = false; otpWrap.classList.remove('otp--complete');
+      if (SIM.server && otp.opts && otp.opts.purpose === 'login') { serverAlert('Couldn’t log you in'); otpInput.focus(); try { otpInput.select(); } catch (e) {} return; }
       if (otpInput.value === DB.otp) {
         clearInterval(otp.timer);
         var o = otp.opts;
-        window.ShineSheet.close('#otpSheet', 'verified');
-        if (o.purpose === 'login') loginSuccess(o.account, 'OTP');
-        else { reset = { account: o.account, at: Date.now() }; startNewPassword(); }
+        otpWrap.classList.add('otp--valid'); otpBtn.disabled = true; otp.busy = true;   // boxes turn green, then the sheet leaves
+        try { otpInput.blur(); } catch (e) {}
+        setTimeout(function () {
+          otp.busy = false; otpWrap.classList.remove('otp--valid');
+          window.ShineSheet.close('#otpSheet', 'verified');
+          if (o.purpose === 'login') loginSuccess(o.account, 'OTP');
+          else { reset = { account: o.account, at: Date.now() }; startNewPassword(); }
+        }, 520);
         return;
       }
       otp.tries++;
       if (otp.tries >= 4) { otpLockUntil = Date.now() + 10 * 60000; lockState(); return; }
-      otpWrap.classList.add('otp--invalid'); otpBtn.disabled = true; otpMeta(); renderBoxes();
-      otpInput.focus(); try { otpInput.select(); } catch (e) {}
+      /* wrong: the boxes empty out at once and shake red for a beat, so the next OTP can be typed straight away
+         (a full field + maxlength would swallow the first new digit) — "Wrong OTP · n tries left" stays */
+      otp.wrong = true; otpInput.value = ''; otpWrap.classList.add('otp--invalid'); otpBtn.disabled = true; otpMeta(); renderBoxes();
+      otpInput.focus();
+      clearTimeout(otp.clr); otp.clr = setTimeout(function () { otpWrap.classList.remove('otp--invalid'); renderBoxes(); }, 700);
     }, 900);
   });
-  $('#otpSheet').addEventListener('shine:sheet-closed', function (e) { if (e.target.id === 'otpSheet') { clearInterval(otp.timer); clearInterval(otp.lockTick); } });
+  $('#otpSheet').addEventListener('shine:sheet-closed', function (e) { if (e.target.id === 'otpSheet') { clearInterval(otp.timer); clearInterval(otp.lockTick); clearTimeout(otp.auto); clearTimeout(otp.clr); } });
 
   /* ── account picker ───────────────────────────────────────────────── */
   var picker = { list: [], sel: -1, purpose: 'login', phone: '' };
@@ -1245,7 +1298,7 @@ window.ShineLoginConfig = (function () {
     var done = busy(pwdBtn, 'Logging in…');
     later(function () {
       done();
-      if (SIM.server) { serverAlert('Couldn’t log you in', function () { $('#pwdBtn').click(); }); return; }
+      if (SIM.server) { serverAlert('Couldn’t log you in'); return; }
       var a = DB.accounts[em];
       if (!a) { setField(emailIn, 'invalid', 'No account found with this email. <a href="#" data-act="register">Register instead</a>'); emailIn.focus(); return; }
       if (a.locked || (pwdTries[em] || 0) >= 3) {
@@ -1279,7 +1332,7 @@ window.ShineLoginConfig = (function () {
       var done = busy(b, 'Connecting to Google…');
       later(function () {
         done();
-        if (SIM.server) { serverAlert('Couldn’t log you in', function () { b.click(); }); return; }
+        if (SIM.server) { serverAlert('Couldn’t log you in'); return; }
         if (SIM.google) {
           setAlert('#socialAlert', alertNoAccount('r.lingam@gmail.com'));
           return;
@@ -1347,34 +1400,33 @@ window.ShineLoginConfig = (function () {
   npBtn.addEventListener('click', function () {
     if (SIM.expired) { setAlert('#npAlert', alertHTML('negative', 'Your OTP has expired', 'It works for 10 minutes only. <a href="#forgot" data-act="forgot">Get a new OTP</a>')); return; }
     if (npIn.value === DB.password) { setField(npIn, 'invalid', 'You’ve used this password before. Try a new one.'); $('#npStrong').hidden = true; npBtn.disabled = true; npIn.focus(); return; }
-    var pw = npIn.value;
-    route('updating', { replace: true, focusHeading: true });
+    var pw = npIn.value, done = busy(npBtn, 'Updating…');
+    [npIn, cpIn].forEach(function (i) { i.blur(); });
     later(function () {
+      done();
       DB.password = pw;
       $$('.g-item[data-pass]').forEach(function (n) { n.setAttribute('data-value', pw); n.querySelector('.g-v').textContent = pw; });   // demo data shows the new password
-      route('updated', { replace: true });
-      var bar = $('#updProgress'); bar.style.transition = 'none'; bar.style.width = '0%'; void bar.offsetWidth;
-      bar.style.transition = 'width 3s linear'; bar.style.width = '100%';
-      updTimer = setTimeout(afterReset, 3000);
-    }, 1600);
+      afterReset();
+    }, 1100);
   });
-  var updTimer;
+  /* no transitional screen (user, 2026-10-09): straight back to log in, Password tab, email filled,
+     and an informative floating success alert at the top */
   function afterReset() {
-    clearTimeout(updTimer);
-    if (current !== 'updated') return;
     var acc = reset && reset.account; reset = null;
     route('login', { replace: true, focusHeading: false });
     setTab('pwd');
     emailIn.value = acc ? acc.email : ''; pwdIn.value = ''; pwdIn.type = 'password'; setField(emailIn, null); setField(pwdIn, null); pwdReady();
+    $$('[data-for="pwdInput"]').forEach(function (b) { b.innerHTML = IC.eye; b.setAttribute('aria-pressed', 'false'); });
     if (acc) pwdTries[acc.email] = 0;
-    pwdIn.focus();
-    toast('Password updated. Log in with your new one', 'success');
+    if (window.ShineNotify) window.ShineNotify.alert({ tone: 'success', title: 'Password reset successfully', text: 'Please log in using your new password.' });
   }
 
   /* ── success ──────────────────────────────────────────────────────── */
+  var SPLASH_TINT = '#1B1F24';    // splash scrim (cn-black @ 94 %) over the warm page → the status bar colour while it shows
   function loginSuccess(acc, via) {
-    $('#doneTitle').innerHTML = 'Welcome back, <em>' + acc.name + '!</em>';
-    $('#doneVia').textContent = 'Logged in with ' + via;
+    $('#doneTitle').textContent = 'Welcome back, ' + acc.name + '.';
+    $('#doneSub').textContent = CFG && CFG.next ? 'Taking you back…' : 'Loading your dashboard…';
+    try { if (doc.activeElement && doc.activeElement.blur) doc.activeElement.blur(); } catch (e) {}
     route('done');
     if (CFG && CFG.next) setTimeout(function () { window.location.replace(CFG.next); }, 1400);   // ?next= → back to the screen that asked for login
   }
@@ -1393,15 +1445,14 @@ window.ShineLoginConfig = (function () {
       case 'terms': e.preventDefault(); var du = CFG && (a.getAttribute('data-doc') === 'privacy' ? CFG.privacyUrl : CFG.termsUrl);
         if (du) go(du); else toast(CFG ? (a.getAttribute('data-doc') === 'privacy' ? 'Privacy Policy is coming soon' : 'Terms are coming soon') : 'Opens Terms & Privacy Policy'); break;
       case 'back': if (CFG) leave(); else toast('Goes back to the previous app screen'); break;
-      case 'continue': e.preventDefault(); window.location.replace((CFG && (CFG.next || CFG.homeUrl)) || location.pathname); break;
+      case 'reset': e.preventDefault(); a.disabled = true; a.classList.add('is-going');      // start the logged-out experience again
+        setTimeout(function () { if (CFG) window.location.replace(CFG.homeUrl); else { location.href = location.pathname + '#login'; location.reload(); } }, 220); break;
       case 'forgot': e.preventDefault(); window.ShineSheet.closeAll('route'); startForgot(a); break;
       case 'to-login': e.preventDefault(); route('login'); break;
       case 'cancel-reset': reset = null; route('login'); toast('Your password wasn’t changed'); break;
-      case 'updated-login': afterReset(); break;
-      case 'restart': e.preventDefault(); location.href = location.pathname + '#login'; location.reload(); break;
       case 'otp-change': e.preventDefault(); var back = otp.opts && otp.opts.purpose === 'reset' ? $('#fpInput') : $('#idInput');
         window.ShineSheet.close('#otpSheet', 'change'); setTimeout(function () { back.focus(); try { back.select(); } catch (x) {} }, 300); break;
-      case 'resend': otpInput.value = ''; otpWrap.classList.remove('otp--invalid'); otpBtn.disabled = true; renderBoxes(); startTimer();
+      case 'resend': clearTimeout(otp.clr); otp.wrong = false; otpInput.value = ''; otpWrap.classList.remove('otp--invalid'); otpBtn.disabled = true; renderBoxes(); startTimer();
         toast('OTP sent again to ' + (otp.opts ? otp.opts.to : 'you'), 'success'); otpInput.focus(); break;
       case 'use-password': e.preventDefault(); window.ShineSheet.close('#otpSheet', 'password'); setTab('pwd');
         if (otp.opts && otp.opts.account) { emailIn.value = otp.opts.account.email; pwdReady(); }
@@ -1424,8 +1475,8 @@ window.ShineLoginConfig = (function () {
     if (kind === 'otp-code') {
       if (!window.ShineSheet.isOpen('#otpSheet') || otpInput.disabled) { toast('Request an OTP first, then use this code', 'warning'); return; }
       window.ShineSheet.close('#guideSheet', 'use');
-      otpInput.value = v; otpInput.dispatchEvent(new Event('input')); glow($('#otpBoxes'));
-      setTimeout(function () { otpBtn.focus(); }, inSheet ? 320 : 0); return;
+      otpInput.value = v; otpInput.dispatchEvent(new Event('input')); glow($('#otpBoxes'));   // fills all 6 → auto-submits
+      return;
     }
     window.ShineSheet.closeAll('use');
     var target;
