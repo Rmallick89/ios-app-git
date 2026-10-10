@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · SEARCH MODAL  (app component)                       v1.3.1
+   SHINE · SEARCH MODAL  (app component)                       v1.3.2
    "What's next for you?" — keyword · location · experience → Search Jobs
    ───────────────────────────────────────────────────────────────────────
    Ported from the JSRP "Edit search" overlay (jsrp/JSRP-Index.html,
@@ -108,7 +108,7 @@
   display: none; flex-direction: column; align-items: center;
   /* card anchors to the TOP so the on-screen keyboard never covers the fields */
   justify-content: flex-start;
-  padding: max(var(--ssm-layout-xs), env(safe-area-inset-top)) var(--ssm-layout-xs) var(--ssm-layout-xs);
+  padding: max(var(--ssm-stack-md), env(safe-area-inset-top)) var(--ssm-layout-xs) var(--ssm-layout-xs);   /* 12 from the top, 24 at the sides — like the JSRP floating nav */
   background: var(--ssm-surface-scrim);
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   opacity: 0; transition: opacity var(--ssm-dur) ease;
@@ -167,7 +167,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 .ssm-eyebrow-dot { width: 6px; height: 6px; border-radius: var(--ssm-radius-full); background: var(--ssm-surface-brand);
   box-shadow: 0 0 0 3px var(--ssm-c-brand-500-op18); flex: none; }
 .ssm-title {
-  position: relative; margin: 0 0 calc(var(--ssm-stack-xl) + var(--ssm-inset-md)); padding-right: calc(var(--ssm-control-close) + var(--ssm-inline-md));   /* heading → content 28, as JSRP sheets */
+  position: relative; margin: 0 0 calc(var(--ssm-stack-xl) + var(--ssm-inset-md));   /* heading → content 28, as JSRP sheets; full width — the close disc sits on the eyebrow row */
   font-size: var(--ssm-heading-lg-size); line-height: var(--ssm-heading-lg-lh); letter-spacing: var(--ssm-heading-lg-ls);
   font-weight: var(--ssm-w-extrabold); color: var(--ssm-content-base);
 }
@@ -209,7 +209,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 
 /* Suggestion dropdown — reads as an extension of its field */
 .ssm-dropdown {
-  position: absolute; top: calc(100% + var(--ssm-inset-sm)); left: 0; right: 0; z-index: 5;
+  position: absolute; top: calc(100% + var(--ssm-inset-sm)); left: calc(-1 * var(--ssm-stroke-thin)); right: calc(-1 * var(--ssm-stroke-thin)); z-index: 5;   /* same edges as the field */
   max-height: var(--ssm-dropdown-max); overflow-y: auto; overscroll-behavior: contain;
   padding: var(--ssm-inset-sm);
   background: var(--ssm-surface-raised);
@@ -221,13 +221,13 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 }
 .ssm-field.is-open .ssm-dropdown { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
 .ssm-dropdown-eyebrow {
-  display: block; padding: var(--ssm-inset-md) var(--ssm-inset-lg) var(--ssm-inset-xs);
+  display: block; padding: var(--ssm-inset-md) var(--ssm-inset-sm) var(--ssm-inset-xs);   /* starts on the field icon's edge */
   font-size: var(--ssm-eyebrow-sm-size); line-height: var(--ssm-eyebrow-sm-lh); letter-spacing: var(--ssm-eyebrow-sm-ls);
   font-weight: var(--ssm-w-bold); text-transform: uppercase; color: var(--ssm-content-faded);
 }
 .ssm-option {
-  display: flex; align-items: center; gap: var(--ssm-inline-lg);
-  min-height: var(--ssm-control-sm); padding: 0 var(--ssm-inset-lg);
+  display: flex; align-items: center; gap: var(--ssm-inline-md);   /* icon + text sit exactly under the field's icon + text */
+  min-height: var(--ssm-control-sm); padding: 0 var(--ssm-inset-sm);
   border-radius: var(--ssm-radius-md); cursor: pointer;
   font-size: var(--ssm-body-md-size); line-height: var(--ssm-body-md-lh); font-weight: var(--ssm-w-medium); color: var(--ssm-content-base);
   transition: background var(--ssm-dur-fast) ease;
@@ -237,7 +237,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 .ssm-option[aria-selected="true"] { color: var(--ssm-content-brand); font-weight: var(--ssm-w-semibold); }
 .ssm-option[aria-selected="true"] .ssm-option-icon { color: var(--ssm-content-brand); }
 .ssm-option b { color: var(--ssm-content-brand); font-weight: var(--ssm-w-bold); }
-.ssm-option-icon { display: inline-flex; flex: none; color: var(--ssm-content-faded); }
+.ssm-option-icon { display: inline-flex; flex: none; width: var(--ssm-icon-md); justify-content: center; color: var(--ssm-content-faded); }
 .ssm-option-icon svg { width: var(--ssm-icon-sm); height: var(--ssm-icon-sm); }
 .ssm-option-empty { padding: var(--ssm-inset-xl) var(--ssm-inset-lg); text-align: center;
   font-size: var(--ssm-body-sm-size); line-height: var(--ssm-body-sm-lh); color: var(--ssm-content-faded); }
@@ -253,7 +253,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 .ssm-error-wrap.is-shown { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
 .ssm-error {
   display: flex; align-items: center; gap: var(--ssm-inline-md); margin: 0;
-  padding: var(--ssm-inset-lg) var(--ssm-inset-xl);
+  padding: var(--ssm-inset-lg);   /* 12 all round — the app alerts' (notify) inset */
   background: var(--ssm-surface-negative-subtle); border: var(--ssm-stroke-thin) solid var(--ssm-stroke-negative);
   border-radius: var(--ssm-radius-lg); color: var(--ssm-content-negative); box-shadow: var(--ssm-elev-overlay);
   font-size: var(--ssm-body-md-size); line-height: var(--ssm-body-md-lh); font-weight: var(--ssm-w-semibold);
