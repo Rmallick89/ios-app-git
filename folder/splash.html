@@ -18,8 +18,8 @@
 </script>
 <meta name="theme-color" content="#0D1117">
 <meta name="color-scheme" content="dark">
-<!-- SHINE APP · SPLASH · Crossing paths — a blue and a yellow shooting star cross the screen and meet at the logo.
-     App bundle (APK / iPhone app) · opens index.html. Plays once (≈ 2 s), then replaces itself with ?to=<same-site URL> or "index.html".
+<!-- SHINE APP · SPLASH · Merged — two shooting stars meet at the logo, then a sunrise glow rises from the bottom.
+     App bundle (APK / iPhone app) · used by all three apps · opens index.html. Plays once (≈ 2.8 s), then replaces itself with ?to=<same-site URL> or "index.html".
      Dark (#0D1117) from the first paint so the phone status bar matches; ?loop=1 replays (review). -->
 <title>Shine</title>
 <link rel="preload" href="fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="fonts/fonts.css"><script src="native.js"></script>
@@ -255,7 +255,6 @@ html.out .sp-stage{animation:spOut .42s cubic-bezier(.4,0,.2,1) forwards}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01s!important;animation-delay:0s!important;animation-iteration-count:1!important}
   html.out .sp-stage{animation:spOut .01s forwards}}
 
-.sm .bg{inset:0;background:linear-gradient(to top,color-mix(in srgb,var(--c-brand-700) 34%,transparent),transparent 55%);opacity:0;animation:fadeIn .8s ease forwards}
 .sm svg.met{inset:0;width:100%;height:100%;overflow:visible}
 .sm .met path{fill:none;stroke-linecap:round}
 .sm .m-b{--tail:var(--c-brand-300);--core:var(--c-brand-100);--glow:var(--c-brand-400)}
@@ -285,6 +284,13 @@ html.out .sp-stage{animation:spOut .42s cubic-bezier(.4,0,.2,1) forwards}
 html.out .sp-stage{animation-duration:.32s}
 @media (prefers-reduced-motion:reduce){.sm .met{display:none}}
 
+/* sunrise: the splash-sunrise horizon light, held back until the stars have met and the logo is in (.hit + 0.42 s) */
+.sm .sun{inset:0;opacity:0;transform:translateY(14%);
+  background:radial-gradient(42% 12% at 50% 102%,color-mix(in srgb,var(--c-logo-yellow) 26%,transparent) 0,transparent 100%),
+             radial-gradient(125% 52% at 50% 106%,color-mix(in srgb,var(--c-brand-400) 42%,transparent) 0%,color-mix(in srgb,var(--c-brand-600) 28%,transparent) 40%,color-mix(in srgb,var(--c-brand-700) 14%,transparent) 64%,transparent 84%)}
+.sm .hit .sun{animation:sunUp .9s cubic-bezier(.16,1,.3,1) .42s forwards}
+@keyframes sunUp{to{opacity:1;transform:none}}
+
 /* final: logo a little smaller (was min(44vw,172px)), no tagline */
 .s03r .sp-logo,.sm .sp-logo{width:min(38vw,148px)}
 
@@ -292,7 +298,7 @@ html.out .sp-stage{animation-duration:.32s}
 <link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shine Folder"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-startup-image" href="icons/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1260x2736.png" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})</script>
 </head>
 <body>
-<div class="sp sm"><div class="sp-stage"><div class="fx" aria-hidden="true"><i class="bg"></i><svg class="met"></svg><i class="halo"></i><i class="spark"></i></div><svg class="shine-logo sp-logo" viewBox="13 25 214 130" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shine">
+<div class="sp sm"><div class="sp-stage"><div class="fx" aria-hidden="true"><i class="sun"></i><svg class="met"></svg><i class="halo"></i><i class="spark"></i></div><svg class="shine-logo sp-logo" viewBox="13 25 214 130" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shine">
 <path class="w w1" d="M38.8164 104.079C43.392 104.079 47.3954 105.167 50.8271 107.341C54.3162 109.458 56.7761 112.462 58.2061 116.353L48.6826 120.815C47.9963 118.87 46.7375 117.325 44.9072 116.181C43.1343 114.979 41.104 114.378 38.8164 114.378C37.1577 114.378 35.8415 114.722 34.8691 115.408C33.9542 116.095 33.4972 117.039 33.4971 118.24C33.4971 118.87 33.6685 119.442 34.0117 119.957C34.3549 120.472 34.8981 120.93 35.6416 121.33C36.4424 121.731 37.4147 122.103 38.5586 122.446L46.0225 124.678C49.9118 125.822 52.8862 127.567 54.9453 129.913C57.0043 132.202 58.0341 135.034 58.0342 138.409C58.0342 141.327 57.262 143.874 55.7178 146.048C54.2307 148.222 52.1431 149.939 49.4551 151.197C46.7669 152.399 43.5922 153 39.9316 153C34.7841 153 30.294 151.798 26.4619 149.396C22.6869 146.935 20.113 143.645 18.7402 139.525L28.1777 135.062C29.3788 137.58 31.0085 139.554 33.0674 140.984C35.1265 142.415 37.415 143.13 39.9316 143.13C41.7618 143.13 43.1634 142.758 44.1357 142.015C45.108 141.271 45.5937 140.241 45.5938 138.925C45.5938 138.238 45.4223 137.666 45.0791 137.208C44.736 136.693 44.2213 136.235 43.5352 135.835C42.8488 135.434 41.9905 135.091 40.9609 134.805L32.9824 132.573C29.1503 131.486 26.2046 129.741 24.1455 127.338C22.0865 124.878 21.0567 121.988 21.0566 118.67C21.0566 115.752 21.8 113.206 23.2871 111.031C24.7742 108.857 26.8617 107.169 29.5498 105.968C32.2381 104.709 35.3274 104.079 38.8164 104.079Z" fill="currentColor"/>
 <path class="w w2" fill-rule="evenodd" clip-rule="evenodd" d="M201.976 104.079C205.693 104.079 208.982 104.68 211.842 105.882C214.702 107.026 217.104 108.656 219.049 110.773C221.051 112.89 222.566 115.351 223.596 118.154C224.625 120.901 225.14 123.905 225.14 127.166C225.14 128.081 225.083 128.998 224.969 129.913C224.912 130.771 224.768 131.515 224.539 132.145H191.731C191.885 133.344 192.181 134.459 192.623 135.491C193.481 137.494 194.797 139.068 196.57 140.212C198.343 141.299 200.488 141.843 203.005 141.843C205.293 141.843 207.237 141.385 208.839 140.47C210.497 139.554 211.784 138.295 212.699 136.693L222.995 141.585C222.08 143.874 220.621 145.876 218.619 147.593C216.674 149.309 214.358 150.654 211.67 151.627C208.982 152.542 206.036 153 202.833 153C197.857 153 193.539 151.913 189.878 149.738C186.217 147.507 183.386 144.532 181.384 140.812C179.382 137.094 178.381 132.974 178.381 128.454C178.381 123.762 179.411 119.585 181.47 115.923C183.586 112.261 186.418 109.372 189.964 107.255C193.51 105.138 197.514 104.079 201.976 104.079ZM201.976 114.378C199.745 114.378 197.828 114.922 196.227 116.009C194.625 117.096 193.424 118.698 192.623 120.815C192.399 121.409 192.214 122.038 192.066 122.703H211.505C211.431 121.983 211.287 121.296 211.069 120.644C210.44 118.698 209.325 117.182 207.724 116.095C206.179 114.95 204.263 114.378 201.976 114.378Z" fill="currentColor"/>
 <path class="w w3" d="M75.6787 109.418C76.6593 108.043 77.8885 106.949 79.3682 106.139C81.8276 104.765 84.688 104.079 87.9482 104.079C91.4943 104.079 94.5829 104.823 97.2139 106.311C99.9021 107.798 101.989 109.887 103.477 112.576C104.964 115.208 105.708 118.298 105.708 121.846V151.97H92.8379V124.592C92.8379 122.761 92.4662 121.187 91.7227 119.871C91.0363 118.555 90.0352 117.525 88.7197 116.781C87.4615 116.038 85.9745 115.666 84.2588 115.666C82.6001 115.666 81.1124 116.037 79.7969 116.781C78.4815 117.525 77.4525 118.555 76.709 119.871C76.0226 121.187 75.6787 122.761 75.6787 124.592V151.97H62.8096V87H75.6787V109.418Z" fill="currentColor"/>
@@ -349,12 +355,12 @@ window.SP_START = function (st, reduce) {
   requestAnimationFrame(frame);
 };
 
-/* hand-over: play (≤ 1700 ms) → fade to ink → location.replace(next).  next = ?to=<same-site URL> or the default.
+/* hand-over: play (≤ 2500 ms) → fade to ink → location.replace(next).  next = ?to=<same-site URL> or the default.
    ?loop=1 replays instead of leaving (review only). */
 (function () {
   var DEFAULT = 'index.html', root = document.documentElement, LOOP = /[?&]loop=1/.test(location.search);
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var T = reduce ? 1000 : 1700, END = reduce ? 1100 : 2050, TPL = null, next = DEFAULT;
+  var T = reduce ? 1000 : 2500, END = reduce ? 1100 : 2840, TPL = null, next = DEFAULT;
   try {
     var to = new URLSearchParams(location.search).get('to');
     if (to) { var u = new URL(to, location.href);                     // same site only, never another splash
