@@ -6,7 +6,7 @@
   /* App launch → splash first. The first time this page opens in a session (app launch / new browser tab) it hands
      over to the splash, which plays (~2 s) and returns here with location.replace — so Back never shows the splash and
      going "home" later in the session does not replay it. Skipped inside iframes and when storage is blocked.
-     #0D1117 = c-cn-black (the splash colour; painted before the redirect so nothing light flashes). */
+     #0C1731 = the splash colour (midnight navy; painted before the redirect so nothing light flashes). */
   (function () {
     try {
       if (window.top !== window) return;
@@ -14,7 +14,7 @@
       if (s.getItem(k)) return;
       s.setItem(k, '1'); if (s.getItem(k) !== '1') return;
       var st = document.createElement('style');
-      st.textContent = 'html{background:#0D1117!important}body{visibility:hidden!important}';
+      st.textContent = 'html{background:#0C1731!important}body{visibility:hidden!important}';
       document.head.appendChild(st);
       location.replace('splash.html?to=' + encodeURIComponent(location.href));
     } catch (e) {}

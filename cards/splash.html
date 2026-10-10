@@ -16,11 +16,11 @@
     if (iOS && m && !/maximum-scale/.test(m.content)) m.content += ', maximum-scale=1';
   })();
 </script>
-<meta name="theme-color" content="#0D1117">
+<meta name="theme-color" content="#0C1731">
 <meta name="color-scheme" content="dark">
 <!-- SHINE APP · SPLASH · Merged — two shooting stars meet at the logo, then a sunrise glow rises from the bottom.
      App bundle (APK / iPhone app) · used by all three apps · opens index.html. Plays once (≈ 3 s), then replaces itself with ?to=<same-site URL> or "index.html".
-     Dark (#0D1117) from the first paint so the phone status bar matches; ?loop=1 replays (review). -->
+     Dark (#0C1731) from the first paint so the phone status bar matches; ?loop=1 replays (review). -->
 <title>Shine</title>
 <link rel="preload" href="fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="fonts/fonts.css"><script src="native.js"></script>
 
@@ -291,6 +291,11 @@ html.out .sp-stage{animation-duration:.32s}
              radial-gradient(135% 64% at 50% 106%,color-mix(in srgb,var(--c-brand-400) 70%,transparent) 0%,color-mix(in srgb,var(--c-brand-500) 46%,transparent) 34%,color-mix(in srgb,var(--c-brand-700) 26%,transparent) 60%,transparent 86%),
              radial-gradient(90% 34% at 50% 104%,color-mix(in srgb,var(--c-cn-white) 12%,transparent) 0,transparent 100%)}
 .sm .hit .sun{animation:sunUp 1s cubic-bezier(.16,1,.3,1) .42s forwards}
+/* base: midnight navy instead of neutral ink, so the dark belongs to the same blue family as the sunrise
+   (user, 2026-10-10) = color-mix(c-brand-700 18%, c-cn-black), written as its sRGB value #0C1731 because the app's
+   bar sampler (native.js) and the phones' launch screens / status bar need a plain rgb colour. */
+:root{--splash-base:#0C1731}
+html,body,.sm{background:var(--splash-base)}
 @keyframes sunUp{to{opacity:1;transform:none}}
 
 /* final: logo a little smaller (was min(44vw,172px)), no tagline */

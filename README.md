@@ -10,7 +10,7 @@ The three logged-out homepage options as iPhone home-screen web apps — the iPh
 
 Each app opens on its splash (`splash.html`, dark, ≈ 3 s — the same **Merged** splash on all three — two shooting stars meet at the logo, then a sunrise glow rises from the bottom), which then hands over to the homepage; the homepage sends a fresh launch to the splash itself, so already-installed icons get it too.
 
-**Launch screen:** iPhone shows a launch screen before a home-screen app has loaded. Each app ships plain #0D1117 launch images (`icons/launch-*.png`, one exact size per iPhone screen, linked as `apple-touch-startup-image`), the same colour as the splash's first frame, so tapping the icon shows only the Shine splash. iOS saves the launch screen when the app is **added** to the Home Screen — after this update, delete the three icons and add them again once.
+**Launch screen:** iPhone shows a launch screen before a home-screen app has loaded. Each app ships plain midnight-navy #0C1731 launch images (`icons/launch-*.png`, one exact size per iPhone screen, linked as `apple-touch-startup-image`), the same colour as the splash's first frame, so tapping the icon shows only the Shine splash. iOS saves the launch screen when the app is **added** to the Home Screen — after this update, delete the three icons and add them again once.
 
 Each folder is a self-contained app: the splash, the homepage, login and job search pages, fonts, a web-app manifest, home-screen icons and an offline cache (`sw.js`). `index.html` at the root is the install page that links to all three.
 
