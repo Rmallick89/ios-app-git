@@ -19,7 +19,7 @@
 <meta name="theme-color" content="#0D1117">
 <meta name="color-scheme" content="dark">
 <!-- SHINE APP · SPLASH · Merged — two shooting stars meet at the logo, then a sunrise glow rises from the bottom.
-     App bundle (APK / iPhone app) · used by all three apps · opens index.html. Plays once (≈ 2.8 s), then replaces itself with ?to=<same-site URL> or "index.html".
+     App bundle (APK / iPhone app) · used by all three apps · opens index.html. Plays once (≈ 3 s), then replaces itself with ?to=<same-site URL> or "index.html".
      Dark (#0D1117) from the first paint so the phone status bar matches; ?loop=1 replays (review). -->
 <title>Shine</title>
 <link rel="preload" href="fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="fonts/fonts.css"><script src="native.js"></script>
@@ -284,11 +284,13 @@ html.out .sp-stage{animation:spOut .42s cubic-bezier(.4,0,.2,1) forwards}
 html.out .sp-stage{animation-duration:.32s}
 @media (prefers-reduced-motion:reduce){.sm .met{display:none}}
 
-/* sunrise: the splash-sunrise horizon light, held back until the stars have met and the logo is in (.hit + 0.42 s) */
-.sm .sun{inset:0;opacity:0;transform:translateY(14%);
-  background:radial-gradient(42% 12% at 50% 102%,color-mix(in srgb,var(--c-logo-yellow) 26%,transparent) 0,transparent 100%),
-             radial-gradient(125% 52% at 50% 106%,color-mix(in srgb,var(--c-brand-400) 42%,transparent) 0%,color-mix(in srgb,var(--c-brand-600) 28%,transparent) 40%,color-mix(in srgb,var(--c-brand-700) 14%,transparent) 64%,transparent 84%)}
-.sm .hit .sun{animation:sunUp .9s cubic-bezier(.16,1,.3,1) .42s forwards}
+/* sunrise: held back until the stars have met and the logo is in (.hit + 0.42 s). Stronger than splash-sunrise
+   (user, 2026-10-10: "looks very less visible") — a brighter warm core, a taller blue glow and a soft haze. */
+.sm .sun{inset:0;opacity:0;transform:translateY(22%);
+  background:radial-gradient(58% 17% at 50% 101%,color-mix(in srgb,var(--c-logo-yellow) 58%,transparent) 0,color-mix(in srgb,var(--c-logo-yellow) 18%,transparent) 55%,transparent 100%),
+             radial-gradient(135% 64% at 50% 106%,color-mix(in srgb,var(--c-brand-400) 70%,transparent) 0%,color-mix(in srgb,var(--c-brand-500) 46%,transparent) 34%,color-mix(in srgb,var(--c-brand-700) 26%,transparent) 60%,transparent 86%),
+             radial-gradient(90% 34% at 50% 104%,color-mix(in srgb,var(--c-cn-white) 12%,transparent) 0,transparent 100%)}
+.sm .hit .sun{animation:sunUp 1s cubic-bezier(.16,1,.3,1) .42s forwards}
 @keyframes sunUp{to{opacity:1;transform:none}}
 
 /* final: logo a little smaller (was min(44vw,172px)), no tagline */
@@ -355,12 +357,12 @@ window.SP_START = function (st, reduce) {
   requestAnimationFrame(frame);
 };
 
-/* hand-over: play (≤ 2500 ms) → fade to ink → location.replace(next).  next = ?to=<same-site URL> or the default.
+/* hand-over: play (≤ 2650 ms) → fade to ink → location.replace(next).  next = ?to=<same-site URL> or the default.
    ?loop=1 replays instead of leaving (review only). */
 (function () {
   var DEFAULT = 'index.html', root = document.documentElement, LOOP = /[?&]loop=1/.test(location.search);
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var T = reduce ? 1000 : 2500, END = reduce ? 1100 : 2840, TPL = null, next = DEFAULT;
+  var T = reduce ? 1000 : 2650, END = reduce ? 1100 : 2990, TPL = null, next = DEFAULT;
   try {
     var to = new URLSearchParams(location.search).get('to');
     if (to) { var u = new URL(to, location.href);                     // same site only, never another splash
