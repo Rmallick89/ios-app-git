@@ -36,7 +36,7 @@
 </script>
 <meta name="theme-color" content="#FAF9F6">
 <title>Shine — Find your next job</title>
-<link rel="preload" href="fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="fonts/fonts.css"><script src="native.js"></script>
+<link rel="preload" href="fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="fonts/fonts.css"><script src="native.js"></script><script data-topbar>/* top bar platform: Android app bar in the APK (ShineNative bridge) · iOS navigation bar everywhere else */document.documentElement.classList.add(window.ShineNative?'tb-android':'tb-ios')</script>
 
 
 <style>
@@ -671,6 +671,27 @@ body{background:var(--surface-neutral-base)}
 .f-front{pointer-events:none}
 .cta{display:block}
 
+</style>
+<style data-topbar>
+/* ── Top bar = system status bar + app header, one surface (2026-10-10 · APK + iOS apps) ──────────────────────────
+   The header starts right under the status bar, on the same plain page colour the status bar shows, at the platform's
+   bar height with the logo and Explore jobs centred in it:
+     · Android — Material 3 small top app bar, 64dp. The phone already reserves the status bar above the WebView, so the
+       page adds no top inset of its own (under viewport-fit=cover the WebView reports the camera cutout as
+       safe-area-inset-top, which doubled the gap).
+     · iOS — navigation bar, 44pt (HIG). The safe-area inset stays (0 with the default status bar style).
+   No extra margin above the bar, nothing decorative behind it; Explore jobs keeps a 48px touch target. */
+html{--tb-h:var(--unit-44)}
+html.tb-android{--tb-h:var(--unit-64)}
+html.tb-android .screen{padding-top:0}
+html .appbar{margin-top:0;height:var(--tb-h)}
+html .pill-explore{position:relative}
+html .pill-explore::after{content:"";position:absolute;left:0;right:0;top:50%;height:var(--unit-48);transform:translateY(-50%)}
+/* option 2 */
+html .appbar .shine-logo{height:var(--unit-28)}   /* same logo size as options 1 & 3 — fits the 44pt iOS bar */
+/* the grid + glow fade in below the top bar (not behind the header), so status bar + header stay one plain band */
+html .bg{-webkit-mask-image:linear-gradient(to bottom,transparent 0,transparent var(--tb-h),#000 calc(var(--tb-h) + var(--unit-64)));
+              mask-image:linear-gradient(to bottom,transparent 0,transparent var(--tb-h),#000 calc(var(--tb-h) + var(--unit-64)))}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shine Folder"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-startup-image" href="icons/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1260x2736.png" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})</script>
 </head>
