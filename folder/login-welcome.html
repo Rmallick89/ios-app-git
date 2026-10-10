@@ -6,7 +6,7 @@
   theme-color + html/body background are the ink colour from the first paint (iOS home-screen apps did not
   repaint the status bar when the in-page splash turned the background dark).
   Query:  ?name=<first name>   &next=<relative url>  (→ "Taking you back…" and continue there after 1.2 s)
-  Reset → the logged-out home (index.html).
+  Reset → the app splash (splash.html) plays again, then it opens the logged-out home (index.html).
 -->
 <html lang="en">
 <head>
@@ -64,7 +64,7 @@ p{margin:var(--unit-6) 0 0;font-size:var(--type-body-md-size);line-height:var(--
 <button class="reset" type="button" id="reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.64-6.36"/><path d="M3 4v5h5"/></svg>Reset</button>
 <script>
 (function () {
-  var HOME = 'index.html';
+  var HOME = 'index.html', SPLASH = 'splash.html';
   var q = new URLSearchParams(location.search);
   function rel(u) { return u && !/^\s*([a-z][a-z0-9+.-]*:|\/\/)/i.test(u) ? u : null; }   // same-site relative only
   var name = (q.get('name') || '').trim().slice(0, 40), next = rel(q.get('next'));
@@ -73,7 +73,9 @@ p{margin:var(--unit-6) 0 0;font-size:var(--type-body-md-size);line-height:var(--
   // arrived straight from the in-page splash (which already showed Reset after 1.2 s) → keep the timing continuous
   var shown = +q.get('t') || 0; document.documentElement.style.setProperty('--reset-delay', Math.max(0, 1200 - shown) + 'ms');
   var b = document.getElementById('reset');
-  b.addEventListener('click', function () { b.disabled = true; b.classList.add('is-going'); setTimeout(function () { location.replace(HOME); }, 220); });
+  // Reset = start the app again: the splash always plays first, then it hands over to the logged-out home (?to=)
+  function viaSplash() { try { return SPLASH + '?to=' + encodeURIComponent(new URL(HOME, location.href).href); } catch (e) { return HOME; } }
+  b.addEventListener('click', function () { b.disabled = true; b.classList.add('is-going'); setTimeout(function () { location.replace(viaSplash()); }, 220); });
 })();
 </script>
 </body>

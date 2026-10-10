@@ -932,6 +932,7 @@ window.ShineLoginConfig = (function () {
   function rel(u) { return u && !/^\s*([a-z][a-z0-9+.-]*:|\/\/)/i.test(u) ? u : null; }   // same-site relative URLs only
   return {
     homeUrl: 'index.html',        // Back fallback + the splash's Reset (logged-out home)
+    splashUrl: 'splash.html',    // Reset replays the app splash first, which then opens homeUrl (?to=)
     welcomeUrl: 'login-welcome.html',   // "Welcome back" page shown after log in (dark from first paint → dark status bar)
     registerUrl: null,          // Register screen (not built yet → toast)
     termsUrl: null, privacyUrl: null,
@@ -1477,7 +1478,12 @@ window.ShineLoginConfig = (function () {
         if (du) go(du); else toast(CFG ? (a.getAttribute('data-doc') === 'privacy' ? 'Privacy Policy is coming soon' : 'Terms are coming soon') : 'Opens Terms & Privacy Policy'); break;
       case 'back': if (CFG) leave(); else toast('Goes back to the previous app screen'); break;
       case 'reset': e.preventDefault(); a.disabled = true; a.classList.add('is-going');      // start the logged-out experience again
-        setTimeout(function () { if (CFG) window.location.replace(CFG.homeUrl); else { location.href = location.pathname + '#login'; location.reload(); } }, 220); break;
+        setTimeout(function () {
+          if (!CFG) { location.href = location.pathname + '#login'; location.reload(); return; }
+          var to = CFG.homeUrl;           // always replay the app splash first; it then opens the logged-out home (?to=)
+          try { if (CFG.splashUrl) to = CFG.splashUrl + '?to=' + encodeURIComponent(new URL(CFG.homeUrl, location.href).href); } catch (er) {}
+          window.location.replace(to);
+        }, 220); break;
       case 'forgot': e.preventDefault(); window.ShineSheet.closeAll('route'); startForgot(a); break;
       case 'to-login': e.preventDefault(); route('login'); break;
       case 'cancel-reset': reset = null; route('login'); toast('Your password wasn’t changed'); break;
