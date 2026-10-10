@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · SEARCH MODAL  (app component)                       v1.3.0
+   SHINE · SEARCH MODAL  (app component)                       v1.3.1
    "What's next for you?" — keyword · location · experience → Search Jobs
    ───────────────────────────────────────────────────────────────────────
    Ported from the JSRP "Edit search" overlay (jsrp/JSRP-Index.html,
@@ -77,7 +77,7 @@
   --ssm-inline-sm: 4px; --ssm-inline-md: 8px; --ssm-inline-lg: 12px;
   --ssm-stack-xxs: 4px; --ssm-stack-xs: 8px; --ssm-stack-md: 12px; --ssm-stack-lg: 14px; --ssm-stack-xl: 20px;
   --ssm-section-sm: 20px; --ssm-section-md: 24px; --ssm-section-lg: 32px;
-  --ssm-layout-xs: 16px;
+  --ssm-layout-xs: 24px;           /* screen gutter = JSRP page (spacing.layout.sm) */
 
   /* size (§2.4) */
   --ssm-stroke-thin: 1px; --ssm-stroke-default: 1.5px;
@@ -129,7 +129,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
   position: relative; width: 100%;
   background: var(--ssm-surface-raised);
   border-radius: var(--ssm-radius-2xl);
-  padding: var(--ssm-section-md) var(--ssm-section-sm) var(--ssm-section-sm);
+  padding: var(--ssm-section-md);   /* 24 all round — the JSRP sheets' padding */
   box-shadow: var(--ssm-elev-modal);
   transform: translateY(calc(-1 * var(--ssm-inset-md)));
   transition: transform var(--ssm-dur-slow) var(--ssm-ease-out);
@@ -146,7 +146,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 
 /* Close — circular, warm well (Button · icon-only, compact) */
 .ssm-close {
-  position: absolute; top: var(--ssm-stack-lg); right: var(--ssm-stack-lg); z-index: 2;
+  position: absolute; top: var(--ssm-inset-xl); right: var(--ssm-inset-xl); z-index: 2;   /* 16 / 16 — JSRP sheet close disc */
   width: var(--ssm-control-close); height: var(--ssm-control-close); padding: 0;
   display: grid; place-items: center; border-radius: var(--ssm-radius-full);
   background: var(--ssm-surface-base); color: var(--ssm-content-muted);
@@ -167,7 +167,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 .ssm-eyebrow-dot { width: 6px; height: 6px; border-radius: var(--ssm-radius-full); background: var(--ssm-surface-brand);
   box-shadow: 0 0 0 3px var(--ssm-c-brand-500-op18); flex: none; }
 .ssm-title {
-  position: relative; margin: 0 0 var(--ssm-stack-xl); padding-right: calc(var(--ssm-control-close) + var(--ssm-inline-md));
+  position: relative; margin: 0 0 calc(var(--ssm-stack-xl) + var(--ssm-inset-md)); padding-right: calc(var(--ssm-control-close) + var(--ssm-inline-md));   /* heading → content 28, as JSRP sheets */
   font-size: var(--ssm-heading-lg-size); line-height: var(--ssm-heading-lg-lh); letter-spacing: var(--ssm-heading-lg-ls);
   font-weight: var(--ssm-w-extrabold); color: var(--ssm-content-base);
 }
@@ -263,7 +263,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 /* ── Submit (A.02 Button · Primary · Brand · lg 48 · block) ─────────── */
 .ssm-submit {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--ssm-inline-md);
-  width: 100%; height: var(--ssm-control-lg); margin-top: var(--ssm-stack-md); padding: 0 var(--ssm-inset-xl);
+  width: 100%; height: var(--ssm-control-lg); margin-top: var(--ssm-section-md); padding: 0 var(--ssm-inset-xl);   /* content → CTA 24, as JSRP sheets */
   border: 0; border-radius: var(--ssm-radius-lg); cursor: pointer;
   background: var(--ssm-surface-brand); color: var(--ssm-content-on-fill-dark);
   font-family: var(--ssm-font); font-size: var(--ssm-label-lg-size); line-height: var(--ssm-label-lg-lh); font-weight: var(--ssm-w-bold);

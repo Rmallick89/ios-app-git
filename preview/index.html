@@ -446,7 +446,7 @@ body{background-image:linear-gradient(to top,var(--surface-brand-brand-subtle) 0
   --ssm-inline-sm: 4px; --ssm-inline-md: 8px; --ssm-inline-lg: 12px;
   --ssm-stack-xxs: 4px; --ssm-stack-xs: 8px; --ssm-stack-md: 12px; --ssm-stack-lg: 14px; --ssm-stack-xl: 20px;
   --ssm-section-sm: 20px; --ssm-section-md: 24px; --ssm-section-lg: 32px;
-  --ssm-layout-xs: 16px;
+  --ssm-layout-xs: 24px;           /* screen gutter = JSRP page (spacing.layout.sm) */
 
   /* size (§2.4) */
   --ssm-stroke-thin: 1px; --ssm-stroke-default: 1.5px;
@@ -498,7 +498,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
   position: relative; width: 100%;
   background: var(--ssm-surface-raised);
   border-radius: var(--ssm-radius-2xl);
-  padding: var(--ssm-section-md) var(--ssm-section-sm) var(--ssm-section-sm);
+  padding: var(--ssm-section-md);   /* 24 all round — the JSRP sheets' padding */
   box-shadow: var(--ssm-elev-modal);
   transform: translateY(calc(-1 * var(--ssm-inset-md)));
   transition: transform var(--ssm-dur-slow) var(--ssm-ease-out);
@@ -515,7 +515,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 
 /* Close — circular, warm well (Button · icon-only, compact) */
 .ssm-close {
-  position: absolute; top: var(--ssm-stack-lg); right: var(--ssm-stack-lg); z-index: 2;
+  position: absolute; top: var(--ssm-inset-xl); right: var(--ssm-inset-xl); z-index: 2;   /* 16 / 16 — JSRP sheet close disc */
   width: var(--ssm-control-close); height: var(--ssm-control-close); padding: 0;
   display: grid; place-items: center; border-radius: var(--ssm-radius-full);
   background: var(--ssm-surface-base); color: var(--ssm-content-muted);
@@ -536,7 +536,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 .ssm-eyebrow-dot { width: 6px; height: 6px; border-radius: var(--ssm-radius-full); background: var(--ssm-surface-brand);
   box-shadow: 0 0 0 3px var(--ssm-c-brand-500-op18); flex: none; }
 .ssm-title {
-  position: relative; margin: 0 0 var(--ssm-stack-xl); padding-right: calc(var(--ssm-control-close) + var(--ssm-inline-md));
+  position: relative; margin: 0 0 calc(var(--ssm-stack-xl) + var(--ssm-inset-md)); padding-right: calc(var(--ssm-control-close) + var(--ssm-inline-md));   /* heading → content 28, as JSRP sheets */
   font-size: var(--ssm-heading-lg-size); line-height: var(--ssm-heading-lg-lh); letter-spacing: var(--ssm-heading-lg-ls);
   font-weight: var(--ssm-w-extrabold); color: var(--ssm-content-base);
 }
@@ -632,7 +632,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 /* ── Submit (A.02 Button · Primary · Brand · lg 48 · block) ─────────── */
 .ssm-submit {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--ssm-inline-md);
-  width: 100%; height: var(--ssm-control-lg); margin-top: var(--ssm-stack-md); padding: 0 var(--ssm-inset-xl);
+  width: 100%; height: var(--ssm-control-lg); margin-top: var(--ssm-section-md); padding: 0 var(--ssm-inset-xl);   /* content → CTA 24, as JSRP sheets */
   border: 0; border-radius: var(--ssm-radius-lg); cursor: pointer;
   background: var(--ssm-surface-brand); color: var(--ssm-content-on-fill-dark);
   font-family: var(--ssm-font); font-size: var(--ssm-label-lg-size); line-height: var(--ssm-label-lg-lh); font-weight: var(--ssm-w-bold);
@@ -713,7 +713,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
   --sn-body-md: 14px; --sn-body-md-lh: 20px;
   --sn-body-sm: 12px; --sn-body-sm-lh: 18px;
   --sn-w-medium: 500; --sn-w-semibold: 600; --sn-w-bold: 700;
-  --sn-gutter: 16px;                                  /* spacing.layout.xs — screen edge gap */
+  --sn-gutter: 24px;                                  /* spacing.layout.sm — screen edge gap = JSRP page gutter (v1.0.1) */
   --sn-radius-lg: 12px; --sn-radius-full: 1024px;
   --sn-icon-sm: 14px; --sn-icon-md: 16px;
   --sn-disc: 32px; --sn-cta-h: 32px;
@@ -849,6 +849,12 @@ html .pill-explore::after{content:"";position:absolute;left:0;right:0;top:50%;he
 :root{--screen-margin:var(--spacing-layout-sm,24px)}
 /* homepage: app bar · headline · CTAs + legal */
 html .appbar,html .copy,html .foot{padding-left:var(--screen-margin);padding-right:var(--screen-margin)}
+</style>
+<style data-spacing>
+/* ── Spacing follows the JSRP page (2026-10-10 audit). ── */
+/* Log in · Sign up 8px apart (JSRP card actions / filter footer) · 24px bottom inset (JSRP results / sheets) */
+html .cta-row{gap:var(--spacing-inline-md)}
+html .foot{padding-bottom:max(var(--spacing-section-md),env(safe-area-inset-bottom))}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shine Preview"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-startup-image" href="icons/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1260x2736.png" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})</script>
 </head>

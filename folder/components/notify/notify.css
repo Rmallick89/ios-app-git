@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · NOTIFY  (app component)                              v1.0.0
+   SHINE · NOTIFY  (app component)                              v1.0.1
    Two floating nudges for every screen of the Shine app:
 
      Toast   — small dark pill at the BOTTOM. One background (inverse black);
@@ -43,7 +43,7 @@
   --sn-body-md: 14px; --sn-body-md-lh: 20px;
   --sn-body-sm: 12px; --sn-body-sm-lh: 18px;
   --sn-w-medium: 500; --sn-w-semibold: 600; --sn-w-bold: 700;
-  --sn-gutter: 16px;                                  /* spacing.layout.xs — screen edge gap */
+  --sn-gutter: 24px;                                  /* spacing.layout.sm — screen edge gap = JSRP page gutter (v1.0.1) */
   --sn-radius-lg: 12px; --sn-radius-full: 1024px;
   --sn-icon-sm: 14px; --sn-icon-md: 16px;
   --sn-disc: 32px; --sn-cta-h: 32px;
