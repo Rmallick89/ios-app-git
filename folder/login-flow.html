@@ -794,6 +794,25 @@ html.tb-ios .demo-fab{top:calc(env(safe-area-inset-top) + (var(--tb-h) - var(--u
 html .be-bar .ghost-back,html .be-bar .pill-explore{position:relative}
 html .be-bar .ghost-back::after,html .be-bar .pill-explore::after,html .demo-fab::after{content:"";position:absolute;left:0;right:0;top:50%;height:var(--unit-48);transform:translateY(-50%)}
 </style>
+<style data-pf>
+/* ── Forgot / new password header = the log-in header (2026-10-11): 32px back disc (same component as log in), the demo key
+   8px after it, and the same dashed rule underneath; the log-in rule now follows the 24px screen gutter too (was 16). ── */
+html .pf-bar{position:relative;margin-bottom:calc(var(--spacing-stack-xs) + var(--unit-2))}
+html .pf-bar .ghost-back{position:relative;width:var(--unit-32);height:var(--unit-32);margin-left:0;background:var(--surface-neutral-raised);
+  border:var(--size-stroke-thin) solid var(--stroke-neutral-base);box-shadow:var(--elevation-neutral-subtle);transition:background-color .15s,transform .12s ease}
+html .pf-bar .ghost-back svg{width:var(--size-icon-md);height:var(--size-icon-md)}
+html .pf-bar .ghost-back:active{background:var(--surface-neutral-state-pressed);transform:scale(.95)}
+@media (hover:hover){html .pf-bar .ghost-back:hover{background:var(--surface-neutral-state-hover)}}
+html .pf-bar .ghost-back::after{content:"";position:absolute;left:0;right:0;top:50%;height:var(--unit-48);transform:translateY(-50%)}
+html .pf-bar::after,html .lg .be-bar::after{content:"";position:absolute;left:var(--screen-margin);right:var(--screen-margin);
+  bottom:calc(-1 * (var(--spacing-stack-xs) + var(--size-stroke-thin)));height:var(--size-stroke-thin);
+  background:repeating-linear-gradient(90deg,var(--stroke-neutral-base) 0 var(--unit-6),transparent var(--unit-6) var(--unit-10));pointer-events:none}
+/* ── Keyboard (these two screens only): the sticky Send OTP / Update password footer no longer rides up on the keyboard.
+   The Android app shrinks the page when the keyboard opens; while it is open (html.kb-open, set below) the screen keeps
+   its full height and the footer drops back into place at the bottom, behind the keyboard. ── */
+html.kb-open .pf{min-height:var(--app-h)}
+html.kb-open .pf-foot{position:static}
+</style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shine Folder"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-startup-image" href="icons/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1260x2736.png" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})</script>
 </head>
 <body>
@@ -983,7 +1002,7 @@ window.ShineLoginConfig = (function () {
     homeUrl: 'index.html',        // Back fallback + the splash's Reset (logged-out home)
     splashUrl: 'splash.html',    // Reset replays the app splash first, which then opens homeUrl (?to=)
     welcomeUrl: 'login-welcome.html',   // "Welcome back" page shown after log in (dark from first paint → dark status bar)
-    registerUrl: null,          // Register screen (not built yet → toast)
+    registerUrl: 'signup-flow.html',   // sign-up flow (App signup)
     termsUrl: null, privacyUrl: null,
     next: rel(q.get('next')),   // e.g. jsrp-logout.html?q=… (JSRP save/apply nudge)
     tab: q.get('tab') === 'password' ? 'password' : 'otp',
@@ -1653,6 +1672,19 @@ function next(){if(document.hidden)return;var cur=ps[k];k=(k+1)%ps.length;var nx
   setTimeout(function(){cur.classList.remove('off')},1200)}
 setInterval(next,3400)})();
 
+</script>
+<script data-kbfoot>
+/* keyboard detector for the forgot / new-password footer: the page height drops by more than 150px while the keyboard is up */
+(function () {
+  var d = document.documentElement, w = innerWidth, max = innerHeight;
+  function check() {
+    if (innerWidth !== w) { w = innerWidth; max = innerHeight; }        // rotation → new baseline
+    if (innerHeight > max) max = innerHeight;
+    d.style.setProperty('--app-h', max + 'px');
+    d.classList.toggle('kb-open', max - innerHeight > 150);
+  }
+  addEventListener('resize', check); check();
+})();
 </script>
 </body>
 </html>

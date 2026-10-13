@@ -12,7 +12,7 @@ Each app opens on its splash (`splash.html`, dark, ≈ 2.4 s — the same **Merg
 
 **Launch screen:** iPhone shows a launch screen before a home-screen app has loaded. Each app ships plain midnight-navy #0C1731 launch images (`icons/launch-*.png`, one exact size per iPhone screen, linked as `apple-touch-startup-image`), the same colour as the splash's first frame, so tapping the icon shows only the Shine splash. iOS saves the launch screen when the app is **added** to the Home Screen — after this update, delete the three icons and add them again once.
 
-Each folder is a self-contained app: the splash, the homepage, login and job search pages, fonts, a web-app manifest, home-screen icons and an offline cache (`sw.js`). `index.html` at the root is the install page that links to all three.
+Each folder is a self-contained app: the splash, the homepage, log-in, sign-up and job search pages, fonts, a web-app manifest, home-screen icons and an offline cache (`sw.js`). `index.html` at the root is the install page that links to all three.
 
 ## Publish (GitHub Pages)
 1. Create an empty GitHub repo named `ios-app-git`, then from this folder: `git add -A`, `git commit -m "iPhone previews"`, `git remote add origin <repo-url>`, `git push -u origin main`.

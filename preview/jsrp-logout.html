@@ -1830,12 +1830,9 @@ body { background: var(--surface-base, var(--surface-base)); }
           btn.addEventListener('click', function(){
             var act = btn.getAttribute('data-save-cta');
             closeNudge();
-            if (act === 'login') {
-              setTimeout(function(){ if (typeof showToast === 'function') showToast('Opens login'); }, 220);
-            } else {
-              // Register → placeholder toast until the real signup flow lands.
-              if (typeof showToast === 'function') showToast('Opens registration');
-            }
+            // Register → the sign-up flow · Log in → the log-in flow (back here after log in)
+            var back = location.pathname.split('/').pop() + location.search;
+            setTimeout(function(){ location.href = act === 'login' ? 'login-flow.html?next=' + encodeURIComponent('' + back) : 'signup-flow.html'; }, 220);
           });
         });
       });
