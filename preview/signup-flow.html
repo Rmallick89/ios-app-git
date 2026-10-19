@@ -3,7 +3,7 @@
   ═══════════════════════════════════════════════════════════════════════════
   SHINE APP · SIGN UP FLOW (logged out)                         signup-flow.html
   Screens  Sign up: upload resume (PDF / DOC, up to 5 MB · uploading · file errors) or fill details manually →
-           Parsing resume (5 steps → completed, redirect 0:05 · "can't read" sheet) → Almost there sheet
+           Reading your resume (one card, 5 steps → "Your profile is ready", continues in 3s · "can’t read" sheet) → Almost there sheet
            (basic details · email / number already on Shine) → OTP sheet (4 digits) → Account created →
            Verify your details (basic · employment · education · skills, ⋮ edit / delete, missing-info states,
            edit sheets) → Profile created → Job preferences (final step) →
@@ -474,11 +474,6 @@ html,body{height:auto;overflow:visible;overscroll-behavior:auto}
 @keyframes otpPop{0%{transform:scale(1)}45%{transform:scale(1.08)}100%{transform:scale(1)}}
 @keyframes otpShake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(3px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(6px)}}
 @media (prefers-reduced-motion:reduce){.otp--complete .otp-seg,.otp--invalid .otp{animation:none}
-}
-.splash-spin{width:var(--unit-48);height:var(--unit-48);border-radius:50%;border:3px solid rgba(255,255,255,.18);border-top-color:var(--c-brand-400);
-  margin-bottom:var(--unit-18);animation:auSpin .9s linear infinite, splashFade .3s ease .04s both}
-@keyframes splashFade{from{opacity:0}to{opacity:1}}
-@media (prefers-reduced-motion:reduce){.splash-spin{animation:auSpin 1.6s linear infinite}
 }
 .btn--primary[aria-busy="true"][disabled]{background:var(--surface-inverse-base);color:var(--content-on-fill-dark-base);cursor:progress}
 h1[tabindex="-1"]:focus{outline:none}
@@ -966,6 +961,46 @@ html .su-land .su-or{margin:var(--unit-32) auto var(--unit-32)}
 /* round 7 (user, 2026-10-12): dots → upload card 36 (was 32) */
 .su-hero{padding-bottom:calc(var(--unit-72) + var(--unit-36))}
 
+/* round 8 (user, 2026-10-13): more breathing room inside the upload card — both parts (white top + navy foot)
+   24 all round; phones ≤760px tall get 20 so the start screen still fits without scrolling */
+.su-up-top,.su-up-bot{padding:var(--spacing-layout-sm)}
+@media (max-height:760px){.su-up-top,.su-up-bot{padding:var(--spacing-section-sm)}
+  .su-up-err-f{margin-bottom:var(--spacing-stack-xs)}}   /* wrong-file state fits too (file line → button 8, was 12) */
+
+/* round 9 (user, 2026-10-19): parsing screen = sample 1 "One card" (App signup/samples/parsing-1-one-card.html)
+   · top icon = the resume (56 tile, scan line) → green verified when done; one spinner only (on the row being read)
+   · thin progress bar (144 × 4) replaces the "~2 mins" pill; "Continuing in 3s" badge takes its slot when done
+   · the five boxes become one grouped card (radius 20), 52 rows with 1px dividers and a status word: Reading / Done */
+.su-parse-ic.su-parse-doc{width:var(--unit-56);height:var(--unit-56);margin-bottom:var(--unit-20);border-radius:var(--size-radius-xl);display:grid;place-items:center;overflow:hidden;
+  background:rgba(255,255,255,.08);border:var(--size-stroke-thin) solid rgba(255,255,255,.14);color:var(--c-brand-200)}
+.su-parse-doc>svg{width:var(--unit-28);height:var(--unit-28)}
+.su-parse-doc::after{content:"";position:absolute;left:0;right:0;top:0;height:var(--unit-2);background:var(--c-brand-300);box-shadow:0 0 12px 2px rgba(126,163,255,.7);animation:suScan 1.6s ease-in-out infinite alternate}
+@keyframes suScan{from{transform:translateY(8px)}to{transform:translateY(46px)}}
+.su-parse-doc .su-done-ic{inset:var(--unit-12)}
+.su-parse.is-done .su-parse-doc{background:rgba(18,183,106,.14);border-color:rgba(18,183,106,.35)}
+.su-parse.is-done .su-parse-doc>svg,.su-parse.is-done .su-parse-doc::after{display:none}
+.su-parse-meta{height:var(--unit-24);margin-top:var(--spacing-stack-md);display:grid;place-items:center}
+.su-parse-bar{width:144px;height:var(--unit-4);border-radius:var(--unit-4);background:rgba(255,255,255,.12);overflow:hidden}
+.su-parse-bar i{display:block;width:100%;height:100%;border-radius:inherit;background:var(--c-brand-400);transform-origin:left;transform:scaleX(var(--su-parse-p,0));transition:transform .6s cubic-bezier(.16,1,.3,1)}
+.su-parse-meta .su-parse-badge{display:none;margin-top:0}
+.su-parse.is-done .su-parse-bar{display:none}
+.su-parse.is-done .su-parse-badge{display:inline-flex}
+.su-steps{gap:0;border-radius:var(--unit-20);overflow:hidden;background:rgba(255,255,255,.05);border:var(--size-stroke-thin) solid rgba(255,255,255,.10)}
+.su-step{height:52px;border:0;border-radius:0;background:transparent;color:rgba(255,255,255,.45)}
+.su-step+.su-step{box-shadow:inset 0 var(--size-stroke-thin) 0 rgba(255,255,255,.08)}
+.su-step+.su-step::before{content:none}
+.su-step-l{flex:1;min-width:0}
+.su-step::after{font-size:var(--type-body-sm-size);line-height:var(--type-body-sm-lh);font-weight:var(--typeface-weight-bold)}
+.su-step.is-active{color:var(--content-on-fill-dark-base);background:rgba(77,124,255,.10)}
+.su-step.is-active::after{content:"Reading";color:var(--c-brand-300)}
+.su-step.is-active .su-step-ic{font-size:0}   /* spinner only, no number inside it */
+.su-step.is-done{color:var(--content-on-fill-dark-base)}
+.su-step.is-done::after{content:"Done";color:var(--c-green-300)}
+@media (max-height:700px){.su-parse-ic.su-parse-doc{width:var(--unit-48);height:var(--unit-48);margin-bottom:var(--unit-14)}
+  .su-parse-doc .su-done-ic{inset:var(--unit-10)}@keyframes suScan{from{transform:translateY(6px)}to{transform:translateY(40px)}}
+  .su-steps{gap:0}.su-step{height:var(--unit-48)}}
+@media (prefers-reduced-motion:reduce){.su-parse-doc::after{animation:none;display:none}.su-parse-bar i{transition:none}}
+
 </style>
 <style data-topbar>
 /* ── Top bar = system status bar + app header, one surface (APK + iOS apps) — same rules as the log-in pages ──
@@ -1008,14 +1043,14 @@ html .pf-bar .ghost-back::after,html .demo-fab::after{content:"";position:absolu
     <div class="su-up" id="upCard">
       <div class="su-up-top">
         <div class="su-up-copy">
-          <h1 class="su-up-h" id="startTitle">Build your profile, <span class="accent">just add resume.</span></h1>
-          <p class="su-up-p">We extract the details, you skip the forms</p>
+          <h1 class="su-up-h" id="startTitle">Let your resume <span class="accent">fill your profile.</span></h1>
+          <p class="su-up-p">2 mins, no typing needed</p>
         </div>
         <span class="su-up-art" aria-hidden="true"><svg viewBox="0 0 72 72" fill="none"><rect x="20" y="14" width="40" height="50" rx="7" fill="var(--surface-neutral-raised)" stroke="var(--stroke-neutral-base)" stroke-width="1.5"/><rect x="28" y="28" width="24" height="5" rx="2.5" fill="var(--c-brand-400)"/><rect x="28" y="39" width="20" height="3" rx="1.5" fill="var(--stroke-neutral-strong)"/><rect x="28" y="47" width="14" height="3" rx="1.5" fill="var(--stroke-neutral-strong)"/><path d="M19 6l3.2 2.6 4.1-.5 1.2 3.9 3.7 1.9-1.4 3.9 1.4 3.9-3.7 1.9-1.2 3.9-4.1-.5L19 29l-3.2-2.6-4.1.5-1.2-3.9-3.7-1.9 1.4-3.9-1.4-3.9 3.7-1.9 1.2-3.9 4.1.5z" fill="var(--surface-decorative-electric-yellow-intense)"/><path d="M19 22.5v-8M15.8 17.3 19 14.1l3.2 3.2" stroke="var(--content-decorative-electric-yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </div>
       <div class="su-up-bot" id="upBox" data-state="idle">
         <!-- idle -->
-        <div class="su-up-tags su-up-idle"><span class="badge badge--positive su-up-time">2 mins</span><span class="su-tag-d">PDF &amp; DOC</span><span class="su-tag-d">Up to 5 MB</span></div>
+        <div class="su-up-tags su-up-idle"><span class="su-tag-d">PDF &amp; DOC</span><span class="su-tag-d">Up to 5 MB</span></div>
         <button class="btn btn--lg btn--block su-btn-light su-up-idle" type="button" id="upBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>Upload resume</button>
         <!-- uploading -->
         <div class="su-prog" id="upProg" hidden>
@@ -1043,11 +1078,11 @@ html .pf-bar .ghost-back::after,html .demo-fab::after{content:"";position:absolu
   <!-- ═══════════ 2 · PARSING (dark) ═══════════ -->
   <section class="view su-parse" data-view="parsing" aria-labelledby="parseTitle" hidden>
     <div class="su-parse-c">
-      <div class="su-parse-ic"><span class="splash-spin su-spin" aria-hidden="true"></span><span class="su-done-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5l2.4 1.8 3-.2 1 2.8 2.6 1.6-.8 2.9.8 2.9-2.6 1.6-1 2.8-3-.2L12 19.3l-2.4-1.8-3 .2-1-2.8L3 13.3l.8-2.9L3 7.5l2.6-1.6 1-2.8 3 .2L12 1.5zm3.8 7.3a1 1 0 0 0-1.4 0l-3.3 3.3-1.5-1.5a1 1 0 1 0-1.4 1.4l2.2 2.2a1 1 0 0 0 1.4 0l4-4a1 1 0 0 0 0-1.4z"/></svg></span></div>
-      <h1 class="su-parse-h" id="parseTitle">Parsing your resume</h1>
-      <p class="su-parse-p" id="parseSub">Please wait while we extract your information</p>
-      <span class="badge badge--positive su-parse-badge" id="parseBadge">~2 mins</span>
-      <ol class="su-steps" id="steps" aria-live="polite"><li class="su-step"><span class="su-step-ic">1<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span>Analysing resume</li><li class="su-step"><span class="su-step-ic">2<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span>Extracting basic details</li><li class="su-step"><span class="su-step-ic">3<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span>Extracting educational details</li><li class="su-step"><span class="su-step-ic">4<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span>Extracting employment details</li><li class="su-step"><span class="su-step-ic">5<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span>Extracting skills</li></ol>
+      <div class="su-parse-ic su-parse-doc" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span class="su-done-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5l2.4 1.8 3-.2 1 2.8 2.6 1.6-.8 2.9.8 2.9-2.6 1.6-1 2.8-3-.2L12 19.3l-2.4-1.8-3 .2-1-2.8L3 13.3l.8-2.9L3 7.5l2.6-1.6 1-2.8 3 .2L12 1.5zm3.8 7.3a1 1 0 0 0-1.4 0l-3.3 3.3-1.5-1.5a1 1 0 1 0-1.4 1.4l2.2 2.2a1 1 0 0 0 1.4 0l4-4a1 1 0 0 0 0-1.4z"/></svg></span></div>
+      <h1 class="su-parse-h" id="parseTitle">Reading your resume</h1>
+      <p class="su-parse-p" id="parseSub">We’ll fill your profile from it</p>
+      <div class="su-parse-meta"><div class="su-parse-bar" aria-hidden="true"><i></i></div><span class="badge badge--brand su-parse-badge" id="parseBadge"></span></div>
+      <ol class="su-steps" id="steps" aria-live="polite"><li class="su-step"><span class="su-step-ic">1<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span><span class="su-step-l">Scanning resume</span></li><li class="su-step"><span class="su-step-ic">2<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span><span class="su-step-l">Basic details</span></li><li class="su-step"><span class="su-step-ic">3<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span><span class="su-step-l">Education</span></li><li class="su-step"><span class="su-step-ic">4<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span><span class="su-step-l">Experience</span></li><li class="su-step"><span class="su-step-ic">5<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span><span class="su-step-l">Skills</span></li></ol>
     </div>
     <p class="su-parse-safe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>Your data is safe &amp; secured</p>
   </section>
@@ -1606,10 +1641,12 @@ window.ShineSignupConfig = (function () {
   function startParse() {
     mode = 'resume';
     var view = $('.su-parse'), steps = $$('.su-step');
+    function prog(p) { view.style.setProperty('--su-parse-p', p); }   // thin progress bar under the subtitle (0 → 1)
+    prog(0);
     view.classList.remove('is-done');
-    $('#parseTitle').textContent = 'Parsing your resume';
-    $('#parseSub').textContent = 'Please wait while we extract your information';
-    var b = $('#parseBadge'); b.className = 'badge badge--positive su-parse-badge'; b.textContent = '~2 mins';
+    $('#parseTitle').textContent = 'Reading your resume';
+    $('#parseSub').textContent = 'We’ll fill your profile from it';
+    var b = $('#parseBadge'); b.className = 'badge badge--brand su-parse-badge'; b.textContent = '';
     steps.forEach(function (s) { s.className = 'su-step'; });
     route('parsing');
     var STEP = 900, failAt = SIM.unreadable ? 1 : -1;
@@ -1617,17 +1654,17 @@ window.ShineSignupConfig = (function () {
       parse.timers.push(setTimeout(function () {
         if (i > 0) steps[i - 1].className = 'su-step is-done';
         if (i === failAt) { s.className = 'su-step is-active'; parse.timers.push(setTimeout(function () { Sheet.open('#failSheet'); }, 700)); cancelAfter(); return; }
-        s.className = 'su-step is-active';
+        s.className = 'su-step is-active'; prog((i + .5) / steps.length);
       }, 250 + i * STEP));
     });
     if (failAt >= 0) return;
     parse.timers.push(setTimeout(function () {
       steps[steps.length - 1].className = 'su-step is-done';
-      view.classList.add('is-done');
-      $('#parseTitle').textContent = 'Parsing completed';
-      $('#parseSub').textContent = 'Your resume has been analysed';
-      var n = 5; b.className = 'badge badge--brand su-parse-badge';
-      function tickTxt() { b.textContent = 'Redirecting in 0:0' + n; }
+      view.classList.add('is-done'); prog(1);
+      $('#parseTitle').textContent = 'Your profile is ready';
+      $('#parseSub').textContent = 'Next, check your details';
+      var n = 3;
+      function tickTxt() { b.textContent = 'Continuing in ' + n + 's'; }
       tickTxt();
       parse.tick = setInterval(function () { n--; if (n <= 0) { clearInterval(parse.tick); openBasic(parsedProfile()); } else tickTxt(); }, 1000);
     }, 250 + steps.length * STEP));

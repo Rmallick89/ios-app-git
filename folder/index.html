@@ -698,6 +698,18 @@ html .bg{-webkit-mask-image:linear-gradient(to bottom,transparent 0,transparent 
 /* Log in · Sign up 8px apart (JSRP card actions / filter footer) */
 html .cta-row{gap:var(--spacing-inline-md)}
 </style>
+<style data-legal>
+/* Terms line under Log in · Sign up (2026-10-13) — option 1's .legal: Body-sm, faded, links muted semibold underlined;
+   14px (DS spacing.stack.lg = option 1's foot gap) under the button row, centred on the row */
+.legal{font-size:var(--type-body-sm-size);line-height:var(--type-body-sm-lh);color:var(--content-neutral-faded);text-align:center}
+.legal a{color:var(--content-neutral-muted);font-weight:var(--typeface-weight-semibold);text-decoration:underline;text-underline-offset:var(--unit-2)}
+.cta-row + .legal{margin-top:var(--spacing-stack-lg)}
+</style>
+<style data-legal-gap>
+/* Terms line 20px under Log in · Sign up (user, 2026-10-13; was 14px) */
+html .foot{gap:0}
+html .foot .cta-row + .legal,html .cta .cta-row + .legal{margin-top:var(--unit-20)}
+</style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shine Folder"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-startup-image" href="icons/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1260x2736.png" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})</script>
 </head>
 <body>
@@ -717,7 +729,7 @@ html .cta-row{gap:var(--spacing-inline-md)}
   <section class="hero">
     <h1 class="hh">Your next career move <em>starts here.</em></h1>
     <p class="hs">Explore verified jobs that fit your skills.</p>
-    <div class="cta"><div class="cta-row"><a class="btn btn--xl btn--secondary" href="login-flow.html">Log in</a><a class="btn btn--xl btn--primary" href="signup-flow.html">Sign up</a></div></div>
+    <div class="cta"><div class="cta-row"><a class="btn btn--xl btn--secondary" href="login-flow.html">Log in</a><a class="btn btn--xl btn--primary" href="signup-flow.html">Sign up</a></div><p class="legal">By continuing, you agree to our <a href="#">Terms</a> &amp; <a href="#">Privacy Policy</a></p></div>
   </section>
   <section class="stage"><div class="scene">
     <div class="folder"><div class="f-glow"></div><div class="f-back"><svg aria-hidden="true"><defs>
