@@ -14,7 +14,7 @@ Each app opens on its splash (`splash.html`, dark, ≈ 2.4 s — the same **Merg
 
 Each folder is a self-contained app: the splash, the homepage, log-in, sign-up and job search pages, fonts, a web-app manifest, home-screen icons and an offline cache (`sw.js`). `index.html` at the root is the install page that links to all three.
 
-**Home-screen icon:** the same icon as the logged-in app (`App-login/ios-preview/login/icons/`, byte-identical) — the splash's midnight navy with its sunrise glowing up from the bottom and the white Shine logo — on all three apps (was a white / tinted icon with the dark logo). The app names still tell them apart. An icon already on the Home Screen only changes after it is deleted and added again.
+**Home-screen icon:** the logged-in app's icon (`App-login/ios-preview/login/icons/`) — the splash's midnight navy with its sunrise glowing up from the bottom and the white Shine logo — with the logo 15% smaller (85% of its width, same centre), on all three apps. The app names still tell them apart. An icon already on the Home Screen only changes after it is deleted and added again.
 
 ## Publish (GitHub Pages)
 1. Create an empty GitHub repo named `ios-app-git`, then from this folder: `git add -A`, `git commit -m "iPhone previews"`, `git remote add origin <repo-url>`, `git push -u origin main`.
