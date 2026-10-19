@@ -1001,6 +1001,18 @@ html .su-land .su-or{margin:var(--unit-32) auto var(--unit-32)}
   .su-steps{gap:0}.su-step{height:var(--unit-48)}}
 @media (prefers-reduced-motion:reduce){.su-parse-doc::after{animation:none;display:none}.su-parse-bar i{transition:none}}
 
+/* round 10 (user, 2026-10-19): the parsing screen's background = the splash's final frame, exactly
+   (App splash/splash-merged.html, .sun at rest): plain midnight navy #0C1731 with the same eased sunrise rising from
+   the bottom edge — warm yellow core 64% × 20% at 50% 101% · brand-500 glow 140% × 64% at 50% 106% · brand-700 deep lift
+   175% × 92% at 50% 112%; same stops, colour-mix values written as rgba. No navy → blue linear wash and no dot grid
+   (the splash has neither), so the hand-off from splash → parsing reads as one surface. */
+.su-parse{background-color:var(--su-navy);background-image:radial-gradient(64% 20% at 50% 101%,rgba(250,202,34,0.5) 0%,rgba(250,202,34,0.4136) 10%,rgba(250,202,34,0.3346) 20%,rgba(250,202,34,0.2631) 30%,rgba(250,202,34,0.1994) 40%,rgba(250,202,34,0.1436) 50%,rgba(250,202,34,0.0961) 60%,rgba(250,202,34,0.0573) 70%,rgba(250,202,34,0.0276) 80%,rgba(250,202,34,0.0079) 90%,rgba(250,202,34,0) 100%),
+    radial-gradient(140% 64% at 50% 106%,rgba(26,86,255,0.58) 0%,rgba(26,86,255,0.4552) 10%,rgba(26,86,255,0.3472) 20%,rgba(26,86,255,0.2554) 30%,rgba(26,86,255,0.1791) 40%,rgba(26,86,255,0.1178) 50%,rgba(26,86,255,0.0705) 60%,rgba(26,86,255,0.0364) 70%,rgba(26,86,255,0.0143) 80%,rgba(26,86,255,0.0029) 90%,rgba(26,86,255,0) 100%),
+    radial-gradient(175% 92% at 50% 112%,rgba(10,51,166,0.38) 0%,rgba(10,51,166,0.3144) 10%,rgba(10,51,166,0.2543) 20%,rgba(10,51,166,0.2) 30%,rgba(10,51,166,0.1515) 40%,rgba(10,51,166,0.1091) 50%,rgba(10,51,166,0.073) 60%,rgba(10,51,166,0.0435) 70%,rgba(10,51,166,0.021) 80%,rgba(10,51,166,0.006) 90%,rgba(10,51,166,0) 100%);background-repeat:no-repeat}
+.su-parse::after{content:none}
+/* the trust line now sits on the warm sunrise core — white text keeps it readable (6.4 : 1; muted grey was 3.9 : 1) */
+.su-parse .su-parse-safe{color:var(--content-on-fill-dark-base)}
+
 </style>
 <style data-topbar>
 /* ── Top bar = system status bar + app header, one surface (APK + iOS apps) — same rules as the log-in pages ──
