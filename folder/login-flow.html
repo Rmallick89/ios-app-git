@@ -813,6 +813,8 @@ html .pf-bar::after,html .lg .be-bar::after{content:"";position:absolute;left:va
 html.kb-open .pf{min-height:var(--app-h)}
 html.kb-open .pf-foot{position:static}
 </style>
+
+<style data-demo-scope>/* demo-data key: only on screens where its data can be used (user, 2026-10-19) */html.demo-away .demo-fab{display:none !important}</style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shine Folder"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-startup-image" href="icons/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1260x2736.png" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})</script>
 </head>
 <body>
@@ -1684,6 +1686,36 @@ setInterval(next,3400)})();
     d.classList.toggle('kb-open', max - innerHeight > 150);
   }
   addEventListener('resize', check); check();
+})();
+</script>
+<script data-demo-scope>
+/* demo-data key: shown only where its data can be used — the visible screen, or the sheet on top, must be one that
+   takes demo data (user, 2026-10-19). Re-checked whenever a screen, sheet or upload state changes. */
+(function () {
+  var R = {views:{login:1,forgot:1,'new-password':1},sheets:{otpSheet:1},off:function(){return document.documentElement.classList.contains('is-done')}}, html = document.documentElement, q = 0;
+  function view() {
+    var vs = document.querySelectorAll('.view[data-view]'), n = null;
+    for (var i = 0; i < vs.length; i++) if (!vs[i].hidden) n = vs[i].getAttribute('data-view');
+    return n;
+  }
+  function sync() {
+    q = 0;
+    var S = window.ShineSheet, top = S && S.top ? S.top() : [].slice.call(document.querySelectorAll('.bs.is-open')).pop() || null, v = view(), show;
+    if (top && top.id === 'guideSheet') return;                       // the guide itself is open: leave as is
+    show = top ? !!R.sheets[top.id] : !!R.views[v];
+    if (show && R.off(v)) show = false;
+    html.classList.toggle('demo-away', !show);
+  }
+  function later() { if (!q) q = setTimeout(sync, 0); }
+  ['shine:sheet-open', 'shine:sheet-close', 'shine:sheet-opened', 'shine:sheet-closed'].forEach(function (e) { document.addEventListener(e, later); });
+  function boot() {
+    var mo = new MutationObserver(later), vs = document.querySelectorAll('.view[data-view]');
+    for (var i = 0; i < vs.length; i++) mo.observe(vs[i], { attributes: true, attributeFilter: ['hidden'] });
+    var b = document.getElementById('upBox'); if (b) mo.observe(b, { attributes: true, attributeFilter: ['data-state'] });
+    mo.observe(html, { attributes: true, attributeFilter: ['class'] });
+    sync();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 </script>
 </body>

@@ -1014,6 +1014,7 @@ html .su-land .su-or{margin:var(--unit-32) auto var(--unit-32)}
 .su-parse .su-parse-safe{color:var(--content-on-fill-dark-base)}
 
 </style>
+<style data-demo-scope>/* demo-data key: only on screens where its data can be used (user, 2026-10-19) */html.demo-away .demo-fab{display:none !important}</style>
 <style data-topbar>
 /* ── Top bar = system status bar + app header, one surface (APK + iOS apps) — same rules as the log-in pages ──
    Sign-up header (back · demo key · Have an account? Log in) and the inner pages' bar (close / back · demo key) start right
@@ -2270,6 +2271,36 @@ window.ShineSignupConfig = (function () {
     d.classList.toggle('kb-open', max - innerHeight > 150);
   }
   addEventListener('resize', check); check();
+})();
+</script>
+<script data-demo-scope>
+/* demo-data key: shown only where its data can be used — the visible screen, or the sheet on top, must be one that
+   takes demo data (user, 2026-10-19). Re-checked whenever a screen, sheet or upload state changes. */
+(function () {
+  var R = {views:{start:1},sheets:{basicSheet:1,otpSheet:1},off:function(v){var b=document.getElementById('upBox');return v==='start'&&b&&b.getAttribute('data-state')==='busy'}}, html = document.documentElement, q = 0;
+  function view() {
+    var vs = document.querySelectorAll('.view[data-view]'), n = null;
+    for (var i = 0; i < vs.length; i++) if (!vs[i].hidden) n = vs[i].getAttribute('data-view');
+    return n;
+  }
+  function sync() {
+    q = 0;
+    var S = window.ShineSheet, top = S && S.top ? S.top() : [].slice.call(document.querySelectorAll('.bs.is-open')).pop() || null, v = view(), show;
+    if (top && top.id === 'guideSheet') return;                       // the guide itself is open: leave as is
+    show = top ? !!R.sheets[top.id] : !!R.views[v];
+    if (show && R.off(v)) show = false;
+    html.classList.toggle('demo-away', !show);
+  }
+  function later() { if (!q) q = setTimeout(sync, 0); }
+  ['shine:sheet-open', 'shine:sheet-close', 'shine:sheet-opened', 'shine:sheet-closed'].forEach(function (e) { document.addEventListener(e, later); });
+  function boot() {
+    var mo = new MutationObserver(later), vs = document.querySelectorAll('.view[data-view]');
+    for (var i = 0; i < vs.length; i++) mo.observe(vs[i], { attributes: true, attributeFilter: ['hidden'] });
+    var b = document.getElementById('upBox'); if (b) mo.observe(b, { attributes: true, attributeFilter: ['data-state'] });
+    mo.observe(html, { attributes: true, attributeFilter: ['class'] });
+    sync();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 </script>
 </body>
