@@ -1,20 +1,19 @@
 <!doctype html>
 <!--
   ═══════════════════════════════════════════════════════════════════════════
-  SHINE APP · SIGN UP FLOW (logged out)                         signup-flow.html
-  Screens  Sign up: upload resume (PDF / DOC, up to 5 MB · uploading · file errors) or fill details manually →
-           Reading your resume (one card, 5 steps → "Your profile is ready", continues in 3s · "can’t read" sheet) → Almost there sheet
-           (basic details · email / number already on Shine) → OTP sheet (4 digits) → Account created →
-           Verify your details (basic · employment · education · skills, ⋮ edit / delete, missing-info states,
-           edit sheets) → Profile created → Job preferences (final step) →
-             Show me recommended jobs → recommended-jobs.html (4 jobs)
-             I'll do it later / exit → signup-welcome.html (Reset → splash → logged-out home)
-  Shared components (App-logout/app-components/ — edit THERE, then resync):
-           • bottom-sheet v1.2.1 (ShineSheet) — every sheet (nudge = Save / Share anatomy · lists = Sort anatomy)
-           • notify v1.0.1 (ShineNotify) — toasts
-  Look     every rule of login-flow.html this page uses (DS atoms · header · inner-page anatomy · sheets · demo key ·
-           JSRP spacing), pruned, + the sign-up skin. Dark areas = the JSRP hero recipe.
-  Linking  signup-flow.html?demo=0  hides the Demo data helper (on by default). Config: ShineSignupConfig.
+  SHINE APP · SIGN UP · 1 — THE SIGN-UP SCREEN (logged out)        signup-flow.html
+  Screen   Why Shine? carousel · Let your resume fill your profile: upload resume (PDF / DOC, up to 5 MB · uploading ·
+           file errors) → signup-resume.html · Don’t have a resume? Fill details manually → signup-manual.html ·
+           Have an account? Log in → login-flow.html · back → the screen that opened sign up
+  Sign up is three connected pages in this folder:
+    1 signup-flow.html    the sign-up screen: upload resume (→ 2) · fill details manually (→ 3) · log in
+    2 signup-resume.html  reading your resume → Almost there → OTP → Account created → Verify your details →
+                          Profile created → Job preferences → recommended-jobs.html · I’ll do it later → signup-welcome.html
+    3 signup-manual.html  fill details manually: Basic details → OTP → Education → Employment → Key skills →
+                          Job preferences → Add your resume → signup-welcome.html
+  1 → 2 hands over the file (name · size) and the demo switches in sessionStorage (shine.su.file · shine.su.sim).
+  Shared components (App-logout/app-components/ — edit THERE, then resync): bottom-sheet v1.2.1 · notify v1.0.1
+  Linking  signup-flow.html?demo=0 hides the Demo data helper. Config: ShineSignupConfig.
   ═══════════════════════════════════════════════════════════════════════════
 -->
 <html lang="en" class="su-top-dark">
@@ -37,7 +36,7 @@
 <meta name="theme-color" content="#0C1731">
 <title>Sign up · Shine</title>
 <link rel="preload" href="fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="fonts/fonts.css"><script src="native.js"></script>
-<script data-topbar>/* top bar platform: Android app bar in the APK (ShineNative bridge) · iOS navigation bar everywhere else */document.documentElement.classList.add(window.ShineNative?'tb-android':'tb-ios')</script>
+
 <style>
 
 /* ════════════════════════════════════════════════════════════════
@@ -173,10 +172,396 @@
 
 
 </style>
-<!-- COMPONENT · bottom-sheet v1.2.1 -->
-<link rel="stylesheet" href="components/bottom-sheet/bottom-sheet.css">
-<!-- COMPONENT · notify v1.0.1 -->
-<link rel="stylesheet" href="components/notify/notify.css">
+<!-- ▼ COMPONENT · bottom-sheet v1.2.1 · verbatim copy of App-logout/app-components/bottom-sheet/bottom-sheet.css — do not edit here -->
+<style data-component="bottom-sheet">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · BOTTOM SHEET  (app component)                        v1.2.1
+   The one sheet primitive behind every slide-up panel in the app:
+   Sort, Filter (+ its "See all" sub-sheet), Share, Save, Feedback…
+   ───────────────────────────────────────────────────────────────────────
+   • Pair with bottom-sheet.js (ShineSheet). Zero dependencies.
+   • Classes are prefixed `bs-`. The component owns ONLY the container:
+     position, surface, radius, elevation, handle, header, scrolling body,
+     footer, scrim, motion and the closed state. Content inside the sheet
+     is styled by whoever owns it (sort-filter, a page…).
+   • Scoped token layer below mirrors design-system/DESIGN-SYSTEM.md
+     (light theme, mobile column) so the sheet renders the same on any
+     page whatever token names that page uses.
+   • Closed sheets are `[hidden]` → display:none. Nothing parked off-screen
+     can cast a shadow into the viewport (the JSRP bottom-band bug).
+   • v1.2 · keyboard-aware: while a sheet is open ShineSheet tracks the
+     on-screen keyboard (visualViewport). v1.2.1: the sheet stays anchored to
+     the screen bottom and its surface runs on behind the keyboard (like a
+     native iOS sheet) — its CONTENT is padded up by the keyboard height
+     (--bs-kb) and the sheet is capped to the visible area (--bs-vvh). v1.2.0
+     lifted the whole sheet, which on iOS 26 left a dimmed gap around the
+     floating keyboard and its accessory bar.
+   • v1.2 · status bar: scrims paint with background-image (no background-
+     color) and are display:none once faded out, so iOS 26 Safari tints the
+     status bar from body — which ShineSheet dims to match while a scrim
+     is up. Closed scrims can no longer leave a grey status bar behind.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Scoped tokens ─────────────────────────────────────────────────── */
+.bs, .bs-scrim {
+  /* primitives */
+  --bs-c-cn-black: #0D1117; --bs-c-cn-white: #FFFFFF; --bs-c-cn-200: #E4E7EC;
+  --bs-c-cn-500: #667085; --bs-c-cn-700: #344054; --bs-c-wn-200: #F5F1E8;
+
+  /* semantic (§2.2) */
+  --bs-surface: var(--bs-c-cn-white);                 /* surface.neutral.raised  */
+  --bs-surface-inverse: var(--bs-c-cn-black);         /* surface.inverse.base    */
+  --bs-content: var(--bs-c-cn-black);                 /* content.neutral.base    */
+  --bs-content-muted: var(--bs-c-cn-700);
+  --bs-content-on-dark: var(--bs-c-cn-white);
+  --bs-stroke: var(--bs-c-cn-200);                    /* stroke.neutral.base     */
+  --bs-close-fill: var(--bs-c-wn-200);                /* warm-neutral/200 disc   */
+
+  /* scrim — surface.neutral-state.overlay family */
+  --bs-scrim: rgba(13,17,23,.30);
+  --bs-scrim-strong: rgba(13,17,23,.45);              /* auth / share nudges      */
+  --bs-scrim-strong-blur: 4px;
+  --bs-scrim-nested: rgba(13,17,23,.40);              /* sub-sheet over a sheet   */
+
+  /* elevation — proposed `elevation.neutral.sheet` (upward-cast modal) */
+  --bs-elevation: 0 -16px 48px -8px rgba(13,17,23,.30);
+  --bs-elevation-inverse: 0 -16px 48px -8px rgba(0,0,0,.50);
+  --bs-divider-shadow: 0 6px 12px -8px rgba(13,17,23,.18);   /* head / foot on scroll */
+
+  /* typography */
+  --bs-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --bs-title-size: 16px; --bs-title-weight: 800;
+
+  /* size + spacing (§2.3 / §2.4 · mobile) */
+  --bs-radius: 32px;                                  /* size.radius.3xl         */
+  --bs-radius-full: 1024px;
+  --bs-gutter: 24px;                                  /* spacing.layout.sm       */
+  --bs-head-pad-top: 16px; --bs-head-pad-bottom: 20px;
+  --bs-close: 28px; --bs-close-icon: 12px;            /* size.icon.xs            */
+  --bs-handle-w: 40px; --bs-handle-h: 4px;
+  --bs-max-h: 90vh;
+
+  /* motion */
+  --bs-ease: cubic-bezier(.32,.72,0,1);
+  --bs-dur-in: 320ms; --bs-dur-out: 260ms; --bs-dur-scrim: 240ms; --bs-dur-kb: 240ms;
+
+  /* stacking — ShineSheet assigns z = --bs-z + 2·depth (+1 for the sheet) */
+  --bs-z: 100;
+}
+
+/* ── Scrim (one per stack level, created by ShineSheet) ───────────── */
+.bs-scrim {
+  position: fixed; inset: 0;
+  /* colour as an image layer, never background-color: iOS 26 Safari tints the status bar from the
+     background-color of a fixed element at the top edge (ignoring its opacity) — see v1.2 note */
+  --bs-scrim-c: var(--bs-scrim);
+  background: linear-gradient(var(--bs-scrim-c), var(--bs-scrim-c));
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--bs-dur-scrim) ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.bs-scrim[hidden] { display: none !important; }
+.bs-scrim.is-open { opacity: 1; pointer-events: auto; }
+.bs-scrim--strong { --bs-scrim-c: var(--bs-scrim-strong); -webkit-backdrop-filter: blur(var(--bs-scrim-strong-blur)); backdrop-filter: blur(var(--bs-scrim-strong-blur)); }
+.bs-scrim--nested { position: absolute; --bs-scrim-c: var(--bs-scrim-nested); border-radius: var(--bs-radius) var(--bs-radius) 0 0; }
+
+/* ── Sheet ─────────────────────────────────────────────────────────── */
+.bs {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  z-index: calc(var(--bs-z) + 1);
+  display: flex; flex-direction: column;
+  max-height: var(--bs-max-h); max-height: min(var(--bs-max-h), 90dvh);
+  background: var(--bs-surface); color: var(--bs-content);
+  border-radius: var(--bs-radius) var(--bs-radius) 0 0;
+  box-shadow: var(--bs-elevation);
+  font-family: var(--bs-font);
+  overflow: hidden;
+  outline: none;
+  transform: translate3d(0, 100%, 0);
+  transition: transform var(--bs-dur-out) var(--bs-ease), padding-bottom var(--bs-dur-kb) var(--bs-ease), max-height var(--bs-dur-kb) var(--bs-ease);
+  will-change: transform;
+  touch-action: pan-y;
+}
+.bs[hidden] { display: none !important; }
+.bs.is-open { transform: translate3d(0, 0, 0); transition-duration: var(--bs-dur-in), var(--bs-dur-kb), var(--bs-dur-kb); }
+.bs.is-dragging { transition: none; }
+
+/* inverse (dark) — feedback / quick-check sheets */
+.bs--inverse {
+  background: var(--bs-surface-inverse); color: var(--bs-content-on-dark);
+  border-top: 1px solid rgba(255,255,255,.10);
+  box-shadow: var(--bs-elevation-inverse);
+}
+.bs--inverse .bs-handle { background: rgba(255,255,255,.25); }
+
+/* nested — a sheet that opens INSIDE another sheet and covers it (See all) */
+.bs--nested {
+  position: absolute; top: 0; max-height: none; height: 100%;
+  box-shadow: none;
+  transform: translate3d(0, 110%, 0);
+  transition: transform 280ms ease;
+}
+.bs--nested.is-open { transition-duration: 280ms; }
+
+/* ── Anatomy ───────────────────────────────────────────────────────── */
+.bs-handle {
+  flex-shrink: 0;
+  width: var(--bs-handle-w); height: var(--bs-handle-h);
+  margin: 10px auto 0;
+  border-radius: var(--bs-radius-full);
+  background: var(--bs-stroke);
+  cursor: grab; touch-action: none;
+}
+.bs-handle::before { content: ""; display: block; height: 24px; margin: -10px -24px 0; }  /* 44px-wide drag target */
+
+.bs-head {
+  flex-shrink: 0;
+  position: relative; z-index: 2;
+  display: flex; align-items: center; gap: 8px;
+  padding: var(--bs-head-pad-top) var(--bs-gutter) var(--bs-head-pad-bottom);
+  touch-action: none;
+  transition: box-shadow 160ms ease;
+}
+.bs-title {
+  flex: 1; min-width: 0; margin: 0;
+  font: var(--bs-title-weight) var(--bs-title-size)/1.25 var(--bs-font);
+  color: inherit; letter-spacing: 0;
+}
+.bs-close {
+  flex-shrink: 0;
+  width: var(--bs-close); height: var(--bs-close);
+  display: grid; place-items: center;
+  border: none; border-radius: 50%;
+  background: var(--bs-close-fill); color: var(--bs-content);
+  cursor: pointer; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.bs-close svg { width: var(--bs-close-icon); height: var(--bs-close-icon); }
+.bs-close:focus-visible, .bs :focus-visible { outline: 2px solid rgba(26,86,255,.55); outline-offset: 2px; }   /* elevation.focus ring */
+
+.bs-body {
+  flex: 1 1 auto; min-height: 0;
+  overflow-y: auto; overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.bs-foot {
+  flex-shrink: 0;
+  position: relative; z-index: 2;
+  padding: 16px var(--bs-gutter) calc(16px + env(safe-area-inset-bottom, 0px));
+  transition: box-shadow 160ms ease;
+}
+/* ── Call to action · two behaviours (v1.1) ─────────────────────────────
+   One CTA group per sheet: .bs-actions. Where it lives decides how it behaves.
+     INLINE  — last child of .bs-body. Follows the content and scrolls with it.
+               For short, read-then-act sheets: nudges, confirmations, OTP entry.
+     STICKY  — inside .bs-foot, after .bs-body. Pinned while the body scrolls under
+               it; divider only while more content sits below. For scrolling or
+               editable content: filters, pickers, lists, long forms.
+     data-bs-cta="inline" | "sticky" | "auto" on .bs makes ShineSheet place it;
+     "auto" = inline while everything fits, sticky as soon as the body overflows.
+     ShineSheet mirrors the live state in data-bs-cta-state on the sheet.        */
+.bs-body--gutter { padding-left: var(--bs-gutter); padding-right: var(--bs-gutter); }
+.bs-actions { display: flex; flex-direction: column; gap: 10px; }
+.bs-actions--row { flex-direction: row; }
+.bs-actions--row > * { flex: 1 1 0; min-width: 0; }
+/* inline: 24 above (spacing.layout.sm), gutter + home indicator below */
+.bs-body > .bs-actions {
+  margin-top: var(--bs-gutter);
+  padding-bottom: calc(var(--bs-gutter) + env(safe-area-inset-bottom, 0px));
+}
+/* sticky: the footer supplies the padding + scroll divider */
+.bs-foot > .bs-actions { margin: 0; padding: 0; }
+.bs-foot[hidden] { display: none !important; }
+
+/* elevation appears only when content actually scrolls under head / foot */
+.bs.is-scrolled .bs-head { box-shadow: var(--bs-divider-shadow); }
+.bs.has-more .bs-foot { box-shadow: 0 -6px 12px -8px rgba(13,17,23,.18); }
+
+/* sheets without a footer still clear the home indicator */
+.bs--pad-bottom { padding-bottom: calc(var(--bs-gutter) + env(safe-area-inset-bottom, 0px)); }
+
+/* ── On-screen keyboard (v1.2.1) — ShineSheet sets html.bs-kb + --bs-kb / --bs-vvh ──
+   The sheet keeps its place at the bottom edge and its white surface continues
+   behind the keyboard (and iOS 26's floating accessory bar), the way a native
+   sheet does; the content is padded up by the keyboard height, so the last
+   control sits a gutter above it. Its visible part never grows past the visible
+   area (16 px clear of the top). The home indicator sits under the keyboard,
+   so the safe-area padding is dropped while it is up. */
+.bs-kb .bs:not(.bs--nested) { padding-bottom: var(--bs-kb, 0px); max-height: calc(var(--bs-vvh, 100vh) - 16px + var(--bs-kb, 0px)); }
+.bs-kb .bs-body > .bs-actions { padding-bottom: var(--bs-gutter); }
+.bs-kb .bs-foot { padding-bottom: 16px; }
+.bs-kb .bs--pad-bottom:not(.bs--nested) { padding-bottom: calc(var(--bs-gutter) + var(--bs-kb, 0px)); }
+
+/* page scroll lock (set on <html> by ShineSheet) */
+.bs-lock, .bs-lock body { overflow: hidden !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bs, .bs--nested, .bs-scrim { transition-duration: 1ms !important; }
+}
+
+</style>
+<!-- ▲ COMPONENT · bottom-sheet -->
+<!-- ▼ COMPONENT · notify v1.0.1 · verbatim copy of App-logout/app-components/notify/notify.css — do not edit here -->
+<style data-component="notify">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · NOTIFY  (app component)                              v1.0.1
+   Two floating nudges for every screen of the Shine app:
+
+     Toast   — small dark pill at the BOTTOM. One background (inverse black);
+               the tone shows only in the icon colour (DS A.09 Toast).
+               "Resume uploaded", "Link copied", "Job saved".
+     Alert   — contextual card at the TOP (the "Account not found" look:
+               icon disc · title · text · optional action), coloured by tone.
+               For results that need a moment of attention: server errors,
+               "Couldn't send OTP", "Profile updated", "Session expiring".
+
+   Tones (both): success · warning · error · brand · neutral
+     (DS intents positive · notice · negative · info · neutral)
+
+   • Every class is prefixed `sn-`; the component carries its OWN scoped token
+     layer (values from design-system/DESIGN-SYSTEM.md, light) so it renders
+     the same on any page, whatever token vocabulary the host uses.
+   • Floating Alert is a deliberate extension of DS A.07 (which is inline-only):
+     same anatomy and intent colours, delivered as an overlay that auto-dismisses.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Scoped tokens ─────────────────────────────────────────────────── */
+.sn-layer {
+  /* palette */
+  --sn-black: #0D1117; --sn-white: #FFFFFF;
+  --sn-cn-200: #E4E7EC; --sn-cn-500: #667085; --sn-cn-700: #344054;
+  --sn-green-50: #EAFAF0; --sn-green-300: #5DD4A1; --sn-green-600: #0E9A5A; --sn-green-700: #027A48;
+  --sn-amber-100: #FFF4ED; --sn-amber-400: #FAB663; --sn-amber-600: #D97706; --sn-amber-700: #A35A04;
+  --sn-red-50: #FEF2F2; --sn-red-200: #FECDCA; --sn-red-300: #FCA5A0; --sn-red-600: #B42318;
+  --sn-brand-100: #EBF0FF; --sn-brand-200: #C9DBFF; --sn-brand-300: #7EA3FF; --sn-brand-600: #0B3FCC;
+
+  /* semantic */
+  --sn-content-base: var(--sn-black);
+  --sn-content-muted: var(--sn-cn-700);
+  --sn-content-on-dark: var(--sn-white);
+  --sn-surface-raised: var(--sn-white);
+  --sn-surface-inverse: var(--sn-black);
+  --sn-stroke-base: var(--sn-cn-200);
+
+  /* type · size · space · motion */
+  --sn-font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --sn-body-md: 14px; --sn-body-md-lh: 20px;
+  --sn-body-sm: 12px; --sn-body-sm-lh: 18px;
+  --sn-w-medium: 500; --sn-w-semibold: 600; --sn-w-bold: 700;
+  --sn-gutter: 24px;                                  /* spacing.layout.sm — screen edge gap = JSRP page gutter (v1.0.1) */
+  --sn-radius-lg: 12px; --sn-radius-full: 1024px;
+  --sn-icon-sm: 14px; --sn-icon-md: 16px;
+  --sn-disc: 32px; --sn-cta-h: 32px;
+  --sn-elev-overlay: 0 16px 36px -10px rgba(13,17,23,.30), 0 4px 10px -2px rgba(13,17,23,.10);
+  --sn-elev-toast: 0 10px 24px rgba(16,24,40,.20);
+  --sn-ease-out: cubic-bezier(.22,1,.36,1);
+  --sn-ease-in: cubic-bezier(.4,0,1,1);
+
+  /* placement — pages can override with ShineNotify.configure({ toastBottom, alertTop }) */
+  --sn-toast-bottom: 32px;
+  --sn-alert-top: 12px;
+  --sn-z: 10000;                                      /* above sheets (100+) and the search modal (9997) */
+}
+
+/* ── Layers (one per kind, created on first use) ───────────────────── */
+.sn-layer {
+  position: fixed; left: 0; right: 0; z-index: var(--sn-z);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0 var(--sn-gutter); pointer-events: none;
+  font-family: var(--sn-font); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+}
+.sn-layer *, .sn-layer *::before, .sn-layer *::after { box-sizing: border-box; }
+.sn-layer--toast { bottom: calc(var(--sn-toast-bottom) + env(safe-area-inset-bottom, 0px)); }
+.sn-layer--alert { top: calc(var(--sn-alert-top) + env(safe-area-inset-top, 0px)); }
+
+/* ══ Toast — dark pill, tone = icon colour (DS A.09) ══════════════════ */
+.sn-toast {
+  display: inline-flex; align-items: center; gap: 8px; max-width: min(100%, 480px);
+  padding: 12px 20px; border-radius: var(--sn-radius-full);
+  background: var(--sn-surface-inverse); color: var(--sn-content-on-dark);
+  box-shadow: var(--sn-elev-toast);
+  font-size: var(--sn-body-md); line-height: var(--sn-body-md-lh); font-weight: var(--sn-w-semibold);
+  white-space: nowrap;
+  opacity: 0; transform: translateY(12px);
+  transition: opacity 200ms ease, transform 260ms var(--sn-ease-out);
+}
+.sn-toast.is-in { opacity: 1; transform: none; }
+.sn-toast.is-out { opacity: 0; transform: translateY(8px); transition: opacity 180ms ease, transform 200ms var(--sn-ease-in); }
+.sn-toast-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }   /* one line, never wraps */
+.sn-toast-icon { display: inline-flex; flex: none; color: var(--sn-content-on-dark); }
+.sn-toast-icon svg { width: var(--sn-icon-sm); height: var(--sn-icon-sm); }
+.sn-toast[data-tone="success"] .sn-toast-icon { color: var(--sn-green-300); }
+.sn-toast[data-tone="warning"] .sn-toast-icon { color: var(--sn-amber-400); }
+.sn-toast[data-tone="error"]   .sn-toast-icon { color: var(--sn-red-300); }
+.sn-toast[data-tone="brand"]   .sn-toast-icon { color: var(--sn-brand-300); }
+
+/* ══ Alert — contextual card at the top (DS A.07 anatomy, floating) ═══ */
+.sn-alert {
+  --sn-a-bg: var(--sn-surface-raised); --sn-a-stroke: var(--sn-stroke-base);
+  --sn-a-title: var(--sn-content-base); --sn-a-icon: var(--sn-content-muted);
+  position: relative; pointer-events: auto; touch-action: pan-x;
+  display: flex; align-items: center; gap: 12px; width: 100%; max-width: 480px;
+  padding: 12px; border-radius: var(--sn-radius-lg);
+  background: var(--sn-a-bg); border: 1px solid var(--sn-a-stroke);
+  box-shadow: var(--sn-elev-overlay);
+  font-size: var(--sn-body-sm); line-height: var(--sn-body-sm-lh); color: var(--sn-content-muted);
+  opacity: 0; transform: translateY(-16px) scale(.98);
+  transition: opacity 220ms ease, transform 340ms var(--sn-ease-out);
+  cursor: default;
+}
+.sn-alert.is-in { opacity: 1; transform: none; }
+.sn-alert.is-out { opacity: 0; transform: translateY(-12px) scale(.98); transition: opacity 180ms ease, transform 220ms var(--sn-ease-in); }
+.sn-alert.is-dragging { transition: none; }
+.sn-alert[data-tone="success"] { --sn-a-bg: var(--sn-green-50);  --sn-a-stroke: rgba(14,154,90,.28);  --sn-a-title: var(--sn-green-700); --sn-a-icon: var(--sn-green-700); }
+.sn-alert[data-tone="warning"] { --sn-a-bg: var(--sn-amber-100); --sn-a-stroke: rgba(217,119,6,.30);  --sn-a-title: var(--sn-amber-700); --sn-a-icon: var(--sn-amber-700); }
+.sn-alert[data-tone="error"]   { --sn-a-bg: var(--sn-red-50);    --sn-a-stroke: var(--sn-red-200);     --sn-a-title: var(--sn-red-600);   --sn-a-icon: var(--sn-red-600); }
+.sn-alert[data-tone="brand"]   { --sn-a-bg: var(--sn-brand-100); --sn-a-stroke: var(--sn-brand-200);   --sn-a-title: var(--sn-brand-600); --sn-a-icon: var(--sn-brand-600); }
+.sn-alert[data-tone="neutral"] { --sn-a-bg: var(--sn-surface-raised); --sn-a-stroke: var(--sn-stroke-base); --sn-a-title: var(--sn-content-base); --sn-a-icon: var(--sn-content-muted); }
+
+/* icon disc — white, ringed in the tone's stroke, top-aligned with the title */
+.sn-alert-disc {
+  flex: none; align-self: flex-start; width: var(--sn-disc); height: var(--sn-disc);
+  display: grid; place-items: center; border-radius: var(--sn-radius-full);
+  background: var(--sn-surface-raised); border: 1px solid var(--sn-a-stroke); color: var(--sn-a-icon);
+}
+.sn-alert[data-tone="neutral"] .sn-alert-disc { background: #F7F9FB; }
+.sn-alert-disc svg { width: var(--sn-icon-md); height: var(--sn-icon-md); }
+.sn-alert-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sn-alert-title { font-size: var(--sn-body-md); line-height: var(--sn-body-md-lh); font-weight: var(--sn-w-bold); color: var(--sn-a-title); }
+.sn-alert-text { font-weight: var(--sn-w-medium); overflow-wrap: anywhere; }
+.sn-alert-text b, .sn-alert-text strong { color: var(--sn-content-base); font-weight: var(--sn-w-semibold); }
+
+/* action — DS A.02 Button · Secondary, compact 32 px pill */
+.sn-alert-cta {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  height: var(--sn-cta-h); padding: 0 12px; margin: 0; border-radius: var(--sn-radius-full);
+  background: var(--sn-surface-raised); color: var(--sn-content-base); border: 1px solid var(--sn-stroke-base);
+  font: var(--sn-w-bold) var(--sn-body-sm)/var(--sn-body-sm-lh) var(--sn-font); white-space: nowrap;
+  text-decoration: none; cursor: pointer; -webkit-appearance: none; appearance: none;
+  transition: transform 120ms ease, background-color 150ms ease;
+}
+.sn-alert-cta:active { transform: scale(.97); background: #EEF1F5; }
+@media (hover: hover) { .sn-alert-cta:hover { background: #F7F9FB; } }
+.sn-alert-cta:focus-visible { outline: 1.5px solid var(--sn-brand-600); outline-offset: 2px; }
+
+/* time-left hairline along the bottom edge (pauses with the timer) */
+.sn-alert-timer {
+  position: absolute; left: 12px; right: 12px; bottom: 0; height: 2px; border-radius: 2px;
+  background: var(--sn-a-stroke); transform-origin: left center; transform: scaleX(0); opacity: .9;
+}
+.sn-alert.is-running .sn-alert-timer { animation: sn-timer var(--sn-dur, 5000ms) linear forwards; }
+.sn-alert.is-paused .sn-alert-timer { animation-play-state: paused; }
+@keyframes sn-timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+.sn-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sn-toast, .sn-alert, .sn-toast.is-out, .sn-alert.is-out { transform: none !important; transition: opacity 150ms ease !important; }
+  .sn-alert.is-running .sn-alert-timer { animation: none; }
+}
+
+</style>
+<!-- ▲ COMPONENT · notify -->
 <!-- page · the login page's look (DS atoms · header · inner pages · sheets · demo key · JSRP spacing), pruned to this page -->
 <style>
 :root{--c-red-50:#FEF2F2; --c-red-200:#FECDCA; --c-green-300:#5DD4A1;
@@ -1015,25 +1400,6 @@ html .su-land .su-or{margin:var(--unit-32) auto var(--unit-32)}
 
 </style>
 <style data-demo-scope>/* demo-data key: only on screens where its data can be used (user, 2026-10-19) */html.demo-away .demo-fab{display:none !important}</style>
-<style data-topbar>
-/* ── Top bar = system status bar + app header, one surface (APK + iOS apps) — same rules as the log-in pages ──
-   Sign-up header (back · demo key · Have an account? Log in) and the inner pages' bar (close / back · demo key) start right
-   under the status bar, at the platform's bar height, with everything centred in it:
-     · Android — Material 3 small top app bar, 64dp; no page top inset (the WebView reports the camera cutout as
-       safe-area-inset-top under viewport-fit=cover, which doubled the gap above the header).
-     · iOS — navigation bar, 44pt (HIG); the safe-area inset stays.
-   The 24px side gutter and the dashed rule under the inner-page bar are unchanged; header controls get 48px touch targets. */
-html{--tb-h:var(--unit-44)}
-html.tb-android{--tb-h:var(--unit-64)}
-html.tb-android .view{padding-top:0}
-html.tb-android .su-hero{padding-top:0}
-html.tb-android .su-parse{padding-top:var(--unit-72)}
-html.tb-android .be-bar,html.tb-android .pf-bar,html.tb-ios .be-bar,html.tb-ios .pf-bar{margin-top:0;height:var(--tb-h)}
-html.tb-android .demo-fab{top:calc((var(--tb-h) - var(--unit-32)) / 2)}
-html.tb-ios .demo-fab{top:calc(env(safe-area-inset-top) + (var(--tb-h) - var(--unit-32)) / 2)}
-html .pf-bar .ghost-back::after,html .demo-fab::after{content:"";position:absolute;left:0;right:0;top:50%;height:var(--unit-48);transform:translateY(-50%)}
-@media (max-height:700px){html.tb-android .su-parse{padding-top:var(--unit-40)}}
-</style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shine Preview"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-startup-image" href="icons/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1260x2736.png" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})</script>
 </head>
 <body>
@@ -1088,343 +1454,636 @@ html .pf-bar .ghost-back::after,html .demo-fab::after{content:"";position:absolu
     <p class="pf-secure su-safe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>Your data is safe &amp; secured</p>
   </section>
 
-  <!-- ═══════════ 2 · PARSING (dark) ═══════════ -->
-  <section class="view su-parse" data-view="parsing" aria-labelledby="parseTitle" hidden>
-    <div class="su-parse-c">
-      <div class="su-parse-ic su-parse-doc" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span class="su-done-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5l2.4 1.8 3-.2 1 2.8 2.6 1.6-.8 2.9.8 2.9-2.6 1.6-1 2.8-3-.2L12 19.3l-2.4-1.8-3 .2-1-2.8L3 13.3l.8-2.9L3 7.5l2.6-1.6 1-2.8 3 .2L12 1.5zm3.8 7.3a1 1 0 0 0-1.4 0l-3.3 3.3-1.5-1.5a1 1 0 1 0-1.4 1.4l2.2 2.2a1 1 0 0 0 1.4 0l4-4a1 1 0 0 0 0-1.4z"/></svg></span></div>
-      <h1 class="su-parse-h" id="parseTitle">Reading your resume</h1>
-      <p class="su-parse-p" id="parseSub">We’ll fill your profile from it</p>
-      <div class="su-parse-meta"><div class="su-parse-bar" aria-hidden="true"><i></i></div><span class="badge badge--brand su-parse-badge" id="parseBadge"></span></div>
-      <ol class="su-steps" id="steps" aria-live="polite"><li class="su-step"><span class="su-step-ic">1<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span><span class="su-step-l">Scanning resume</span></li><li class="su-step"><span class="su-step-ic">2<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span><span class="su-step-l">Basic details</span></li><li class="su-step"><span class="su-step-ic">3<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span><span class="su-step-l">Education</span></li><li class="su-step"><span class="su-step-ic">4<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span><span class="su-step-l">Experience</span></li><li class="su-step"><span class="su-step-ic">5<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z"/></svg></span><span class="su-step-l">Skills</span></li></ol>
-    </div>
-    <p class="su-parse-safe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>Your data is safe &amp; secured</p>
-  </section>
-
-  <!-- ═══════════ 3 · VERIFY YOUR DETAILS (page — profile form anatomy, JSRP cards) ═══════════ -->
-  <section class="view pf su-verify" data-view="verify" aria-labelledby="vTitle" hidden>
-    <header class="pf-bar"><button class="ghost-back" type="button" data-act="exit" aria-label="Exit sign up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></header>
-    <main class="pf-body">
-      <h1 class="pf-h" id="vTitle">Verify your <em>details.</em></h1>
-      <p class="su-sub" id="vSub">AI can miss things. Make sure your profile is accurate.</p>
-      <div class="su-acc" id="vAcc">
-        <span class="su-acc-l">Resume parse accuracy</span>
-        <div class="progress progress--sm progress--positive" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="98" aria-label="Resume parse accuracy"><div class="progress-track"><div class="progress-fill" style="width:98%"></div></div></div>
-        <span class="badge badge--positive">98% · High</span>
-      </div>
-
-      <section class="su-card" id="cBasic" aria-labelledby="hBasic">
-        <div class="su-card-h"><h2 class="su-eb" id="hBasic">Basic details</h2><button class="su-disc" type="button" data-act="edit-basic" aria-label="Edit basic details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button></div>
-        <div id="basicOut"></div>
-      </section>
-      <section class="su-card" id="cEmp" aria-labelledby="hEmp">
-        <div class="su-card-h"><h2 class="su-eb" id="hEmp">Employment history</h2><button class="su-disc" type="button" data-act="add-emp" aria-label="Add employment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
-        <div class="su-list" id="empOut"></div>
-      </section>
-      <section class="su-card" id="cEdu" aria-labelledby="hEdu">
-        <div class="su-card-h"><h2 class="su-eb" id="hEdu">Education history</h2><button class="su-disc" type="button" data-act="add-edu" aria-label="Add education"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
-        <div class="su-list" id="eduOut"></div>
-      </section>
-      <section class="su-card" id="cSkill" aria-labelledby="hSkill">
-        <div class="su-card-h"><h2 class="su-eb" id="hSkill">Your skills</h2><button class="su-disc" type="button" data-act="add-skill" aria-label="Add skills"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
-        <div id="skillOut"></div>
-      </section>
-    </main>
-    <div class="pf-foot">
-      <button class="btn btn--lg btn--block btn--primary" type="button" id="vBtn">Complete your profile</button>
-      <p class="su-foot-alt" id="vAlt">Uploaded the wrong resume? <a href="#" data-act="reupload">Upload new</a></p>
-    </div>
-  </section>
-
-  <!-- ═══════════ 4 · JOB PREFERENCES (final step) ═══════════ -->
-  <section class="view pf su-prefs" data-view="prefs" aria-labelledby="pTitle" hidden>
-    <header class="pf-bar"><button class="ghost-back" type="button" data-act="to-verify" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button></header>
-    <main class="pf-body">
-      <div class="su-ph"><h1 class="pf-h" id="pTitle">Add job <em>preferences.</em></h1><span class="badge badge--brand">Final step</span></div>
-      <div class="su-score">
-        <div class="su-ring" id="pRing" style="--p:98"><b id="pPct">98%</b><span class="badge badge--positive" id="pLvl">High</span></div>
-        <div class="su-score-t"><p class="su-score-eb">Profile completion score</p><p class="su-score-p">Complete preferences to unlock better matches and faster recruiter visibility.</p></div>
-      </div>
-      <form class="su-form" id="prefForm" novalidate>
-        <div class="field" data-field="roles">
-          <label class="field-label" for="roleIn">Preferred job roles <span class="su-opt">(Max 3)</span></label>
-          <div class="su-tok" data-max="3" data-src="roles" id="roleTok"><div class="field-control"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="field-input" id="roleIn" type="text" autocomplete="off" placeholder="Search &amp; add job roles" aria-autocomplete="list" aria-controls="roleSugg"></div>
-            <div class="su-chips" aria-live="polite"></div><ul class="su-sugg" id="roleSugg" role="listbox" hidden></ul></div>
-        </div>
-        <div class="field" data-field="locs">
-          <label class="field-label" for="locIn">Preferred job location <span class="su-opt">(Max 4)</span></label>
-          <div class="su-tok" data-max="4" data-src="cities" id="locTok"><div class="field-control"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="field-input" id="locIn" type="text" autocomplete="off" placeholder="Search &amp; add locations" aria-autocomplete="list" aria-controls="locSugg"></div>
-            <div class="su-chips" aria-live="polite"></div><ul class="su-sugg" id="locSugg" role="listbox" hidden></ul></div>
-        </div>
-        <div class="field">
-          <span class="field-label" id="lExp">Expected salary <span class="su-opt">(Annually)</span></span>
-          <button class="field-control su-sel" type="button" data-pick="expSal" aria-labelledby="lExp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12M6 9h12M14.5 20 7 13h3a4.5 4.5 0 0 0 0-9"/></svg><span class="su-sel-v" data-ph="Select amount"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>
-        </div>
-        <fieldset class="su-chipset"><legend class="field-label">Preferred job type</legend>
-          <div class="su-chip-row" data-multi="jobType"><button class="chip" type="button" aria-pressed="false" data-v="permanent">Permanent</button><button class="chip" type="button" aria-pressed="false" data-v="contract">Contractual</button><button class="chip" type="button" aria-pressed="false" data-v="freelance">Freelance</button><button class="chip" type="button" aria-pressed="false" data-v="intern">Internship</button></div></fieldset>
-        <fieldset class="su-chipset"><legend class="field-label">Preferred job mode</legend>
-          <div class="su-chip-row" data-multi="jobMode"><button class="chip" type="button" aria-pressed="false" data-v="onsite">Onsite</button><button class="chip" type="button" aria-pressed="false" data-v="hybrid">Hybrid</button><button class="chip" type="button" aria-pressed="false" data-v="remote">Remote</button></div></fieldset>
-      </form>
-    </main>
-    <div class="pf-foot">
-      <button class="btn btn--lg btn--block btn--primary" type="button" id="pBtn">Show me recommended jobs<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7l5 5-5 5M13 7l5 5-5 5"/></svg></button>
-      <button class="su-later" type="button" data-act="later">I’ll do it later</button>
-    </div>
-  </section>
-</div>
-
-<!-- ═══════════ SHEETS — shared bottom-sheet component · nudge anatomy (JSRP Save / Share) and list anatomy (JSRP Sort) ═══════════ -->
-
-<!-- Almost there — STICKY call to action (a form of any length: Verify stays reachable) -->
-<div class="bs au-nudge su-form-sheet" id="basicSheet" data-bs-scrim="strong" data-bs-cta="sticky" data-bs-dismiss="false" aria-labelledby="bTitle" hidden>
-  <div class="bs-handle" aria-hidden="true"></div>
-  <button class="nudge-close" type="button" data-act="basic-close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-  <div class="bs-body bs-body--gutter">
-    <div class="nudge-body">
-      <h2 class="nudge-h" id="bTitle">Almost <span class="accent">there.</span></h2>
-      <p class="nudge-msg su-sheet-msg" id="bMsg">We pulled this from your resume. Just confirm and we’ll set up your account.</p>
-      <form class="su-form" id="bForm" novalidate>
-        <div class="field" data-field="name"><label class="field-label" for="bName">Full name</label>
-          <div class="field-control"><input class="field-input" id="bName" type="text" autocomplete="name" autocapitalize="words" placeholder="e.g. Ramalingam Murthy" aria-describedby="bNameMsg"></div>
-          <p class="field-message" id="bNameMsg" hidden></p></div>
-        <div class="field"><span class="field-label" id="lLoc">Current location</span>
-          <button class="field-control su-sel" type="button" data-pick="loc" aria-labelledby="lLoc"><span class="su-sel-v" data-ph="Search &amp; select city"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div>
-        <div class="field" data-field="email"><label class="field-label" for="bEmail">Email address</label>
-          <div class="field-control"><input class="field-input" id="bEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="e.g. name@gmail.com" aria-describedby="bEmailMsg"></div>
-          <p class="field-message" id="bEmailMsg" hidden></p></div>
-        <div class="field" data-field="phone"><label class="field-label" for="bPhone">Phone number</label>
-          <div class="field-control"><span class="field-prefix" aria-label="Country code +91">+91</span><input class="field-input" id="bPhone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="11" placeholder="10-digit mobile number" aria-describedby="bPhoneMsg"></div>
-          <p class="field-message" id="bPhoneMsg" hidden></p></div>
-        <div class="field su-exp"><span class="field-label" id="lExpB">Total work experience</span>
-          <div class="su-2">
-            <button class="field-control su-sel" type="button" data-pick="expY" aria-labelledby="lExpB"><span class="su-sel-v" data-ph="Years"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>
-            <button class="field-control su-sel" type="button" data-pick="expM" aria-labelledby="lExpB"><span class="su-sel-v" data-ph="Months"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div></div>
-        <div class="field su-sal"><span class="field-label" id="lSalB">Current salary <span class="su-opt">(Annually)</span></span>
-          <button class="field-control su-sel" type="button" data-pick="salary" aria-labelledby="lSalB"><span class="su-sel-v" data-ph="Select salary"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>
-          <label class="su-check"><input type="checkbox" data-bind="fresher"><span class="su-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>I’m a fresher</label></div>
-        <fieldset class="su-chipset"><legend class="field-label">Notice period</legend>
-          <div class="su-chip-row" data-single="notice"><button class="chip" type="button" aria-pressed="false" data-v="immediate">Immediate joiner</button><button class="chip" type="button" aria-pressed="false" data-v="d15">15 days</button><button class="chip" type="button" aria-pressed="false" data-v="m1">1 month</button><button class="chip" type="button" aria-pressed="false" data-v="m2">2 months</button><button class="chip" type="button" aria-pressed="false" data-v="m2p">2+ months</button><button class="chip" type="button" aria-pressed="false" data-v="serving">Serving notice</button></div></fieldset>
-      </form>
-      <div class="alert-slot" id="bAlert"></div>
-    </div>
-  </div>
-  <div class="bs-foot"><div class="bs-actions">
-    <button class="btn btn--lg btn--block btn--primary" type="button" id="bBtn" disabled>Verify phone number<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-    <p class="pf-secure su-secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Your number is safe with us. No spam, ever.</p>
-  </div></div>
-</div>
-
-<!-- OTP — INLINE call to action (read, then act) -->
-<div class="bs au-nudge" id="otpSheet" data-bs-scrim="strong" data-bs-cta="inline" aria-labelledby="otpTitle" hidden>
-  <div class="bs-handle" aria-hidden="true"></div>
-  <button class="nudge-close" type="button" data-bs-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-  <div class="bs-body bs-body--gutter">
-    <div class="nudge-body">
-      <h2 class="nudge-h" id="otpTitle">Enter OTP to <span class="accent">verify.</span></h2>
-      <p class="nudge-msg otp-label">Sent to <strong class="num" id="otpTo"></strong><a href="#" data-act="otp-change">Change</a></p>
-      <div class="otp-wrap su-otp4">
-        <input class="otp-input" id="otpInput" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="4" aria-label="4-digit OTP" aria-describedby="otpMeta" data-bs-autofocus>
-        <div class="otp" id="otpBoxes" aria-hidden="true"><span class="otp-seg"></span><span class="otp-seg"></span><span class="otp-seg"></span><span class="otp-seg"></span></div>
-      </div>
-      <div class="otp-meta" id="otpMeta" aria-live="polite"></div>
-      <div class="alert-slot" id="otpAlert"></div>
-    </div>
-    <div class="bs-actions"><button class="btn btn--lg btn--block btn--primary" type="button" id="otpBtn" disabled>Verify &amp; create account</button></div>
-  </div>
-</div>
-
-<!-- result sheets: account created · profile created (auto-advance) -->
-<div class="bs au-nudge su-result" id="doneSheet" data-bs-scrim="strong" data-bs-dismiss="false" data-bs-drag="false" aria-labelledby="dTitle" hidden>
-  <div class="bs-handle" aria-hidden="true"></div>
-  <div class="bs-body bs-body--gutter">
-    <div class="nudge-body">
-      <div class="su-burst" aria-hidden="true"><i style="--x:48px;--y:0px;--c:var(--c-brand-400);--d:0.00s"></i><i style="--x:32px;--y:24px;--c:var(--c-green-500);--d:0.03s"></i><i style="--x:30px;--y:38px;--c:var(--c-pink-500);--d:0.06s"></i><i style="--x:1px;--y:40px;--c:var(--c-cyan-500);--d:0.09s"></i><i style="--x:-11px;--y:47px;--c:var(--c-amber-400);--d:0.12s"></i><i style="--x:-31px;--y:26px;--c:var(--c-violet-500);--d:0.00s"></i><i style="--x:-43px;--y:21px;--c:var(--c-brand-400);--d:0.03s"></i><i style="--x:-39px;--y:-8px;--c:var(--c-green-500);--d:0.06s"></i><i style="--x:-43px;--y:-21px;--c:var(--c-pink-500);--d:0.09s"></i><i style="--x:-18px;--y:-36px;--c:var(--c-cyan-500);--d:0.12s"></i><i style="--x:-11px;--y:-47px;--c:var(--c-amber-400);--d:0.00s"></i><i style="--x:16px;--y:-36px;--c:var(--c-violet-500);--d:0.03s"></i><i style="--x:30px;--y:-38px;--c:var(--c-brand-400);--d:0.06s"></i><i style="--x:39px;--y:-10px;--c:var(--c-green-500);--d:0.09s"></i><span class="su-burst-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5l2.4 1.8 3-.2 1 2.8 2.6 1.6-.8 2.9.8 2.9-2.6 1.6-1 2.8-3-.2L12 19.3l-2.4-1.8-3 .2-1-2.8L3 13.3l.8-2.9L3 7.5l2.6-1.6 1-2.8 3 .2L12 1.5zm3.8 7.3a1 1 0 0 0-1.4 0l-3.3 3.3-1.5-1.5a1 1 0 1 0-1.4 1.4l2.2 2.2a1 1 0 0 0 1.4 0l4-4a1 1 0 0 0 0-1.4z"/></svg></span></div>
-      <h2 class="nudge-h" id="dTitle">Account <span class="accent">created.</span></h2>
-      <p class="nudge-msg" id="dMsg">Welcome to Shine! Your account is ready.</p>
-    </div>
-  </div>
-</div>
-
-<!-- parse failure -->
-<div class="bs au-nudge su-result" id="failSheet" data-bs-scrim="strong" data-bs-cta="inline" aria-labelledby="fTitle" hidden>
-  <div class="bs-handle" aria-hidden="true"></div>
-  <button class="nudge-close" type="button" data-bs-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-  <div class="bs-body bs-body--gutter">
-    <div class="nudge-body">
-      <span class="su-err-ic" aria-hidden="true">!</span>
-      <h2 class="nudge-h" id="fTitle">We couldn’t read your <span class="accent">resume.</span></h2>
-      <p class="nudge-msg">The file looks corrupted or damaged.</p>
-      <div class="alert alert--neutral su-tip"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4.6a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6zm1.1 10.2a1.1 1.1 0 0 1-2.2 0v-4.6a1.1 1.1 0 0 1 2.2 0v4.6z"/></svg><div><span class="alert-title">What you can do</span><span class="alert-text">Open your resume in another app, save it again, then upload it.</span></div></div>
-    </div>
-    <div class="bs-actions">
-      <button class="btn btn--lg btn--block btn--primary" type="button" data-act="retry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.35-5.65"/><path d="M20 4v5h-5"/></svg>Retry upload</button>
-      <button class="btn btn--lg btn--block btn--secondary" type="button" data-act="manual">Fill details manually</button>
-    </div>
-  </div>
-</div>
-
-<!-- exit confirm -->
-<div class="bs au-nudge" id="exitSheet" data-bs-scrim="strong" data-bs-cta="inline" aria-labelledby="xTitle" hidden>
-  <div class="bs-handle" aria-hidden="true"></div>
-  <button class="nudge-close" type="button" data-bs-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-  <div class="bs-body bs-body--gutter">
-    <div class="nudge-body">
-      <h2 class="nudge-h" id="xTitle">Leave before you <span class="accent">finish?</span></h2>
-      <p class="nudge-msg">You’re moments away from jobs picked for you. Here’s what you’ll miss:</p>
-      <div class="su-miss-card" aria-roledescription="carousel" aria-label="Why Shine">
-        <p class="su-eyebrow">Why Shine?</p>
-        <div class="su-stats" id="exitStats"><div class="su-stat" role="group" aria-roledescription="slide" aria-label="1 of 4"><p class="su-stat-n"><span class="su-stat-ic su-stat-ic--ey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6.5 6.5 0 0 1 3.5 6"/></svg></span>10K+</p><p class="su-stat-t">Recruiters searching for the right candidate</p></div><div class="su-stat" role="group" aria-roledescription="slide" aria-label="2 of 4"><p class="su-stat-n"><span class="su-stat-ic su-stat-ic--pos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></span>50K+</p><p class="su-stat-t">Profiles noticed by recruiters every month</p></div><div class="su-stat" role="group" aria-roledescription="slide" aria-label="3 of 4"><p class="su-stat-n"><span class="su-stat-ic su-stat-ic--brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M16 9h2a2 2 0 0 1 2 2v10M2 21h20M8 7h4M8 11h4M8 15h4"/></svg></span>2K+</p><p class="su-stat-t">Companies hiring across all roles</p></div><div class="su-stat" role="group" aria-roledescription="slide" aria-label="4 of 4"><p class="su-stat-n"><span class="su-stat-ic su-stat-ic--pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>85%</p><p class="su-stat-t">Profiles get noticed by recruiters in 48h</p></div></div>
-        <div class="su-dots" role="tablist" aria-label="Choose a reason"><button class="su-dot" type="button" role="tab" aria-label="Reason 1" aria-selected="true"></button><button class="su-dot" type="button" role="tab" aria-label="Reason 2" aria-selected="false"></button><button class="su-dot" type="button" role="tab" aria-label="Reason 3" aria-selected="false"></button><button class="su-dot" type="button" role="tab" aria-label="Reason 4" aria-selected="false"></button></div>
-      </div>
-    </div>
-    <div class="bs-actions">
-      <button class="btn btn--lg btn--block btn--primary" type="button" data-bs-close>Continue setting up</button>
-      <button class="btn btn--lg btn--block btn--secondary" type="button" data-act="exit-yes">Yes, exit</button>
-    </div>
-  </div>
-</div>
-
-<!-- delete confirm -->
-<div class="bs au-nudge" id="delSheet" data-bs-scrim="strong" data-bs-cta="inline" aria-labelledby="delTitle" hidden>
-  <div class="bs-handle" aria-hidden="true"></div>
-  <button class="nudge-close" type="button" data-bs-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-  <div class="bs-body bs-body--gutter">
-    <div class="nudge-body">
-      <h2 class="nudge-h" id="delTitle">Delete this <span class="accent">record?</span></h2>
-      <p class="nudge-msg" id="delMsg"></p>
-      <span class="badge badge--negative su-del-b">This can’t be undone</span>
-    </div>
-    <div class="bs-actions">
-      <button class="btn btn--lg btn--block su-btn-neg" type="button" id="delBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>Delete record</button>
-      <button class="btn btn--lg btn--block btn--secondary" type="button" data-bs-close>Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- ⋮ menu (list anatomy) -->
-<div class="bs su-list-sheet" id="menuSheet" hidden>
-  <div class="bs-handle" aria-hidden="true"></div>
-  <div class="bs-head"><h2 class="bs-title" id="menuTitle">Options</h2><button class="bs-close" type="button" data-bs-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-  <div class="bs-body">
-    <button class="su-row" type="button" data-act="menu-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg><span>Edit details</span></button>
-    <button class="su-row su-row--neg" type="button" data-act="menu-del"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg><span>Delete details</span></button>
-  </div>
-</div>
-
-<!-- picker (list anatomy = JSRP Sort sheet) · optional search -->
-<div class="bs su-list-sheet su-pick" id="pickSheet" hidden>
-  <div class="bs-handle" aria-hidden="true"></div>
-  <div class="bs-head"><h2 class="bs-title" id="pickTitle">Select</h2><button class="bs-close" type="button" data-bs-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-  <div class="su-pick-search" hidden><div class="field-control"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="field-input" id="pickQ" type="text" autocomplete="off" placeholder="Search"></div></div>
-  <div class="bs-body" role="radiogroup" aria-labelledby="pickTitle" id="pickList"></div>
-</div>
-
-<!-- form sheets (list head + sticky Save) -->
-<div class="bs su-list-sheet su-fs" id="ebSheet" data-bs-cta="sticky" hidden>
-  <div class="bs-handle" aria-hidden="true"></div>
-  <div class="bs-head"><h2 class="bs-title">Edit basic details</h2><button class="bs-close" type="button" data-bs-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-  <div class="bs-body">
-    <form class="su-form" id="ebForm" novalidate>
-      <div class="field su-exp"><span class="field-label" id="lExpE">Total work experience</span>
-        <div class="su-2">
-          <button class="field-control su-sel" type="button" data-pick="expY" aria-labelledby="lExpE"><span class="su-sel-v" data-ph="Years"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>
-          <button class="field-control su-sel" type="button" data-pick="expM" aria-labelledby="lExpE"><span class="su-sel-v" data-ph="Months"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div>
-        <label class="su-check"><input type="checkbox" data-bind="fresher"><span class="su-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>I’m a fresher</label></div>
-      <div class="field su-sal"><span class="field-label" id="lSalE">Current salary <span class="su-opt">(Annually)</span></span>
-        <button class="field-control su-sel" type="button" data-pick="salary" aria-labelledby="lSalE"><span class="su-sel-v" data-ph="Select salary"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div>
-      <div class="field"><span class="field-label" id="lLocE">Current location</span>
-        <div class="su-sel-wrap"><button class="field-control su-sel" type="button" data-pick="loc" aria-labelledby="lLocE"><span class="su-sel-v" data-ph="Search &amp; select city"></span></button>
-          <button class="su-locate" type="button" data-act="locate" aria-label="Use my current location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button></div></div>
-      <fieldset class="su-chipset"><legend class="field-label">Notice period</legend>
-        <div class="su-chip-row" data-single="notice"><button class="chip" type="button" aria-pressed="false" data-v="immediate">Immediate joiner</button><button class="chip" type="button" aria-pressed="false" data-v="d15">15 days</button><button class="chip" type="button" aria-pressed="false" data-v="m1">1 month</button><button class="chip" type="button" aria-pressed="false" data-v="m2">2 months</button><button class="chip" type="button" aria-pressed="false" data-v="m2p">2+ months</button><button class="chip" type="button" aria-pressed="false" data-v="serving">Serving notice</button></div></fieldset>
-      <fieldset class="su-chipset"><legend class="field-label">Gender</legend>
-        <div class="su-chip-row" data-single="gender"><button class="chip" type="button" aria-pressed="false" data-v="Male">Male</button><button class="chip" type="button" aria-pressed="false" data-v="Female">Female</button><button class="chip" type="button" aria-pressed="false" data-v="Transgender">Transgender</button><button class="chip" type="button" aria-pressed="false" data-v="Non-binary">Non-binary</button><button class="chip" type="button" aria-pressed="false" data-v="Prefer not to say">Prefer not to say</button></div></fieldset>
-    </form>
-  </div>
-  <div class="bs-foot"><div class="bs-actions"><button class="btn btn--lg btn--block btn--primary" type="button" id="ebBtn">Save</button></div></div>
-</div>
-
-<div class="bs su-list-sheet su-fs" id="eduSheet" data-bs-cta="sticky" hidden>
-  <div class="bs-handle" aria-hidden="true"></div>
-  <div class="bs-head"><h2 class="bs-title" id="eduTitle">Add education</h2><button class="bs-close" type="button" data-bs-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-  <div class="bs-body">
-    <form class="su-form" id="eduForm" novalidate>
-      <div class="field"><span class="field-label" id="lEdu">Education</span>
-        <button class="field-control su-sel" type="button" data-pick="course" aria-labelledby="lEdu"><span class="su-sel-v" data-ph="Search &amp; select education"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div>
-      <fieldset class="su-chipset"><legend class="field-label">Course type</legend>
-        <div class="su-chip-row" data-single="ctype"><button class="chip" type="button" aria-pressed="false" data-v="full">Full time</button><button class="chip" type="button" aria-pressed="false" data-v="part">Part time</button><button class="chip" type="button" aria-pressed="false" data-v="distance">Distance</button></div></fieldset>
-      <div class="field" data-field="uni"><label class="field-label" for="eUni">University / institute / board</label>
-        <div class="field-control"><input class="field-input" id="eUni" type="text" autocomplete="off" placeholder="e.g. Indian Institute of Technology, Delhi"></div></div>
-      <div class="field"><span class="field-label" id="lDur">Course duration</span>
-        <div class="su-2">
-          <button class="field-control su-sel" type="button" data-pick="eFrom" aria-labelledby="lDur"><span class="su-sel-v" data-ph="Starting year"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>
-          <button class="field-control su-sel" type="button" data-pick="eTo" aria-labelledby="lDur"><span class="su-sel-v" data-ph="Ending year"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div>
-        <label class="su-check"><input type="checkbox" data-bind="ePursuing"><span class="su-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span>I’m currently pursuing this course</label></div>
-      <div class="field"><span class="field-label" id="lGrade">Grading system <span class="su-opt">(Optional)</span></span>
-        <button class="field-control su-sel" type="button" data-pick="grade" aria-labelledby="lGrade"><span class="su-sel-v" data-ph="Select grading system"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div>
-      <div class="field" data-field="score" id="eScoreF" hidden><label class="field-label" for="eScore">Score</label>
-        <div class="field-control"><input class="field-input" id="eScore" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 8.5"></div></div>
-    </form>
-  </div>
-  <div class="bs-foot"><div class="bs-actions"><button class="btn btn--lg btn--block btn--primary" type="button" id="eduBtn" disabled>Save</button></div></div>
-</div>
-
-<div class="bs su-list-sheet su-fs" id="empSheet" data-bs-cta="sticky" hidden>
-  <div class="bs-handle" aria-hidden="true"></div>
-  <div class="bs-head"><h2 class="bs-title" id="empTitle">Add employment</h2><button class="bs-close" type="button" data-bs-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-  <div class="bs-body">
-    <form class="su-form" id="empForm" novalidate>
-      <fieldset class="su-chipset"><legend class="field-label">Employment type</legend>
-        <div class="su-chip-row" data-single="etype"><button class="chip" type="button" aria-pressed="false" data-v="permanent">Permanent</button><button class="chip" type="button" aria-pressed="false" data-v="contract">Contractual</button><button class="chip" type="button" aria-pressed="false" data-v="intern">Internship</button><button class="chip" type="button" aria-pressed="false" data-v="freelance">Freelance</button></div></fieldset>
-      <div class="field" data-field="role"><label class="field-label" for="wRole">Job role</label>
-        <div class="field-control"><input class="field-input" id="wRole" type="text" autocomplete="off" placeholder="e.g. Senior Sales Executive"></div></div>
-      <div class="field" data-field="co"><label class="field-label" for="wCo">Company name</label>
-        <div class="field-control"><input class="field-input" id="wCo" type="text" autocomplete="off" placeholder="e.g. XYZ Technologies Pvt. Ltd."></div></div>
-      <div class="field"><span class="field-label" id="lDept">Department</span>
-        <button class="field-control su-sel" type="button" data-pick="dept" aria-labelledby="lDept"><span class="su-sel-v" data-ph="Search &amp; select department"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div>
-      <div class="field"><span class="field-label" id="lInd">Industry</span>
-        <button class="field-control su-sel" type="button" data-pick="ind" aria-labelledby="lInd"><span class="su-sel-v" data-ph="Search &amp; select industry"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div>
-      <fieldset class="su-chipset"><legend class="field-label">Are you currently working here?</legend>
-        <div class="su-chip-row" data-single="wCur"><button class="chip" type="button" aria-pressed="false" data-v="yes">Yes, I am</button><button class="chip" type="button" aria-pressed="false" data-v="no">No, I’m not</button></div></fieldset>
-      <div class="field"><span class="field-label" id="lDoj">Date of joining</span>
-        <div class="su-2">
-          <button class="field-control su-sel" type="button" data-pick="dojM" aria-labelledby="lDoj"><span class="su-sel-v" data-ph="Month"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>
-          <button class="field-control su-sel" type="button" data-pick="dojY" aria-labelledby="lDoj"><span class="su-sel-v" data-ph="Year"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div></div>
-      <div class="field" id="lwdF"><span class="field-label" id="lLwd">Last working day</span>
-        <div class="su-2">
-          <button class="field-control su-sel" type="button" data-pick="lwdM" aria-labelledby="lLwd"><span class="su-sel-v" data-ph="Month"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>
-          <button class="field-control su-sel" type="button" data-pick="lwdY" aria-labelledby="lLwd"><span class="su-sel-v" data-ph="Year"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button></div>
-        <p class="field-message su-date-err" id="lwdMsg" hidden></p></div>
-    </form>
-  </div>
-  <div class="bs-foot"><div class="bs-actions"><button class="btn btn--lg btn--block btn--primary" type="button" id="empBtn" disabled>Save</button></div></div>
-</div>
-
-<div class="bs su-list-sheet su-fs" id="skillSheet" data-bs-cta="sticky" hidden>
-  <div class="bs-handle" aria-hidden="true"></div>
-  <div class="bs-head"><h2 class="bs-title">Add skills</h2><button class="bs-close" type="button" data-bs-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-  <div class="bs-body">
-    <div class="field"><label class="field-label" for="skIn">Skills <span class="su-opt">(Min 3 &amp; max 15)</span></label>
-      <div class="su-tok" data-max="15" data-src="skills" id="skTok"><div class="field-control"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="field-input" id="skIn" type="text" autocomplete="off" placeholder="Search &amp; add skills" aria-autocomplete="list" aria-controls="skSugg"></div>
-        <div class="su-chips" aria-live="polite"></div><ul class="su-sugg" id="skSugg" role="listbox" hidden></ul></div>
-      <p class="field-helper" id="skHelp"></p></div>
-  </div>
-  <div class="bs-foot"><div class="bs-actions"><button class="btn btn--lg btn--block btn--primary" type="button" id="skBtn" disabled>Save</button></div></div>
 </div>
 
 <!-- ═══════════ DEMO DATA (prototype helper · ?demo=0 hides it) ═══════════ -->
 <button class="demo-fab" type="button" data-bs-open="#guideSheet" aria-label="Open demo data" title="Demo data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3L20 3M16 7l3 3M14 9l2 2"/></svg></button>
-<aside class="guide" id="guidePanel" aria-label="Demo data"><section class="g-sec"><h3 class="g-h">Upload resume</h3><div class="g-card"><div class="g-item" data-kind="file" data-value="{&quot;name&quot;: &quot;Ramalingam_Resume.pdf&quot;, &quot;size&quot;: 245760}"><span class="g-txt"><span class="g-k">Sample resume</span><span class="g-v">Ramalingam_Resume.pdf · 240 KB</span></span><button class="g-use" type="button" data-g="use" aria-label="Use sample resume">Use</button></div><div class="g-item" data-kind="file" data-value="{&quot;name&quot;: &quot;Resume_scan.pdf&quot;, &quot;size&quot;: 8388608}"><span class="g-txt"><span class="g-k">Too large</span><span class="g-v">Resume_scan.pdf · 8 MB</span></span><button class="g-use" type="button" data-g="use" aria-label="Use too large">Use</button></div><div class="g-item" data-kind="file" data-value="{&quot;name&quot;: &quot;resume-photo.jpg&quot;, &quot;size&quot;: 1258291}"><span class="g-txt"><span class="g-k">Wrong file type</span><span class="g-v">resume-photo.jpg · 1.2 MB</span></span><button class="g-use" type="button" data-g="use" aria-label="Use wrong file type">Use</button></div></div></section><section class="g-sec"><h3 class="g-h">Already on Shine</h3><div class="g-card"><div class="g-item" data-kind="email" data-value="ramaraj.lingam@gmail.com"><span class="g-txt"><span class="g-k">Email ID</span><span class="g-v">ramaraj.lingam@<wbr>gmail.com</span></span><button class="g-copy" type="button" data-g="copy" aria-label="Copy email id"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg></button><button class="g-use" type="button" data-g="use" aria-label="Use email id">Use</button></div><div class="g-item" data-kind="phone" data-value="9876543210"><span class="g-txt"><span class="g-k">Phone number</span><span class="g-v">98765 43210</span></span><button class="g-copy" type="button" data-g="copy" aria-label="Copy phone number"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg></button><button class="g-use" type="button" data-g="use" aria-label="Use phone number">Use</button></div></div></section><section class="g-sec"><h3 class="g-h">OTP verification</h3><div class="g-card"><div class="g-item" data-kind="otp" data-value="1234"><span class="g-txt"><span class="g-k">4-digit OTP</span><span class="g-v">1234</span></span><button class="g-copy" type="button" data-g="copy" aria-label="Copy 4-digit otp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg></button><button class="g-use" type="button" data-g="use" aria-label="Use 4-digit otp">Use</button></div></div></section><section class="g-sec g-sec--sim"><h3 class="g-h">Simulate</h3><div class="g-card"><button class="g-sw" type="button" role="switch" aria-checked="false" data-sim="partial"><span>Resume missed some details</span><i aria-hidden="true"></i></button><button class="g-sw" type="button" role="switch" aria-checked="false" data-sim="unreadable"><span>Resume can’t be read</span><i aria-hidden="true"></i></button></div></section></aside>
+<aside class="guide" id="guidePanel" aria-label="Demo data"><section class="g-sec"><h3 class="g-h">Upload resume</h3><div class="g-card"><div class="g-item" data-kind="file" data-value="{&quot;name&quot;: &quot;Ramalingam_Resume.pdf&quot;, &quot;size&quot;: 245760}"><span class="g-txt"><span class="g-k">Sample resume</span><span class="g-v">Ramalingam_Resume.pdf · 240 KB</span></span><button class="g-use" type="button" data-g="use" aria-label="Use sample resume">Use</button></div><div class="g-item" data-kind="file" data-value="{&quot;name&quot;: &quot;Resume_scan.pdf&quot;, &quot;size&quot;: 8388608}"><span class="g-txt"><span class="g-k">Too large</span><span class="g-v">Resume_scan.pdf · 8 MB</span></span><button class="g-use" type="button" data-g="use" aria-label="Use too large">Use</button></div><div class="g-item" data-kind="file" data-value="{&quot;name&quot;: &quot;resume-photo.jpg&quot;, &quot;size&quot;: 1258291}"><span class="g-txt"><span class="g-k">Wrong file type</span><span class="g-v">resume-photo.jpg · 1.2 MB</span></span><button class="g-use" type="button" data-g="use" aria-label="Use wrong file type">Use</button></div></div></section><section class="g-sec g-sec--sim"><h3 class="g-h">Simulate</h3><div class="g-card"><button class="g-sw" type="button" role="switch" aria-checked="false" data-sim="partial"><span>Resume missed some details</span><i aria-hidden="true"></i></button><button class="g-sw" type="button" role="switch" aria-checked="false" data-sim="unreadable"><span>Resume can’t be read</span><i aria-hidden="true"></i></button></div></section></aside>
 <div class="bs au-list" id="guideSheet" hidden>
   <div class="bs-handle" aria-hidden="true"></div>
   <div class="bs-head"><h2 class="bs-title" id="guideTitle">Demo data</h2>
     <button class="bs-close" type="button" data-bs-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-  <div class="bs-body"><section class="g-sec"><h3 class="g-h">Upload resume</h3><div class="g-card"><div class="g-item" data-kind="file" data-value="{&quot;name&quot;: &quot;Ramalingam_Resume.pdf&quot;, &quot;size&quot;: 245760}"><span class="g-txt"><span class="g-k">Sample resume</span><span class="g-v">Ramalingam_Resume.pdf · 240 KB</span></span><button class="g-use" type="button" data-g="use" aria-label="Use sample resume">Use</button></div><div class="g-item" data-kind="file" data-value="{&quot;name&quot;: &quot;Resume_scan.pdf&quot;, &quot;size&quot;: 8388608}"><span class="g-txt"><span class="g-k">Too large</span><span class="g-v">Resume_scan.pdf · 8 MB</span></span><button class="g-use" type="button" data-g="use" aria-label="Use too large">Use</button></div><div class="g-item" data-kind="file" data-value="{&quot;name&quot;: &quot;resume-photo.jpg&quot;, &quot;size&quot;: 1258291}"><span class="g-txt"><span class="g-k">Wrong file type</span><span class="g-v">resume-photo.jpg · 1.2 MB</span></span><button class="g-use" type="button" data-g="use" aria-label="Use wrong file type">Use</button></div></div></section><section class="g-sec"><h3 class="g-h">Already on Shine</h3><div class="g-card"><div class="g-item" data-kind="email" data-value="ramaraj.lingam@gmail.com"><span class="g-txt"><span class="g-k">Email ID</span><span class="g-v">ramaraj.lingam@<wbr>gmail.com</span></span><button class="g-copy" type="button" data-g="copy" aria-label="Copy email id"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg></button><button class="g-use" type="button" data-g="use" aria-label="Use email id">Use</button></div><div class="g-item" data-kind="phone" data-value="9876543210"><span class="g-txt"><span class="g-k">Phone number</span><span class="g-v">98765 43210</span></span><button class="g-copy" type="button" data-g="copy" aria-label="Copy phone number"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg></button><button class="g-use" type="button" data-g="use" aria-label="Use phone number">Use</button></div></div></section><section class="g-sec"><h3 class="g-h">OTP verification</h3><div class="g-card"><div class="g-item" data-kind="otp" data-value="1234"><span class="g-txt"><span class="g-k">4-digit OTP</span><span class="g-v">1234</span></span><button class="g-copy" type="button" data-g="copy" aria-label="Copy 4-digit otp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg></button><button class="g-use" type="button" data-g="use" aria-label="Use 4-digit otp">Use</button></div></div></section><section class="g-sec g-sec--sim"><h3 class="g-h">Simulate</h3><div class="g-card"><button class="g-sw" type="button" role="switch" aria-checked="false" data-sim="partial"><span>Resume missed some details</span><i aria-hidden="true"></i></button><button class="g-sw" type="button" role="switch" aria-checked="false" data-sim="unreadable"><span>Resume can’t be read</span><i aria-hidden="true"></i></button></div></section></div>
+  <div class="bs-body"><section class="g-sec"><h3 class="g-h">Upload resume</h3><div class="g-card"><div class="g-item" data-kind="file" data-value="{&quot;name&quot;: &quot;Ramalingam_Resume.pdf&quot;, &quot;size&quot;: 245760}"><span class="g-txt"><span class="g-k">Sample resume</span><span class="g-v">Ramalingam_Resume.pdf · 240 KB</span></span><button class="g-use" type="button" data-g="use" aria-label="Use sample resume">Use</button></div><div class="g-item" data-kind="file" data-value="{&quot;name&quot;: &quot;Resume_scan.pdf&quot;, &quot;size&quot;: 8388608}"><span class="g-txt"><span class="g-k">Too large</span><span class="g-v">Resume_scan.pdf · 8 MB</span></span><button class="g-use" type="button" data-g="use" aria-label="Use too large">Use</button></div><div class="g-item" data-kind="file" data-value="{&quot;name&quot;: &quot;resume-photo.jpg&quot;, &quot;size&quot;: 1258291}"><span class="g-txt"><span class="g-k">Wrong file type</span><span class="g-v">resume-photo.jpg · 1.2 MB</span></span><button class="g-use" type="button" data-g="use" aria-label="Use wrong file type">Use</button></div></div></section><section class="g-sec g-sec--sim"><h3 class="g-h">Simulate</h3><div class="g-card"><button class="g-sw" type="button" role="switch" aria-checked="false" data-sim="partial"><span>Resume missed some details</span><i aria-hidden="true"></i></button><button class="g-sw" type="button" role="switch" aria-checked="false" data-sim="unreadable"><span>Resume can’t be read</span><i aria-hidden="true"></i></button></div></section></div>
 </div>
 
-<!-- COMPONENT · bottom-sheet v1.2.1 -->
-<script src="components/bottom-sheet/bottom-sheet.js"></script>
-<!-- COMPONENT · notify v1.0.1 -->
-<script src="components/notify/notify.js"></script>
+<!-- ▼ COMPONENT · bottom-sheet v1.2.1 · verbatim copy of App-logout/app-components/bottom-sheet/bottom-sheet.js — do not edit here -->
+<script data-component="bottom-sheet">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · BOTTOM SHEET  (app component)                        v1.2.1
+   Pair with bottom-sheet.css. Zero dependencies, no build step.
+
+   Markup (any element with .bs — it starts closed via [hidden]):
+
+     <div class="bs" id="sortSheet" hidden>
+       <div class="bs-handle"></div>
+       <div class="bs-head">
+         <h2 class="bs-title">Sort by</h2>
+         <button class="bs-close" data-bs-close aria-label="Close">…</button>
+       </div>
+       <div class="bs-body">…</div>
+       <div class="bs-foot">…</div>          (optional)
+     </div>
+
+   Call to action — two behaviours (.bs-actions = the sheet's button group):
+     inline   <div class="bs-body">… <div class="bs-actions">…</div></div>
+              follows the content, scrolls with it (nudges, confirm, OTP)
+     sticky   <div class="bs-body">…</div><div class="bs-foot"><div class="bs-actions">…</div></div>
+              pinned; body scrolls under it (filters, pickers, lists, forms)
+     data-bs-cta="inline|sticky|auto" on .bs → ShineSheet places .bs-actions
+     wherever you wrote it; "auto" keeps it inline while everything fits and
+     pins it as soon as the body overflows (small phone, keyboard, long list).
+     Live state: data-bs-cta-state="inline|sticky" + event shine:sheet-cta.
+
+   Open / close:
+     <button data-bs-open="#sortSheet">Sort</button>          declarative
+     ShineSheet.open('#sortSheet', { trigger: btn })          programmatic
+     ShineSheet.close('#sortSheet')   ·   ShineSheet.closeAll()
+     ShineSheet.isOpen(el)   ·   ShineSheet.top()
+
+   Per-sheet options (attributes on .bs):
+     data-bs-dismiss="false"   no backdrop / Escape / drag dismissal
+     data-bs-drag="false"      no drag-to-dismiss
+     data-bs-scrim="strong"    45% scrim + blur (nudges)  ·  "none" = no scrim
+     data-bs-autofocus         on a child → focused on open (default: the sheet)
+     data-bs-cta="…"           inline | sticky | auto — call-to-action behaviour
+     .bs--nested               opens inside its parent .bs and covers it
+
+   Events (dispatched on the sheet, bubbling):
+     shine:sheet-open    cancelable   detail { trigger }
+     shine:sheet-opened
+     shine:sheet-close   cancelable   detail { reason }   reason: close-button
+                                      | backdrop | escape | drag | api
+     shine:sheet-closed               detail { reason }
+     shine:sheet-cta                  detail { state }    inline ⇄ sticky (auto)
+
+   Behaviour (WAI-ARIA dialog pattern + platform sheet conventions):
+     role="dialog" + aria-modal + aria-labelledby (from .bs-title) · focus
+     moves in, Tab is trapped, focus returns to the trigger · Escape closes
+     the top sheet · page scroll locked while any sheet is open · stacking
+     (a sheet over a sheet gets its own scrim level) · drag the handle or
+     header down to dismiss (velocity- or distance-based) · trigger gets
+     aria-expanded · reduced motion respected · closed = [hidden].
+     v1.2 · keyboard-aware (content padded above the on-screen keyboard while
+     the sheet surface runs on behind it — v1.2.1; height capped to the visible area) · status-bar tint: while a scrim is up html/body
+     get the dimmed page colour, so iOS 26 Safari's status bar dims with it.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function (global) {
+  'use strict';
+  if (global.ShineSheet) return;
+  var doc = global.document;
+
+  var stack = [];                    // open sheets, bottom → top
+  var uid = 0;
+  var FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  var reduced = global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function $(t) { return typeof t === 'string' ? doc.querySelector(t) : t; }
+  function emit(el, name, detail, cancelable) {
+    var ev;
+    try { ev = new CustomEvent(name, { bubbles: true, cancelable: !!cancelable, detail: detail || {} }); }
+    catch (e) { ev = doc.createEvent('CustomEvent'); ev.initCustomEvent(name, true, !!cancelable, detail || {}); }
+    return el.dispatchEvent(ev);
+  }
+  function attr(el, name, val) { return el.getAttribute(name) === val; }
+  function isNested(el) { return el.classList.contains('bs--nested'); }
+  function dismissible(el) { return !attr(el, 'data-bs-dismiss', 'false'); }
+  function durationOf(el) {
+    if (reduced && reduced.matches) return 0;
+    var d = getComputedStyle(el).transitionDuration.split(',')[0];
+    return (parseFloat(d) || 0) * (d.indexOf('ms') > -1 ? 1 : 1000);
+  }
+
+  /* ── one-time wiring of a sheet ─────────────────────────────────── */
+  function prepare(el) {
+    if (el.__bs) return el.__bs;
+    var st = el.__bs = { id: el.id || ('bs-' + (++uid)), scrim: null, trigger: null, timer: 0, reason: null };
+    el.id = st.id;
+    el.setAttribute('role', el.getAttribute('role') || 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('tabindex', '-1');
+    var title = el.querySelector('.bs-title');
+    if (title && !el.hasAttribute('aria-labelledby') && !el.hasAttribute('aria-label')) {
+      title.id = title.id || st.id + '-title';
+      el.setAttribute('aria-labelledby', title.id);
+    }
+    if (!el.classList.contains('is-open')) el.hidden = true;
+
+    // scroll-aware head / foot elevation
+    var body = el.querySelector(':scope > .bs-body');
+    if (body) {
+      st.body = body;
+      body.addEventListener('scroll', function () { syncScroll(el); }, { passive: true });
+    }
+    // call to action — inline (in the body) or sticky (in the foot)
+    var actions = body && el.querySelector(':scope > .bs-body > .bs-actions, :scope > .bs-foot > .bs-actions');
+    if (actions) {
+      st.actions = actions;
+      st.cta = el.getAttribute('data-bs-cta');
+      var wrote = actions.parentNode === body ? 'inline' : 'sticky';
+      placeCta(el, st.cta === 'inline' || st.cta === 'sticky' ? st.cta : st.cta === 'auto' ? 'inline' : wrote, true);
+    }
+    // drag to dismiss — from the handle or header only, so body scrolling is never hijacked
+    if (!attr(el, 'data-bs-drag', 'false')) {
+      Array.prototype.forEach.call(el.querySelectorAll(':scope > .bs-handle, :scope > .bs-head'), function (h) { dragify(el, h); });
+    }
+    return st;
+  }
+
+  /* ── call to action placement ───────────────────────────────────── */
+  function placeCta(el, state, silent) {
+    var st = el.__bs, a = st.actions, body = st.body;
+    if (!a || !body) return;
+    var prev = el.getAttribute('data-bs-cta-state');
+    var had = a.contains(doc.activeElement) ? doc.activeElement : null;   // keep focus across the move
+    if (state === 'sticky') {
+      var foot = a.parentNode.classList && a.parentNode.classList.contains('bs-foot') ? a.parentNode : st.foot;
+      if (!foot) {
+        foot = doc.createElement('div'); foot.className = 'bs-foot';
+        st.ownFoot = true;
+      }
+      st.foot = foot;
+      if (foot.parentNode !== el) body.parentNode.insertBefore(foot, body.nextSibling);
+      if (a.parentNode !== foot) foot.appendChild(a);
+      foot.hidden = false;
+    } else {
+      if (a.parentNode !== body) body.appendChild(a);
+      if (st.foot && !st.foot.querySelector('*')) st.foot.hidden = true;
+    }
+    if (had && doc.activeElement !== had) { try { had.focus({ preventScroll: true }); } catch (e) { had.focus(); } }
+    el.setAttribute('data-bs-cta-state', state);
+    if (!silent && prev && prev !== state) emit(el, 'shine:sheet-cta', { state: state });
+  }
+  // auto: inline while everything fits, sticky once the body overflows. Inline is a few px taller than
+  // the sticky footer (24 + gutter vs 16 + 16), so returning to inline needs that much spare room → no flip-flop.
+  function maxSheetHeight(el) {
+    var vh = global.visualViewport ? Math.min(global.visualViewport.height, global.innerHeight) : global.innerHeight;
+    var m = parseFloat(getComputedStyle(el).maxHeight);
+    return isNaN(m) ? vh * 0.9 : Math.min(m, isNested(el) ? m : vh * 0.9);
+  }
+  function syncCta(el) {
+    var st = el.__bs;
+    if (!st || !st.actions || st.cta !== 'auto' || el.hidden) return;
+    var b = st.body, state = el.getAttribute('data-bs-cta-state');
+    if (state !== 'sticky') {
+      if (b.scrollHeight > b.clientHeight + 1) placeCta(el, 'sticky');
+    } else {
+      var f = st.foot, cs = getComputedStyle(f), g = parseFloat(getComputedStyle(el).getPropertyValue('--bs-gutter')) || 24;
+      var safe = Math.max(0, parseFloat(cs.paddingBottom) - parseFloat(cs.paddingTop));          // home-indicator inset
+      var inlineH = st.actions.offsetHeight + 2 * g + safe;                                    // 24 above + gutter/safe below
+      var room = b.clientHeight + f.offsetHeight + Math.max(0, maxSheetHeight(el) - el.offsetHeight);
+      if (b.scrollHeight + inlineH <= room - 1) placeCta(el, 'inline');
+    }
+  }
+  function watchCta(el, on) {
+    var st = el.__bs;
+    if (!st || !st.actions || st.cta !== 'auto') return;
+    if (on) {
+      if (st.watch) return;
+      var raf = 0, run = function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(function () { syncCta(el); syncScroll(el); }); };
+      st.watch = { run: run, ro: global.ResizeObserver ? new ResizeObserver(run) : null, mo: global.MutationObserver ? new MutationObserver(run) : null };
+      if (st.watch.ro) { st.watch.ro.observe(st.body); Array.prototype.forEach.call(st.body.children, function (c) { st.watch.ro.observe(c); }); }
+      if (st.watch.mo) st.watch.mo.observe(st.body, { childList: true, subtree: true, characterData: true });
+      global.addEventListener('resize', run);
+      if (global.visualViewport) global.visualViewport.addEventListener('resize', run);
+      syncCta(el);
+    } else if (st.watch) {
+      if (st.watch.ro) st.watch.ro.disconnect();
+      if (st.watch.mo) st.watch.mo.disconnect();
+      global.removeEventListener('resize', st.watch.run);
+      if (global.visualViewport) global.visualViewport.removeEventListener('resize', st.watch.run);
+      st.watch = null;
+    }
+  }
+
+  function syncScroll(el) {
+    var b = el.__bs && el.__bs.body; if (!b) return;
+    el.classList.toggle('is-scrolled', b.scrollTop > 2);
+    el.classList.toggle('has-more', b.scrollHeight - b.clientHeight - b.scrollTop > 2);
+  }
+
+  /* ── scrim ──────────────────────────────────────────────────────── */
+  function scrimFor(el) {
+    var st = el.__bs;
+    if (attr(el, 'data-bs-scrim', 'none')) return null;
+    if (!st.scrim) {
+      var s = doc.createElement('div');
+      s.className = 'bs-scrim' + (isNested(el) ? ' bs-scrim--nested' : '') + (attr(el, 'data-bs-scrim', 'strong') ? ' bs-scrim--strong' : '');
+      s.setAttribute('aria-hidden', 'true');
+      s.addEventListener('click', function () { if (dismissible(el)) close(el, 'backdrop'); });
+      el.parentNode.insertBefore(s, el);           // sibling → nested scrims stay inside the parent sheet
+      st.scrim = s;
+    }
+    return st.scrim;
+  }
+
+  /* ── scroll lock (ref-counted via the stack) ────────────────────── */
+  function lock(on) { doc.documentElement.classList.toggle('bs-lock', on); }
+
+  /* ── focus ──────────────────────────────────────────────────────── */
+  function focusables(el) {
+    return Array.prototype.filter.call(el.querySelectorAll(FOCUSABLE), function (n) {
+      return n.offsetParent !== null && n.closest('.bs') === el;      // skip nested sheets' own controls
+    });
+  }
+  doc.addEventListener('keydown', function (e) {
+    var top = stack[stack.length - 1]; if (!top) return;
+    if (e.key === 'Escape') {
+      if (e.defaultPrevented) return;              // an inner control (e.g. a listbox) handled it
+      if (dismissible(top)) { e.preventDefault(); close(top, 'escape'); }
+      return;
+    }
+    if (e.key !== 'Tab') return;
+    var f = focusables(top);
+    if (!f.length) { e.preventDefault(); top.focus(); return; }
+    var first = f[0], last = f[f.length - 1], a = doc.activeElement;
+    if (e.shiftKey && (a === first || a === top)) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+    else if (!top.contains(a)) { e.preventDefault(); first.focus(); }
+  });
+
+  /* ── on-screen keyboard (v1.2) ────────────────────────────────────
+     iOS Safari never resizes the page for the keyboard — it slides over fixed
+     content, so a bottom sheet ends up underneath it. While any sheet is open we
+     follow visualViewport; the CSS pads the sheet's content up by the keyboard
+     height (the surface itself stays on the bottom edge, behind the keyboard):
+       --bs-kb   = layout-viewport bottom − visible-area bottom   (keyboard height)
+       --bs-vvh  = visible height (caps the sheet so its head never hides)
+     Android WebView/Chrome resize the page instead → --bs-kb stays 0 there. */
+  var kb = { on: false, raf: 0, px: 0 };
+  function kbSet(px, h) {
+    var r = doc.documentElement;
+    if (px > 0) { r.style.setProperty('--bs-kb', px + 'px'); r.style.setProperty('--bs-vvh', Math.round(h) + 'px'); r.classList.add('bs-kb'); }
+    else { r.style.removeProperty('--bs-kb'); r.style.removeProperty('--bs-vvh'); r.classList.remove('bs-kb'); }
+    if (px !== kb.px) {
+      kb.px = px;
+      stack.forEach(function (el) { if (el.__bs && el.__bs.actions) { syncCta(el); syncScroll(el); } });
+      var a = doc.activeElement;                         // keep the focused field in view inside the sheet
+      if (px > 0 && a && a.closest && a.closest('.bs') && a.scrollIntoView) setTimeout(function () { try { a.scrollIntoView({ block: 'nearest' }); } catch (e) {} }, 260);
+    }
+  }
+  function kbMeasure() {
+    kb.raf = 0;
+    var vv = global.visualViewport; if (!vv || !stack.length) return kbSet(0);
+    var px = Math.round(global.innerHeight - vv.height - vv.offsetTop);
+    kbSet(px > 80 ? px : 0, vv.height);                  // < 80 px = browser chrome moving, not a keyboard
+  }
+  function kbSchedule() { if (!kb.raf) kb.raf = requestAnimationFrame(kbMeasure); }
+  function keyboard(on) {
+    var vv = global.visualViewport; if (!vv) return;
+    if (on && !kb.on) { vv.addEventListener('resize', kbSchedule); vv.addEventListener('scroll', kbSchedule); }
+    if (!on && kb.on) { vv.removeEventListener('resize', kbSchedule); vv.removeEventListener('scroll', kbSchedule); kbSet(0); }
+    kb.on = on; if (on) kbSchedule();
+  }
+
+  /* ── status-bar tint (v1.2) ─────────────────────────────────────────
+     iOS 26 Safari colours the status bar from body's background-color (or a
+     fixed element's background-color at the top edge). Scrims paint with an image
+     layer, so while one is up we give html/body the page colour dimmed by it —
+     the status bar dims together with the page, and is restored on close. */
+  var tintSaved = null;
+  function rgba(s) { var m = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?/.exec(s || ''); return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null; }
+  function tint() {
+    var r = doc.documentElement, b = doc.body; if (!b) return;
+    var scrims = stack.filter(function (el) { return el.__bs.scrim && !isNested(el); }).map(function (el) { return el.__bs.scrim; });
+    if (!scrims.length) {
+      if (tintSaved) { r.style.backgroundColor = tintSaved[0]; b.style.backgroundColor = tintSaved[1]; tintSaved = null; }
+      return;
+    }
+    if (!tintSaved) {
+      var base = rgba(getComputedStyle(b).backgroundColor);
+      if (!base || base[3] < 0.5) base = rgba(getComputedStyle(r).backgroundColor);
+      if (!base || base[3] < 0.5) base = [255, 255, 255, 1];
+      tintSaved = [r.style.backgroundColor, b.style.backgroundColor, base];
+    }
+    var col = tintSaved[2].slice(0, 3);
+    scrims.forEach(function (sc) {                       // stacked scrims compound
+      var c = rgba(getComputedStyle(sc).getPropertyValue('--bs-scrim-c')) || [13, 17, 23, 0.3];
+      col = [0, 1, 2].map(function (k) { return c[k] * c[3] + col[k] * (1 - c[3]); });
+    });
+    var css = 'rgb(' + col.map(Math.round).join(',') + ')';
+    r.style.backgroundColor = css; b.style.backgroundColor = css;
+  }
+  function scrimMs(sc) { var d = getComputedStyle(sc).transitionDuration; return (parseFloat(d) || 0) * (/ms/.test(d) ? 1 : 1000); }
+
+  /* ── open / close ───────────────────────────────────────────────── */
+  function layer() {
+    stack.forEach(function (el, i) {
+      var base = 'calc(var(--bs-z) + ' + (i * 2) + ')';
+      if (!isNested(el)) {
+        el.style.zIndex = 'calc(var(--bs-z) + ' + (i * 2 + 1) + ')';
+        if (el.__bs.scrim) el.__bs.scrim.style.zIndex = base;
+      } else {
+        el.style.zIndex = 12; if (el.__bs.scrim) el.__bs.scrim.style.zIndex = 11;
+      }
+    });
+  }
+
+  function open(target, opts) {
+    var el = $(target); if (!el) return false;
+    opts = opts || {};
+    var st = prepare(el);
+    if (stack.indexOf(el) > -1) return true;
+    if (!emit(el, 'shine:sheet-open', { trigger: opts.trigger || null }, true)) return false;
+    clearTimeout(st.timer);
+
+    st.trigger = opts.trigger || (doc.activeElement !== doc.body ? doc.activeElement : null);
+    if (st.trigger && st.trigger.setAttribute) { st.trigger.setAttribute('aria-expanded', 'true'); st.trigger.setAttribute('aria-controls', st.id); }
+
+    stack.push(el);
+    if (stack.length === 1) lock(true);
+    var scrim = scrimFor(el);
+    if (scrim) { clearTimeout(scrim.__t); scrim.hidden = false; }
+    el.hidden = false; el.style.transform = '';
+    layer();
+    watchCta(el, true);
+    void el.offsetHeight;                          // commit the closed position so the slide runs
+    el.classList.add('is-open');
+    if (scrim) scrim.classList.add('is-open');
+    syncScroll(el);
+    tint(); keyboard(true);
+
+    var af = el.querySelector('[data-bs-autofocus]');
+    try { (af || el).focus({ preventScroll: true }); } catch (e) { (af || el).focus(); }
+    st.timer = setTimeout(function () { syncScroll(el); emit(el, 'shine:sheet-opened', {}); }, durationOf(el));
+    return true;
+  }
+
+  function close(target, reason) {
+    var el = $(target); if (!el || !el.__bs) return false;
+    var st = el.__bs, i = stack.indexOf(el);
+    if (i < 0) return false;
+    reason = reason || 'api';
+    if (!emit(el, 'shine:sheet-close', { reason: reason }, true)) { el.style.transform = ''; return false; }
+    // closing a parent closes anything stacked above it first
+    for (var k = stack.length - 1; k > i; k--) close(stack[k], 'parent');
+
+    stack.splice(stack.indexOf(el), 1);
+    el.classList.remove('is-open', 'is-dragging');
+    el.style.transform = '';
+    if (st.scrim) {
+      var sc = st.scrim; sc.classList.remove('is-open');
+      clearTimeout(sc.__t); sc.__t = setTimeout(function () { if (!sc.classList.contains('is-open')) sc.hidden = true; }, scrimMs(sc) + 20);
+    }
+    if (st.trigger && st.trigger.setAttribute) st.trigger.setAttribute('aria-expanded', 'false');
+    if (!stack.length) { lock(false); keyboard(false); }
+    layer(); tint();
+
+    var trig = st.trigger; st.trigger = null;
+    if (trig && doc.contains(trig) && typeof trig.focus === 'function' && (!stack.length || stack[stack.length - 1].contains(trig))) {
+      try { trig.focus({ preventScroll: true }); } catch (e) { trig.focus(); }
+    } else if (stack.length) {
+      try { stack[stack.length - 1].focus({ preventScroll: true }); } catch (e) {}
+    }
+    clearTimeout(st.timer);
+    st.timer = setTimeout(function () {
+      if (stack.indexOf(el) > -1) return;            // reopened meanwhile
+      el.hidden = true;
+      watchCta(el, false);
+      emit(el, 'shine:sheet-closed', { reason: reason });
+    }, durationOf(el) + 20);
+    return true;
+  }
+
+  function toggle(target, opts) { var el = $(target); return isOpen(el) ? close(el, 'api') : open(el, opts); }
+  function isOpen(target) { var el = $(target); return !!el && stack.indexOf(el) > -1; }
+  function top() { return stack[stack.length - 1] || null; }
+  function closeAll(reason) { for (var k = stack.length - 1; k >= 0; k--) close(stack[k], reason || 'api'); }
+
+  /* ── drag to dismiss ────────────────────────────────────────────── */
+  function dragify(el, handle) {
+    var y0 = 0, t0 = 0, dy = 0, active = false, pid = null;
+    handle.addEventListener('pointerdown', function (e) {
+      if (!isOpen(el) || !dismissible(el) || e.button > 0) return;
+      if (e.target.closest('button, a, input, select, textarea, [role="button"]')) return;
+      active = true; pid = e.pointerId; y0 = e.clientY; t0 = e.timeStamp; dy = 0;
+      try { handle.setPointerCapture(pid); } catch (x) {}
+      el.classList.add('is-dragging');
+    });
+    handle.addEventListener('pointermove', function (e) {
+      if (!active || e.pointerId !== pid) return;
+      dy = Math.max(0, e.clientY - y0);
+      el.style.transform = 'translate3d(0,' + dy + 'px,0)';
+    });
+    function end(e) {
+      if (!active || (e && e.pointerId !== pid)) return;
+      active = false; el.classList.remove('is-dragging');
+      var v = dy / Math.max(1, (e ? e.timeStamp : t0) - t0);   // px / ms
+      if (dy > el.offsetHeight * 0.3 || (dy > 24 && v > 0.6)) close(el, 'drag');
+      else el.style.transform = '';
+    }
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
+  }
+
+  /* ── declarative triggers ───────────────────────────────────────── */
+  doc.addEventListener('click', function (e) {
+    var o = e.target.closest && e.target.closest('[data-bs-open]');
+    if (o) { e.preventDefault(); open(o.getAttribute('data-bs-open'), { trigger: o }); return; }
+    var c = e.target.closest && e.target.closest('[data-bs-close]');
+    if (c) { var s = c.closest('.bs'); if (s) { e.preventDefault(); close(s, 'close-button'); } }
+  });
+
+  function init(root) {
+    Array.prototype.forEach.call((root || doc).querySelectorAll('.bs'), prepare);
+  }
+  if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', function () { init(); }); else init();
+
+  // re-measure an auto sheet after the page swaps its content (optional — a MutationObserver already does this)
+  function refresh(target) { var el = $(target); if (el && el.__bs) { syncCta(el); syncScroll(el); } }
+
+  global.ShineSheet = { open: open, close: close, toggle: toggle, isOpen: isOpen, top: top, closeAll: closeAll, init: init, refresh: refresh, version: '1.2.1' };
+})(window);
+
+</script>
+<!-- ▲ COMPONENT · bottom-sheet -->
+<!-- ▼ COMPONENT · notify v1.0.1 · verbatim copy of App-logout/app-components/notify/notify.js — do not edit here -->
+<script data-component="notify">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · NOTIFY  (app component)                              v1.0.0
+   Pair with notify.css. Zero dependencies, no build step, no markup to paste.
+
+   Toast — dark pill at the bottom, tone shows in the icon colour
+     ShineNotify.toast('Resume uploaded')                              neutral
+     ShineNotify.toast('Job saved', { tone: 'success' })
+     ShineNotify.toast('Couldn’t copy the link', { tone: 'error' })
+       options: tone, icon (svg string), duration (ms; 0 = stay)
+
+   Alert — contextual card at the top (icon disc · title · text · action)
+     ShineNotify.alert({
+       tone: 'error',                          success · warning · error · brand · neutral
+       title: 'Couldn’t send OTP',
+       text: 'Something went wrong on our side.',   (plain text; `html` instead for <b>…</b>)
+       action: { label: 'Try again', onClick: retry },   or { label, href }
+       icon: '<svg…>',                         optional — replaces the tone icon (e.g. a logo)
+       duration: 6000                          ms; 0 = stays until dismissed
+     })
+
+   Both return a handle { dismiss() }. One toast and one alert at a time:
+   a new one replaces the old. ShineNotify.dismiss('toast' | 'alert' | undefined).
+   ShineNotify.configure({ toastBottom: 84, alertTop: 12 }) — px, e.g. to clear
+   a page's own bottom bar. Fires `shine:notify` on document
+   ({ kind, tone, message }) — the Android shell uses it for haptics.
+
+   Behaviour: alerts slide down, toasts slide up; the timer pauses while the
+   alert is pressed, hovered or focused; swipe an alert up (or tap it, or press
+   Escape) to dismiss; tapping the action runs it and closes the alert.
+   Durations default to the DS rules: toast 3 s (error 5 s); alert 5 s
+   (warning / error 6 s; +2 s when it has an action).
+   ═══════════════════════════════════════════════════════════════════════ */
+(function (global) {
+  'use strict';
+  var doc = global.document;
+  var TONES = ['success', 'warning', 'error', 'brand', 'neutral'];
+  var ICONS = {   // filled 24-grid glyphs (DS: filled icon that echoes the intent)
+    success: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.6-5.5 5.6a1.1 1.1 0 0 1-1.6 0l-2.3-2.3a1.1 1.1 0 1 1 1.6-1.6l1.5 1.5 4.7-4.8a1.1 1.1 0 0 1 1.6 1.6z"/></svg>',
+    warning: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10.3 3.4a2 2 0 0 1 3.4 0l8.1 14a2 2 0 0 1-1.7 3H3.9a2 2 0 0 1-1.7-3zM12 8.6c-.6 0-1.1.5-1.1 1.1v3.8a1.1 1.1 0 0 0 2.2 0V9.7c0-.6-.5-1.1-1.1-1.1zm0 9.2a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6z"/></svg>',
+    error:   '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 5.2c.6 0 1.1.5 1.1 1.1v4.6a1.1 1.1 0 0 1-2.2 0V8.3c0-.6.5-1.1 1.1-1.1zm0 9.9a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6z"/></svg>',
+    brand:   '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5c.5 0 .9.3 1 .8l1.2 4.4c.3 1 1.1 1.8 2.1 2.1l4.4 1.2a1 1 0 0 1 0 2l-4.4 1.2c-1 .3-1.8 1.1-2.1 2.1L13 20.7a1 1 0 0 1-2 0l-1.2-4.4c-.3-1-1.1-1.8-2.1-2.1L3.3 13a1 1 0 0 1 0-2l4.4-1.2c1-.3 1.8-1.1 2.1-2.1L11 3.3c.1-.5.5-.8 1-.8z"/></svg>',
+    neutral: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4.9a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6zm1.1 10a1.1 1.1 0 0 1-2.2 0v-4.6a1.1 1.1 0 0 1 2.2 0z"/></svg>'
+  };
+  var TOAST_ICONS = {   // toast: check for success, glyph per tone otherwise (14 px, on the dark pill)
+    success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>',
+    neutral: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>'
+  };
+  var cfg = { toastBottom: null, alertTop: null };
+  var layers = {}, current = {};
+
+  function tone(t) { return TONES.indexOf(t) > -1 ? t : 'neutral'; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function reduced() { return global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+  function emit(detail) { try { doc.dispatchEvent(new CustomEvent('shine:notify', { detail: detail })); } catch (e) {} }
+
+  function layer(kind) {
+    if (layers[kind] && layers[kind].isConnected) return layers[kind];
+    var l = doc.createElement('div');
+    l.className = 'sn-layer sn-layer--' + kind;
+    // persistent live regions: polite for toasts, the alert sets its own role per tone
+    if (kind === 'toast') { l.setAttribute('role', 'status'); l.setAttribute('aria-live', 'polite'); }
+    applyCfg(l);
+    doc.body.appendChild(l);
+    return (layers[kind] = l);
+  }
+  function applyCfg(l) {
+    if (cfg.toastBottom != null) l.style.setProperty('--sn-toast-bottom', cfg.toastBottom + 'px'); else l.style.removeProperty('--sn-toast-bottom');
+    if (cfg.alertTop != null) l.style.setProperty('--sn-alert-top', cfg.alertTop + 'px'); else l.style.removeProperty('--sn-alert-top');
+  }
+
+  /* shared lifecycle: in → timer (pausable) → out → removed */
+  function lifecycle(kind, el, duration, onClose) {
+    var timer = null, left = duration, started = 0, gone = false;
+    function start() { if (!duration || gone) return; started = Date.now(); timer = setTimeout(close, left); el.classList.remove('is-paused'); }
+    function pause() { if (!timer) return; clearTimeout(timer); timer = null; left -= Date.now() - started; el.classList.add('is-paused'); }
+    function close() {
+      if (gone) return; gone = true; clearTimeout(timer);
+      el.classList.remove('is-in'); el.classList.add('is-out');
+      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, reduced() ? 160 : 240);
+      if (current[kind] && current[kind].el === el) current[kind] = null;
+      if (onClose) onClose();
+    }
+    el.style.setProperty('--sn-dur', duration + 'ms');
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      el.classList.add('is-in'); if (duration) el.classList.add('is-running'); start();
+    }); });
+    return { start: start, pause: pause, close: close };
+  }
+
+  function replace(kind) { if (current[kind]) current[kind].close(); }
+
+  /* ── Toast ───────────────────────────────────────────────────────── */
+  function toast(message, opts) {
+    if (!doc.body) return { dismiss: function () {} };
+    opts = opts || {};
+    var t = tone(opts.tone || 'neutral');
+    var duration = opts.duration != null ? opts.duration : (t === 'error' ? 5000 : 3000);
+    replace('toast');
+    var el = doc.createElement('div');
+    el.className = 'sn-toast'; el.setAttribute('data-tone', t);
+    var icon = opts.icon != null ? opts.icon : (TOAST_ICONS[t] || ICONS[t]);
+    el.innerHTML = (icon ? '<span class="sn-toast-icon" aria-hidden="true">' + icon + '</span>' : '') + '<span class="sn-toast-text">' + esc(message) + '</span>';
+    var l = layer('toast'); l.appendChild(el);
+    var lc = lifecycle('toast', el, duration);
+    current.toast = { el: el, close: lc.close };
+    emit({ kind: 'toast', tone: t, message: String(message) });
+    return { dismiss: lc.close };
+  }
+
+  /* ── Alert ───────────────────────────────────────────────────────── */
+  function alert(o) {
+    if (!doc.body) return { dismiss: function () {} };
+    o = o || {};
+    var t = tone(o.tone || 'neutral');
+    var duration = o.duration != null ? o.duration : ((t === 'error' || t === 'warning') ? 6000 : 5000) + (o.action ? 2000 : 0);
+    replace('alert');
+    var el = doc.createElement('div');
+    el.className = 'sn-alert'; el.setAttribute('data-tone', t);
+    el.setAttribute('role', t === 'error' || t === 'warning' ? 'alert' : 'status');
+    var a = o.action, cta = '';
+    if (a && a.label) cta = a.href ? '<a class="sn-alert-cta" href="' + esc(a.href) + '">' + esc(a.label) + '</a>'
+                                   : '<button class="sn-alert-cta" type="button">' + esc(a.label) + '</button>';
+    el.innerHTML =
+      '<span class="sn-alert-disc" aria-hidden="true">' + (o.icon || ICONS[t]) + '</span>' +
+      '<div class="sn-alert-body">' +
+        (o.title ? '<span class="sn-alert-title">' + esc(o.title) + '</span>' : '') +
+        (o.html != null ? '<span class="sn-alert-text">' + o.html + '</span>' : (o.text ? '<span class="sn-alert-text">' + esc(o.text) + '</span>' : '')) +
+      '</div>' + cta +
+      (duration ? '<span class="sn-alert-timer" aria-hidden="true"></span>' : '') +
+      '<span class="sn-sr">Swipe up or tap to dismiss.</span>';
+    var l = layer('alert'); l.appendChild(el);
+    var lc = lifecycle('alert', el, duration, o.onClose);
+    current.alert = { el: el, close: lc.close };
+
+    // action
+    var btn = el.querySelector('.sn-alert-cta');
+    if (btn) btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (a.onClick) { if (!a.href) e.preventDefault(); a.onClick(e); }
+      lc.close();
+    });
+    // pause while attended
+    el.addEventListener('mouseenter', lc.pause); el.addEventListener('mouseleave', lc.start);
+    el.addEventListener('focusin', lc.pause); el.addEventListener('focusout', lc.start);
+    // swipe up / tap to dismiss
+    var y0 = null, dy = 0, moved = false;
+    el.addEventListener('pointerdown', function (e) {
+      if (e.target.closest('.sn-alert-cta')) return;
+      y0 = e.clientY; dy = 0; moved = false; lc.pause(); el.classList.add('is-dragging');
+      try { el.setPointerCapture(e.pointerId); } catch (x) {}
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (y0 == null) return;
+      dy = Math.min(0, e.clientY - y0) + Math.max(0, e.clientY - y0) * 0.2;   // up freely, down with resistance
+      if (Math.abs(e.clientY - y0) > 4) moved = true;
+      el.style.transform = 'translateY(' + dy + 'px)'; el.style.opacity = String(Math.max(0.2, 1 + dy / 120));
+    });
+    function release() {
+      if (y0 == null) return;
+      el.classList.remove('is-dragging'); y0 = null;
+      if (dy < -28 || !moved) { el.style.transform = ''; el.style.opacity = ''; lc.close(); return; }
+      el.style.transform = ''; el.style.opacity = ''; lc.start();
+    }
+    el.addEventListener('pointerup', release); el.addEventListener('pointercancel', function () { moved = true; release(); });
+
+    emit({ kind: 'alert', tone: t, message: String(o.title || o.text || '') });
+    return { dismiss: lc.close };
+  }
+
+  function dismiss(kind) {
+    ['toast', 'alert'].forEach(function (k) { if ((!kind || kind === k) && current[k]) current[k].close(); });
+  }
+  function configure(o) {
+    o = o || {};
+    if ('toastBottom' in o) cfg.toastBottom = o.toastBottom;
+    if ('alertTop' in o) cfg.alertTop = o.alertTop;
+    for (var k in layers) if (layers[k]) applyCfg(layers[k]);
+  }
+  // Escape closes the alert first (and only the alert), before sheets / modals underneath react
+  global.addEventListener('keydown', function (e) { if (e.key === 'Escape' && current.alert) { current.alert.close(); e.stopImmediatePropagation(); } }, true);
+
+  global.ShineNotify = { toast: toast, alert: alert, dismiss: dismiss, configure: configure, tones: TONES.slice(), version: '1.0.0' };
+})(window);
+
+</script>
+<!-- ▲ COMPONENT · notify -->
 <script>
 /* ── page config ─────────────────────────────────────────────────────────── */
 window.ShineSignupConfig = (function () {
@@ -1432,22 +2091,21 @@ window.ShineSignupConfig = (function () {
   return {
     homeUrl: 'index.html',                  // Back fallback (logged-out home)
     loginUrl: 'login-flow.html',                // "Have an account? Log in" · "Log in instead"
-    welcomeUrl: 'signup-welcome.html',  // I'll do it later · Yes, exit
-    recommendedUrl: 'recommended-jobs.html',   // Show me recommended jobs (4 jobs)
+    resumeUrl: 'signup-resume.html',    // a resume uploaded → reading your resume and the rest of that flow
+    manualUrl: 'signup-manual.html',    // Fill details manually → the manual onboarding flow
     demo: q.get('demo') !== '0'         // Demo data helper on by default; ?demo=0 hides it
   };
 })();
 </script>
 <script>window.__SU_ICONS = {"alert": "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 5.2c.6 0 1.1.5 1.1 1.1v4.6a1.1 1.1 0 0 1-2.2 0V8.3c0-.6.5-1.1 1.1-1.1zm0 9.9a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6z\"/></svg>", "checkc": "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.7 7.7-5.5 5.6a1 1 0 0 1-1.4 0l-2.5-2.5a1 1 0 1 1 1.4-1.4l1.8 1.8 4.8-4.9a1 1 0 0 1 1.4 1.4z\"/></svg>", "check": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" stroke-width=\"3\"><path d=\"M20 6L9 17l-5-5\"/></svg>", "info": "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4.6a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6zm1.1 10.2a1.1 1.1 0 0 1-2.2 0v-4.6a1.1 1.1 0 0 1 2.2 0v4.6z\"/></svg>", "x": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M18 6 6 18M6 6l12 12\"/></svg>", "plus": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg>", "search": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"M20 20l-3.5-3.5\"/></svg>", "more": "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"5\" r=\"1.6\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\"/><circle cx=\"12\" cy=\"19\" r=\"1.6\"/></svg>", "caret": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" stroke-width=\"2.4\"><path d=\"M6 9l6 6 6-6\"/></svg>", "brief": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"7\" width=\"18\" height=\"13\" rx=\"2\"/><path d=\"M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18\"/></svg>", "rupee": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 4h12M6 9h12M14.5 20 7 13h3a4.5 4.5 0 0 0 0-9\"/></svg>", "pin": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z\"/><circle cx=\"12\" cy=\"9.5\" r=\"2.5\"/></svg>"};</script>
 <script>
-/* ═══════════════════════════════════════════════════════════════════════
-   SHINE APP · SIGN UP FLOW — behaviour + mock backend
-   Views:  start (upload resume / fill manually) → parsing → verify (your details) → prefs (job preferences)
-   Sheets: Almost there (basic details) → OTP → Account created · parse failure · exit · delete · ⋮ menu ·
-           pickers · edit basic / education / employment / skills · Profile created · demo data
-   Ends:   "Show me recommended jobs" → recommendedUrl (4 jobs) · "I'll do it later" / exit → welcomeUrl
-   Config: window.ShineSignupConfig (signup-flow.html sets it).
-   ═══════════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   SHINE APP · SIGN UP · 1 — THE SIGN-UP SCREEN — behaviour
+   Upload resume → (uploading 0–100 %) → signup-resume.html, which reads it and runs the rest of that flow ·
+   file errors (type / size) stay here · Fill details manually → signup-manual.html · Log in · back.
+   The file (name · size) and the demo switches go to page 2 in sessionStorage (shine.su.file · shine.su.sim).
+   Config: window.ShineSignupConfig (this page sets it).
+   ═══════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
   var doc = document, html = doc.documentElement;
@@ -1458,154 +2116,19 @@ window.ShineSignupConfig = (function () {
   var Sheet = window.ShineSheet;
   if (CFG.demo !== false) html.classList.add('is-demo');
   function go(url) { window.location.href = url; }
-  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function toast(msg, tone) { if (window.ShineNotify) window.ShineNotify.toast(msg, { tone: tone || 'neutral' }); }
   function later(fn, ms) { return setTimeout(fn, ms == null ? 800 : ms); }
-  function busy(btn, label) {
-    var h = btn.innerHTML, dis = btn.disabled;
-    btn.disabled = true; btn.setAttribute('aria-busy', 'true');
-    btn.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span>' + label;
-    return function () { btn.innerHTML = h; btn.disabled = dis; btn.removeAttribute('aria-busy'); };
-  }
+  function store(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function stored(k) { try { return JSON.parse(sessionStorage.getItem(k) || 'null'); } catch (e) { return null; } }
 
-  /* ── reference data ───────────────────────────────────────────────── */
-  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  var NOW_Y = new Date().getFullYear();
-  function range(a, b) { var r = []; for (var i = a; i <= b; i++) r.push(i); return r; }
-  var OPT = {
-    expY: { title: 'Years of experience', list: range(0, 30).map(function (n) { return { v: n, l: n + (n === 1 ? ' Year' : ' Years') }; }) },
-    expM: { title: 'Months', list: range(0, 11).map(function (n) { return { v: n, l: n + (n === 1 ? ' Month' : ' Months') }; }) },
-    salary: { title: 'Current salary (annually)', list: [{ v: 0.5, l: 'Less than 1 LPA' }].concat(range(1, 50).map(function (n) { return { v: n, l: n + ' LPA' }; })).concat([{ v: 51, l: '50+ LPA' }]) },
-    expSal: { title: 'Expected salary (annually)', list: range(1, 50).map(function (n) { return { v: n, l: n + ' LPA' }; }).concat([{ v: 51, l: '50+ LPA' }]) },
-    loc: { title: 'Current location', search: 'Search city', list: [] },
-    course: { title: 'Education', search: 'Search course', list: ['10th', '12th', 'Diploma', 'B.A.', 'B.Com', 'B.Sc', 'BBA', 'BCA', 'B.Des', 'B.Tech (Computer Science)', 'B.Tech (Electronics)', 'B.Tech (Mechanical)', 'B.E. (Computer Science)', 'LLB', 'MBBS', 'M.A.', 'M.Com', 'M.Sc', 'MCA', 'MBA', 'PGDM', 'M.Des', 'M.Tech (Computer Science)', 'M.Tech (Electronics)', 'Ph.D'].map(function (s) { return { v: s, l: s }; }) },
-    eFrom: { title: 'Starting year', list: range(NOW_Y - 40, NOW_Y).reverse().map(function (n) { return { v: n, l: '' + n }; }) },
-    eTo: { title: 'Ending year', list: range(NOW_Y - 40, NOW_Y + 6).reverse().map(function (n) { return { v: n, l: '' + n }; }) },
-    grade: { title: 'Grading system', list: [{ v: 'cgpa10', l: 'Scale of 10 (CGPA)' }, { v: 'gpa4', l: 'Scale of 4 (GPA)' }, { v: 'pct', l: 'Percentage' }, { v: 'pass', l: 'Course requires a pass' }] },
-    dept: { title: 'Department', search: 'Search department', list: ['Product Management', 'Engineering - Software', 'Data Science & Analytics', 'UX, Design & Architecture', 'Sales & Business Development', 'Marketing & Communication', 'Customer Success & Support', 'Finance & Accounting', 'Human Resources', 'Operations', 'Consulting', 'Legal & Regulatory', 'Healthcare & Life Sciences', 'Teaching & Training'].map(function (s) { return { v: s, l: s }; }) },
-    ind: { title: 'Industry', search: 'Search industry', list: ['Internet & E-commerce', 'IT Services & Consulting', 'Software Product', 'Fintech / Payments', 'Banking', 'Insurance', 'Quick Commerce', 'Food Delivery', 'EdTech', 'HealthTech', 'Telecom', 'Automobile', 'FMCG', 'Media & Entertainment', 'Retail', 'Manufacturing'].map(function (s) { return { v: s, l: s }; }) },
-    dojM: { title: 'Month of joining', list: MONTHS.map(function (m, i) { return { v: i, l: m }; }) },
-    dojY: { title: 'Year of joining', list: range(NOW_Y - 40, NOW_Y).reverse().map(function (n) { return { v: n, l: '' + n }; }) },
-    lwdM: { title: 'Last working month', list: MONTHS.map(function (m, i) { return { v: i, l: m }; }) },
-    lwdY: { title: 'Last working year', list: range(NOW_Y - 40, NOW_Y).reverse().map(function (n) { return { v: n, l: '' + n }; }) }
-  };
-  var CITIES = ['Gurugram, Haryana', 'Noida, Uttar Pradesh', 'New Delhi, Delhi', 'Bengaluru, Karnataka', 'Mumbai, Maharashtra', 'Pune, Maharashtra', 'Hyderabad, Telangana', 'Chennai, Tamil Nadu', 'Kolkata, West Bengal', 'Ahmedabad, Gujarat', 'Jaipur, Rajasthan', 'Chandigarh', 'Indore, Madhya Pradesh', 'Kochi, Kerala', 'Lucknow, Uttar Pradesh', 'Bhubaneswar, Odisha', 'Coimbatore, Tamil Nadu', 'Nagpur, Maharashtra', 'Remote'];
-  OPT.loc.list = CITIES.filter(function (c) { return c !== 'Remote'; }).map(function (c) { return { v: c, l: c }; });
-  var SRC = {
-    cities: CITIES,
-    roles: ['Product Manager', 'Senior Product Manager', 'Lead Product Manager', 'Group Product Manager', 'Associate Product Manager', 'Product Owner', 'Program Manager', 'Product Analyst', 'Business Analyst', 'Product Marketing Manager', 'Technical Product Manager', 'Director of Product', 'UX Designer', 'Data Analyst', 'Software Engineer'],
-    skills: ['Product Management', 'Product Strategy', 'Roadmapping', 'User Research', 'Stakeholder Management', 'A/B Testing', 'SQL', 'Data Analysis', 'Agile', 'Scrum', 'JIRA', 'Go-to-Market', 'Wireframing', 'Figma', 'Critical Thinking', 'Communication', 'Market Research', 'Product Analytics', 'Python', 'Excel', 'Leadership', 'Prioritisation']
-  };
-  var NOTICE = { immediate: 'Immediate joiner', d15: '15 days', m1: '1 month', m2: '2 months', m2p: '2+ months', serving: 'Serving notice' };
-  var ETYPE = { permanent: 'Permanent', contract: 'Contractual', intern: 'Internship', freelance: 'Freelance' };
-  var CTYPE = { full: 'Full time', part: 'Part time', distance: 'Distance' };
-  var GRADE_UNIT = { cgpa10: 'CGPA', gpa4: 'GPA', pct: '%' };
+  /* demo switches (Simulate) — page 2 reads them */
+  var SIM = stored('shine.su.sim') || { unreadable: false, partial: false };
+  function syncSim() { Object.keys(SIM).forEach(function (k) { $$('[data-sim="' + k + '"]').forEach(function (n) { n.setAttribute('aria-checked', !!SIM[k]); }); }); }
 
-  /* ── mock backend ─────────────────────────────────────────────────── */
-  var DB = {
-    emails: { 'ramaraj.lingam@gmail.com': 1, 'designkhk@gmail.com': 1 },       // already on Shine (the log-in demo accounts)
-    phones: { '9876543210': 1, '7564678585': 1 },
-    otp: '1234'
-  };
-  var SIM = { unreadable: false, partial: false };
-  function parsedProfile() {
-    var p = {
-      name: 'Ramalingam Narayan Murthy', loc: 'Gurugram, Haryana', email: 'ramalingam.murthy@gmail.com', phone: '9585544888',
-      expY: 4, expM: 5, fresher: false, salary: 14, notice: 'immediate', gender: 'Male',
-      emp: [
-        { id: 1, role: 'Lead Product Manager', co: 'Google India', city: 'Gurugram', type: 'permanent', dept: 'Product Management', ind: 'Internet & E-commerce', cur: true, dojM: 4, dojY: 2023 },
-        { id: 2, role: 'Product Manager', co: 'Blinkit', city: 'Gurugram', type: 'permanent', dept: 'Product Management', ind: 'Quick Commerce', cur: false, dojM: 4, dojY: 2019, lwdM: 1, lwdY: 2023 },
-        { id: 3, role: 'Product Analyst', co: 'Blinkit', city: 'Gurugram', type: 'intern', dept: 'Data Science & Analytics', ind: 'Quick Commerce', cur: false, dojM: 7, dojY: 2018, lwdM: 2, lwdY: 2019 }
-      ],
-      edu: [
-        { id: 1, course: 'M.Tech (Computer Science)', uni: 'Indian Institute of Technology, Kharagpur', ctype: 'full', from: 2016, to: 2018, grade: 'cgpa10', score: '8.5' },
-        { id: 2, course: 'B.Tech (Computer Science)', uni: 'Indian Institute of Technology, Delhi', ctype: 'full', from: 2012, to: 2016 }
-      ],
-      skills: ['Product Management', 'Product Strategy', 'User Research', 'Stakeholder Management', 'A/B Testing', 'SQL']
-    };
-    if (SIM.partial) {            // the resume missed a few things
-      p.salary = null; p.notice = null; p.expM = null;
-      delete p.emp[0].type; delete p.emp[0].dojM; delete p.emp[0].dojY; p.emp[0].cur = null;
-      delete p.edu[0].from; delete p.edu[0].to;
-    }
-    return p;
-  }
-  function blankProfile() {
-    return { name: '', loc: '', email: '', phone: '', expY: null, expM: null, fresher: false, salary: null, notice: null, gender: null, emp: [], edu: [], skills: [] };
-  }
-  var P = blankProfile();          // the profile being built
-  var mode = 'resume';             // resume | manual
-  var created = false;             // account exists (after OTP)
-  var uid = 100;
+  /* ── back: the screen that opened sign up ─────────────────────────── */
+  function leave() { if (history.length > 1) history.back(); else go(CFG.homeUrl || 'index.html'); }
 
-  /* ── formatters ───────────────────────────────────────────────────── */
-  function fmtPhone(d) { return d.length > 5 ? d.slice(0, 5) + ' ' + d.slice(5) : d; }
-  function firstName() { return (P.name || '').trim().split(/\s+/)[0] || ''; }
-  function expText(p) {
-    if (p.fresher) return 'Fresher';
-    if (p.expY == null) return '';
-    var y = p.expY, m = p.expM || 0, ys = y + (y === 1 ? ' year' : ' years');
-    if (!m) return ys;
-    return (y ? ys + ', ' : '') + m + (m === 1 ? ' month' : ' months');
-  }
-  function salText(v) { if (v == null) return ''; if (v === 0.5) return 'Less than 1 LPA'; if (v === 51) return '50+ LPA'; return v + ' LPA'; }
-  function labelOf(key, v) { var o = (OPT[key].list || []).filter(function (x) { return x.v === v; })[0]; return o ? o.l : ''; }
-  function mon(m) { return MONTHS[m].slice(0, 3); }
-  function empDur(e) {
-    if (e.dojY == null || e.dojM == null || e.cur == null) return '';
-    return mon(e.dojM) + ' ' + e.dojY + ' – ' + (e.cur ? 'Present' : (e.lwdY != null && e.lwdM != null ? mon(e.lwdM) + ' ' + e.lwdY : ''));
-  }
-  function empMissing(e) {
-    var dur = !(e.dojY != null && e.dojM != null && e.cur != null && (e.cur || (e.lwdY != null && e.lwdM != null))), type = !e.type;
-    return dur && type ? 'Employment duration & type are missing' : dur ? 'Employment duration is missing' : type ? 'Employment type is missing' : '';
-  }
-  function eduMissing(e) {
-    var dur = !(e.from && (e.pursuing || e.to)), type = !e.ctype;
-    return dur && type ? 'Course duration & type are missing' : dur ? 'Course duration is missing' : type ? 'Course type is missing' : '';
-  }
-  function basicMissing(p) {
-    var m = [];
-    if (!p.fresher && p.expY == null) m.push('expY');
-    if (!p.fresher && p.salary == null) m.push('salary');
-    if (!p.notice) m.push('notice');
-    return m;
-  }
-
-  /* ── routing ──────────────────────────────────────────────────────── */
-  var current = 'start', depth = 0;
-  function route(name, opts) {
-    opts = opts || {};
-    if (!opts.keepSheets) Sheet.closeAll('route');
-    $$('.view').forEach(function (v) { v.hidden = v.getAttribute('data-view') !== name; });
-    current = name;
-    /* phone browsers paint the status / address bar from theme-color: dark on the hero screens, page colour inside */
-    var tc = doc.querySelector('meta[name="theme-color"]'); if (tc) tc.content = name === 'start' || name === 'parsing' ? '#0C1731' : '#FAF9F6';
-    html.classList.toggle('su-top-dark', name === 'start' || name === 'parsing');   /* iPhone: status bar = body colour (navy) */
-    if (opts.replace) history.replaceState({ v: name, d: depth }, '', '#' + name);
-    else if (!opts.silent) { depth++; history.pushState({ v: name, d: depth }, '', '#' + name); }
-    window.scrollTo(0, 0);
-    var h = $('.view[data-view="' + name + '"] h1');
-    if (h && opts.focus !== false) { h.setAttribute('tabindex', '-1'); try { h.focus({ preventScroll: true }); } catch (e) {} }
-    if (name === 'start') resetUpload();
-  }
-  window.addEventListener('popstate', function (e) {
-    var v = (e.state && e.state.v) || (location.hash || '#start').slice(1);
-    depth = (e.state && e.state.d) || 0;
-    if (created && (v === 'start' || v === 'parsing')) {          // the account exists: back = "leave before you finish?"
-      history.pushState({ v: current, d: ++depth }, '', '#' + current);
-      Sheet.closeAll('back'); setTimeout(function () { Sheet.open('#exitSheet'); }, 30);
-      return;
-    }
-    if (!created && (v === 'verify' || v === 'prefs')) v = 'start';
-    if (v === 'parsing') v = 'start';                              // parsing is a one-way step
-    cancelParse(); route(v, { silent: true });
-  });
-  function leave() {                                               // back from the first screen → the screen that opened sign up
-    if (history.length > depth + 1 && depth >= 0) history.go(-(depth + 1));
-    else go(CFG.homeUrl || 'index.html');
-  }
-
-  /* ── Why Shine carousel (start + exit sheet) ─────────────────────── */
+  /* ── Why Shine carousel ───────────────────────────────────────────── */
   function carousel(root) {
     var slides = $$('.su-stat', root.querySelector('.su-stats')), dots = $$('.su-dot', root), i = 0, t = 0;
     function show(n) {
@@ -1617,16 +2140,16 @@ window.ShineSignupConfig = (function () {
     dots.forEach(function (d, k) { d.addEventListener('click', function () { show(k); run(); }); });
     show(0); run();
   }
-  carousel($('.su-land .su-why')); carousel($('#exitSheet .su-miss-card'));
+  carousel($('.su-land .su-why'));
 
-  /* ── 1 · upload ───────────────────────────────────────────────────── */
-  var upBox = $('#upBox'), fileIn = $('#fileIn'), up = { timer: 0, pct: 0, file: null };
+  /* ── upload ───────────────────────────────────────────────────────── */
+  var upBox = $('#upBox'), fileIn = $('#fileIn'), up = { timer: 0, nav: 0, file: null };
   var MAX = 5 * 1024 * 1024;
   function upState(s) {
     upBox.setAttribute('data-state', s);
     $('#upProg').hidden = s !== 'busy'; $('#upErr').hidden = s !== 'error';
   }
-  function resetUpload() { clearInterval(up.timer); up.file = null; upState('idle'); try { fileIn.value = ''; } catch (e) {} }
+  function resetUpload() { clearInterval(up.timer); clearTimeout(up.nav); up.file = null; upState('idle'); try { fileIn.value = ''; } catch (e) {} }
   function pick() { try { fileIn.value = ''; } catch (e) {} fileIn.click(); }
   $('#upBtn').addEventListener('click', pick);
   fileIn.addEventListener('change', function () { var f = fileIn.files && fileIn.files[0]; if (f) takeFile({ name: f.name, size: f.size }); });
@@ -1640,541 +2163,17 @@ window.ShineSignupConfig = (function () {
     clearInterval(up.timer);
     up.timer = setInterval(function () {
       setPct(steps[k++]);
-      if (k === steps.length) { clearInterval(up.timer); later(startParse, 380); }
+      if (k === steps.length) {                                     // uploaded → page 2 reads it
+        clearInterval(up.timer);
+        store('shine.su.file', { name: f.name, size: f.size }); store('shine.su.sim', SIM);
+        up.nav = later(function () { go(CFG.resumeUrl || 'signup-resume.html'); }, 380);
+      }
     }, 260);
   }
   function setPct(p) { $('#upPct').textContent = p + '%'; $('#upBar .progress-fill').style.width = p + '%'; $('#upBar').setAttribute('aria-valuenow', p); }
-  function upError(h, f) {
-    $('#upErrH').textContent = h; $('#upErrF').textContent = f.name + ' · ' + fmtSize(f.size); upState('error');
-  }
-
-  /* ── 2 · parsing ──────────────────────────────────────────────────── */
-  var parse = { timers: [], tick: 0 };
-  function cancelParse() { parse.timers.forEach(clearTimeout); parse.timers = []; clearInterval(parse.tick); }
-  function startParse() {
-    mode = 'resume';
-    var view = $('.su-parse'), steps = $$('.su-step');
-    function prog(p) { view.style.setProperty('--su-parse-p', p); }   // thin progress bar under the subtitle (0 → 1)
-    prog(0);
-    view.classList.remove('is-done');
-    $('#parseTitle').textContent = 'Reading your resume';
-    $('#parseSub').textContent = 'We’ll fill your profile from it';
-    var b = $('#parseBadge'); b.className = 'badge badge--brand su-parse-badge'; b.textContent = '';
-    steps.forEach(function (s) { s.className = 'su-step'; });
-    route('parsing');
-    var STEP = 900, failAt = SIM.unreadable ? 1 : -1;
-    steps.forEach(function (s, i) {
-      parse.timers.push(setTimeout(function () {
-        if (i > 0) steps[i - 1].className = 'su-step is-done';
-        if (i === failAt) { s.className = 'su-step is-active'; parse.timers.push(setTimeout(function () { Sheet.open('#failSheet'); }, 700)); cancelAfter(); return; }
-        s.className = 'su-step is-active'; prog((i + .5) / steps.length);
-      }, 250 + i * STEP));
-    });
-    if (failAt >= 0) return;
-    parse.timers.push(setTimeout(function () {
-      steps[steps.length - 1].className = 'su-step is-done';
-      view.classList.add('is-done'); prog(1);
-      $('#parseTitle').textContent = 'Your profile is ready';
-      $('#parseSub').textContent = 'Next, check your details';
-      var n = 3;
-      function tickTxt() { b.textContent = 'Continuing in ' + n + 's'; }
-      tickTxt();
-      parse.tick = setInterval(function () { n--; if (n <= 0) { clearInterval(parse.tick); openBasic(parsedProfile()); } else tickTxt(); }, 1000);
-    }, 250 + steps.length * STEP));
-    function cancelAfter() { var keep = parse.timers.slice(-1); parse.timers.slice(0, -1).forEach(clearTimeout); parse.timers = keep; }
-  }
-
-  /* ── selects (picker sheet = JSRP Sort anatomy) ───────────────────── */
-  var pickCtx = null, pickSheet = $('#pickSheet'), pickList = $('#pickList'), pickQ = $('#pickQ');
-  function openPick(key, cur, onPick, trigger) {
-    var o = OPT[key]; pickCtx = { key: key, cur: cur, onPick: onPick };
-    $('#pickTitle').textContent = o.title;
-    var hasSearch = !!o.search;
-    pickSheet.classList.toggle('has-search', hasSearch);
-    $('.su-pick-search', pickSheet).hidden = !hasSearch;
-    pickQ.value = ''; pickQ.placeholder = o.search || 'Search';
-    renderPick('');
-    if (trigger) trigger.setAttribute('aria-expanded', 'true');
-    pickCtx.trigger = trigger;
-    Sheet.open(pickSheet, { trigger: trigger });
-    var on = $('.su-row[aria-checked="true"]', pickList);
-    if (on) setTimeout(function () { on.scrollIntoView({ block: 'center' }); }, 0);
-  }
-  function renderPick(q) {
-    var o = OPT[pickCtx.key], ql = q.trim().toLowerCase();
-    var list = o.list.filter(function (x) { return !ql || x.l.toLowerCase().indexOf(ql) > -1; });
-    if (!list.length && ql && pickCtx.key !== 'loc') list = [{ v: q.trim(), l: q.trim(), add: true }];
-    pickList.innerHTML = list.length ? list.map(function (x) {
-      var on = x.v === pickCtx.cur;
-      return '<button class="su-row" type="button" role="radio" aria-checked="' + on + '" data-v="' + esc(JSON.stringify(x.v)) + '"><span>' + (x.add ? 'Add “' + esc(x.l) + '”' : esc(x.l)) + '</span><span class="su-radio" aria-hidden="true"></span></button>';
-    }).join('') : '<p class="su-pick-empty">No matches. Try another word.</p>';
-  }
-  pickQ.addEventListener('input', function () { renderPick(pickQ.value); });
-  pickList.addEventListener('click', function (e) {
-    var r = e.target.closest('.su-row'); if (!r) return;
-    var v = JSON.parse(r.getAttribute('data-v'));
-    $$('.su-row', pickList).forEach(function (n) { n.setAttribute('aria-checked', n === r); });
-    var o = OPT[pickCtx.key];
-    if (o.search && !o.list.some(function (x) { return x.v === v; })) o.list.unshift({ v: v, l: v });   // typed a new value
-    var fn = pickCtx.onPick;
-    setTimeout(function () { Sheet.close(pickSheet, 'picked'); fn(v); }, 140);
-  });
-  pickSheet.addEventListener('shine:sheet-closed', function (e) { if (e.target === pickSheet && pickCtx && pickCtx.trigger) pickCtx.trigger.setAttribute('aria-expanded', 'false'); });
-  function setSel(btn, text) { $('.su-sel-v', btn).textContent = text || ''; btn.closest('.field') && btn.closest('.field').classList.remove('field--missing'); }
-
-  /* chips: single (radio-like) + multi (toggle) */
-  function chipsSingle(row, val, onChange) {
-    $$('.chip', row).forEach(function (c) { c.setAttribute('aria-pressed', c.getAttribute('data-v') === String(val)); });
-    if (onChange) row._on = onChange;
-  }
-  doc.addEventListener('click', function (e) {
-    var c = e.target.closest('.su-chip-row .chip'); if (!c) return;
-    var row = c.parentNode, v = c.getAttribute('data-v');
-    if (row.hasAttribute('data-multi')) { c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') !== 'true'); }
-    else { $$('.chip', row).forEach(function (n) { n.setAttribute('aria-pressed', n === c); }); }
-    if (row._on) row._on(v);
-  });
-
-  /* token fields (roles, locations, skills) */
-  function tokenField(root, onChange) {
-    var input = $('input', root), chips = $('.su-chips', root), list = $('.su-sugg', root), max = +root.getAttribute('data-max'), src = SRC[root.getAttribute('data-src')];
-    var vals = [], act = -1, ph = input.placeholder;
-    function render() {
-      chips.innerHTML = vals.map(function (v, i) {
-        return '<span class="chip chip--removable">' + esc(v) + '<button class="chip-x" type="button" data-i="' + i + '" aria-label="Remove ' + esc(v) + '">' + IC.x + '</button></span>';
-      }).join('');
-      var full = vals.length >= max;
-      root.classList.toggle('is-full', full); input.disabled = full; input.placeholder = full ? 'Maximum ' + max + ' added' : ph;
-      if (onChange) onChange(vals.slice());
-    }
-    function sugg() {
-      var q = input.value.trim().toLowerCase();
-      if (!q) { list.hidden = true; return; }
-      var m = src.filter(function (s) { return s.toLowerCase().indexOf(q) > -1 && vals.indexOf(s) < 0; }).slice(0, 6);
-      var exact = src.some(function (s) { return s.toLowerCase() === q; }) || vals.some(function (s) { return s.toLowerCase() === q; });
-      var items = m.map(function (s) { var i = s.toLowerCase().indexOf(q); return { v: s, h: esc(s.slice(0, i)) + '<b>' + esc(s.slice(i, i + q.length)) + '</b>' + esc(s.slice(i + q.length)) }; });
-      if (!exact && root.getAttribute('data-src') !== 'cities') items.push({ v: input.value.trim(), h: 'Add “' + esc(input.value.trim()) + '”', add: true });
-      act = items.length ? 0 : -1;
-      list.innerHTML = items.map(function (it, i) { return '<li role="option" data-v="' + esc(it.v) + '"' + (it.add ? ' class="su-sugg-new"' : '') + ' aria-selected="' + (i === act) + '">' + (it.add ? IC.plus : IC.search) + '<span>' + it.h + '</span></li>'; }).join('');
-      list.hidden = !items.length;
-    }
-    function add(v) {
-      if (!v || vals.length >= max) return;
-      if (vals.some(function (x) { return x.toLowerCase() === v.toLowerCase(); })) { toast('Already added'); return; }
-      vals.push(v); input.value = ''; list.hidden = true; render();
-      if (vals.length < max) input.focus();
-    }
-    input.addEventListener('input', sugg);
-    input.addEventListener('keydown', function (e) {
-      var opts = $$('li', list);
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (!opts.length) return; act = (act + (e.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length; opts.forEach(function (o, i) { o.setAttribute('aria-selected', i === act); }); }
-      else if (e.key === 'Enter') { e.preventDefault(); if (opts[act]) add(opts[act].getAttribute('data-v')); }
-      else if (e.key === 'Backspace' && !input.value && vals.length) { vals.pop(); render(); }
-      else if (e.key === 'Escape') { list.hidden = true; }
-    });
-    input.addEventListener('blur', function () { setTimeout(function () { list.hidden = true; }, 150); });
-    list.addEventListener('mousedown', function (e) { e.preventDefault(); });
-    list.addEventListener('click', function (e) { var li = e.target.closest('li'); if (li) add(li.getAttribute('data-v')); });
-    chips.addEventListener('click', function (e) { var x = e.target.closest('.chip-x'); if (!x) return; vals.splice(+x.getAttribute('data-i'), 1); render(); input.focus(); });
-    return { set: function (a) { vals = (a || []).slice(0, max); render(); }, get: function () { return vals.slice(); }, add: add, input: input };
-  }
-
-  /* ── field helpers ────────────────────────────────────────────────── */
-  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
-  function setMsg(input, state, htmlMsg) {
-    var f = input.closest('.field'), m = $('.field-message', f);
-    f.classList.toggle('field--invalid', state === 'invalid');
-    if (state === 'invalid') { input.setAttribute('aria-invalid', 'true'); m.innerHTML = IC.alert + '<span>' + htmlMsg + '</span>'; m.hidden = false; }
-    else { input.removeAttribute('aria-invalid'); m.hidden = true; m.innerHTML = ''; }
-  }
-
-  /* ── Almost there (basic details) ─────────────────────────────────── */
-  var B = {}, bSheet = $('#basicSheet'), bName = $('#bName'), bEmail = $('#bEmail'), bPhone = $('#bPhone'), bBtn = $('#bBtn');
-  var bSel = { loc: $('[data-pick="loc"]', bSheet), expY: $('[data-pick="expY"]', bSheet), expM: $('[data-pick="expM"]', bSheet), salary: $('[data-pick="salary"]', bSheet) };
-  var bFresh = $('[data-bind="fresher"]', bSheet), bNotice = $('[data-single="notice"]', bSheet);
-  function openBasic(p) {
-    cancelParse();
-    B = { name: p.name, loc: p.loc, email: p.email, phone: p.phone, expY: p.expY, expM: p.expM, fresher: p.fresher, salary: p.salary, notice: p.notice, base: p };
-    $('#bTitle').innerHTML = mode === 'manual' ? 'Add your basic <span class="accent">details.</span>' : 'Almost <span class="accent">there.</span>';
-    $('#bMsg').textContent = mode === 'manual' ? 'A few details to set up your account. You can add the rest next.' : 'We pulled this from your resume. Just confirm and we’ll set up your account.';
-    bName.value = B.name || ''; bEmail.value = B.email || ''; bPhone.value = B.phone ? fmtPhone(B.phone) : '';
-    [bName, bEmail, bPhone].forEach(function (i) { setMsg(i, null); });
-    $('#bAlert').innerHTML = '';
-    syncBasic();
-    Sheet.open(bSheet);
-  }
-  function syncBasic() {
-    setSel(bSel.loc, B.loc); setSel(bSel.expY, B.expY == null ? '' : labelOf('expY', B.expY)); setSel(bSel.expM, B.expM == null ? '' : labelOf('expM', B.expM));
-    setSel(bSel.salary, salText(B.salary));
-    bFresh.checked = !!B.fresher;
-    [bSel.expY, bSel.expM, bSel.salary].forEach(function (b) { b.disabled = !!B.fresher; });
-    chipsSingle(bNotice, B.notice);
-    bReady();
-  }
-  function bValid() {
-    return bName.value.trim().length >= 2 && !!B.loc && EMAIL_RE.test(bEmail.value.trim()) && /^[6-9]\d{9}$/.test(bPhone.value.replace(/\D/g, '')) &&
-      (B.fresher || (B.expY != null && B.expM != null && B.salary != null)) && !!B.notice &&
-      !$('.field--invalid', bSheet);
-  }
-  function bReady() { bBtn.disabled = !bValid(); }
-  bName.addEventListener('input', function () { setMsg(bName, null); bReady(); });
-  bEmail.addEventListener('input', function () { setMsg(bEmail, null); bReady(); });
-  bEmail.addEventListener('blur', function () { var v = bEmail.value.trim(); if (v && !EMAIL_RE.test(v)) setMsg(bEmail, 'invalid', 'Enter a valid email address'); bReady(); });
-  bPhone.addEventListener('input', function () {
-    var d = bPhone.value.replace(/\D/g, '').slice(0, 10), f = fmtPhone(d);
-    if (bPhone.value !== f) bPhone.value = f;
-    setMsg(bPhone, null); bReady();
-  });
-  bPhone.addEventListener('blur', function () { var d = bPhone.value.replace(/\D/g, ''); if (d && !/^[6-9]\d{9}$/.test(d)) setMsg(bPhone, 'invalid', 'Enter a valid 10-digit mobile number'); bReady(); });
-  Object.keys(bSel).forEach(function (k) {
-    bSel[k].addEventListener('click', function () {
-      openPick(k, B[k], function (v) { B[k] = v; syncBasic(); }, bSel[k]);
-    });
-  });
-  bFresh.addEventListener('change', function () { B.fresher = bFresh.checked; if (B.fresher) { B.expY = 0; B.expM = 0; B.salary = null; } syncBasic(); });
-  chipsSingle(bNotice, null, function (v) { B.notice = v; bReady(); });
-  bSheet.addEventListener('click', function (e) {
-    var a = e.target.closest('[data-act="basic-close"]'); if (!a) return;
-    Sheet.close(bSheet, 'close-button'); later(function () { route('start'); }, 280);
-  });
-  bBtn.addEventListener('click', function () {
-    if (!bValid()) return;
-    var email = bEmail.value.trim().toLowerCase(), phone = bPhone.value.replace(/\D/g, '');
-    var done = busy(bBtn, 'Checking…');
-    later(function () {
-      done();
-      var bad = false;
-      if (DB.emails[email]) { setMsg(bEmail, 'invalid', 'This email is already on Shine. <a href="#" data-act="login">Log in instead</a> or try a different email'); bad = bEmail; }
-      if (DB.phones[phone]) { setMsg(bPhone, 'invalid', 'This number is already on Shine. <a href="#" data-act="login">Log in instead</a> or try a different number'); bad = bad || bPhone; }
-      bReady();
-      if (bad) { bad.closest('.field').scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
-      B.name = bName.value.trim().replace(/\s+/g, ' '); B.email = email; B.phone = phone;
-      openOtp();
-    }, 700);
-  });
-
-  /* ── OTP ──────────────────────────────────────────────────────────── */
-  var otp = { timer: 0, until: 0, tries: 0, busy: false, auto: 0, wrong: false, clr: 0 };
-  var otpInput = $('#otpInput'), otpBtn = $('#otpBtn'), otpWrap = $('#otpBoxes'), boxes = $$('#otpBoxes .otp-seg');
-  function renderBoxes() {
-    var v = otpInput.value, foc = doc.activeElement === otpInput && !otpWrap.classList.contains('otp--invalid');
-    boxes.forEach(function (b, i) { b.textContent = v[i] || ''; b.classList.toggle('is-filled', !!v[i]); b.classList.toggle('is-focused', foc && v.length < 4 && i === v.length); });
-  }
-  function mmss(s) { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
-  function otpMeta() {
-    var m = $('#otpMeta'), left = (otp.until - Date.now()) / 1000;
-    var err = otp.wrong ? '<p class="otp-error">Wrong OTP · ' + (4 - otp.tries) + ' tr' + (4 - otp.tries === 1 ? 'y' : 'ies') + ' left</p>' : '';
-    m.innerHTML = err + (left > 0 ? '<p class="otp-resend">Resend OTP in <span class="countdown">' + mmss(left) + '</span></p>'
-      : '<p class="otp-resend">Didn’t get the OTP?<button class="resend-btn" type="button" data-act="resend">Resend OTP</button></p>');
-  }
-  function startTimer() { otp.until = Date.now() + 60000; clearInterval(otp.timer); otp.timer = setInterval(function () { otpMeta(); if (Date.now() > otp.until) clearInterval(otp.timer); }, 500); otpMeta(); }
-  function openOtp() {
-    otp.tries = 0; otp.wrong = false; otp.busy = false; clearTimeout(otp.clr);
-    $('#otpTo').textContent = '+91 ' + fmtPhone(B.phone);
-    otpInput.value = ''; otpInput.disabled = false; otpWrap.classList.remove('otp--invalid', 'otp--complete', 'otp--locked'); otpBtn.disabled = true; $('#otpAlert').innerHTML = '';
-    renderBoxes(); startTimer();
-    Sheet.open('#otpSheet', { trigger: bBtn });
-    setTimeout(function () { if (doc.activeElement !== otpInput) try { otpInput.focus({ preventScroll: true }); } catch (e) { otpInput.focus(); } }, 60);
-  }
-  otpInput.addEventListener('input', function () {
-    var d = otpInput.value.replace(/\D/g, '').slice(0, 4);
-    if (otpInput.value !== d) otpInput.value = d;
-    if (otpWrap.classList.contains('otp--invalid')) { otpWrap.classList.remove('otp--invalid'); otp.wrong = false; otpMeta(); }
-    otpBtn.disabled = d.length !== 4; renderBoxes();
-    clearTimeout(otp.auto); otpWrap.classList.remove('otp--complete');
-    if (d.length === 4 && !otp.busy) { void otpWrap.offsetWidth; otpWrap.classList.add('otp--complete'); otp.auto = setTimeout(function () { if (otpInput.value.length === 4 && !otp.busy) otpBtn.click(); }, 280); }
-  });
-  otpInput.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !otpBtn.disabled) { e.preventDefault(); otpBtn.click(); } });
-  ['focus', 'blur', 'keyup', 'click'].forEach(function (ev) { otpInput.addEventListener(ev, function () { try { otpInput.setSelectionRange(otpInput.value.length, otpInput.value.length); } catch (e) {} renderBoxes(); }); });
-  otpBtn.addEventListener('click', function () {
-    if (otpInput.value.length !== 4 || otp.busy) return;
-    clearTimeout(otp.auto); otp.busy = true;
-    var done = busy(otpBtn, 'Creating account');
-    later(function () {
-      otpWrap.classList.remove('otp--complete');
-      if (otpInput.value === DB.otp) {
-        clearInterval(otp.timer); try { otpInput.blur(); } catch (e) {}
-        created = true;
-        commitBasic();
-        Sheet.closeAll('verified');
-        setTimeout(function () { done(); otp.busy = false; route('verify', { replace: false, focus: false }); renderVerify(); showDone('account'); }, 320);
-        return;
-      }
-      done(); otp.busy = false; otp.tries++;
-      if (otp.tries >= 4) {
-        otpInput.disabled = true; otpWrap.classList.add('otp--locked'); otpInput.value = ''; renderBoxes(); otpBtn.disabled = true;
-        $('#otpAlert').innerHTML = '<div class="alert alert--negative" role="alert">' + IC.alert + '<div><span class="alert-title">Too many wrong OTPs</span><span class="alert-text">Request a new OTP to try again.</span></div></div>';
-        otp.until = 0; clearInterval(otp.timer); otp.wrong = false; otpMeta(); return;
-      }
-      otp.wrong = true; otpInput.value = ''; otpWrap.classList.add('otp--invalid'); otpBtn.disabled = true; otpMeta(); renderBoxes(); otpInput.focus();
-      clearTimeout(otp.clr); otp.clr = setTimeout(function () { otpWrap.classList.remove('otp--invalid'); renderBoxes(); }, 700);
-    }, 900);
-  });
-  $('#otpSheet').addEventListener('shine:sheet-closed', function (e) { if (e.target.id === 'otpSheet') { clearInterval(otp.timer); clearTimeout(otp.auto); clearTimeout(otp.clr); } });
-  function commitBasic() {
-    var base = mode === 'manual' ? blankProfile() : B.base;
-    P = JSON.parse(JSON.stringify(base));
-    ['name', 'loc', 'email', 'phone', 'expY', 'expM', 'fresher', 'salary', 'notice'].forEach(function (k) { P[k] = B[k]; });
-    if (P.fresher) { P.expY = 0; P.expM = 0; P.salary = null; }
-  }
-
-  /* ── result sheet (account created · profile created) ─────────────── */
-  var doneT = 0;
-  function showDone(kind) {
-    var s = $('#doneSheet'), burst = $('.su-burst', s);
-    $('#dTitle').innerHTML = kind === 'account' ? 'Account <span class="accent">created.</span>' : 'Profile <span class="accent">created.</span>';
-    $('#dMsg').textContent = kind === 'account' ? 'Welcome to Shine! Your account is ready.' : 'Your profile is ready. One last step.';
-    burst.classList.remove('is-go'); void burst.offsetWidth;
-    Sheet.open(s); setTimeout(function () { burst.classList.add('is-go'); }, 120);
-    clearTimeout(doneT);
-    doneT = setTimeout(function () {
-      Sheet.close(s, 'auto');
-      if (kind === 'profile') setTimeout(function () { route('prefs'); renderPrefs(); }, 260);
-    }, kind === 'account' ? 2000 : 1800);
-  }
-
-  /* ── 3 · verify your details ──────────────────────────────────────── */
-  function metaRow(icon, text, empty) { return '<div class="su-meta-r"><span class="ico">' + IC[icon] + '</span><span class="text' + (empty ? ' is-empty' : '') + '">' + esc(text) + '</span></div>'; }
-  function renderVerify() {
-    var manual = mode === 'manual';
-    $('#vTitle').innerHTML = manual ? 'Complete your <em>profile.</em>' : 'Verify your <em>details.</em>';
-    $('#vSub').textContent = manual ? 'Add your work, education and skills. Recruiters see this first.' : 'AI can miss things. Make sure your profile is accurate.';
-    $('#vAcc').hidden = manual; $('#vAlt').hidden = manual;
-    // basic
-    var miss = basicMissing(P);
-    var h = '<p class="su-name">' + esc(P.name) + (P.notice ? '<span class="tag tag--violet">' + esc(NOTICE[P.notice]) + '</span>' : '') + '</p>';
-    h += '<div class="su-meta">' + metaRow('brief', expText(P) || 'Experience missing', !expText(P)) + metaRow('rupee', P.fresher ? 'Fresher' : (salText(P.salary) || 'Salary missing'), !P.fresher && P.salary == null) + metaRow('pin', P.loc || 'Location missing', !P.loc) + '</div>';
-    if (miss.length) {
-      h += '<div class="su-need"><div class="alert alert--notice" role="status">' + IC.alert + '<div><span class="alert-title">Please add the mandatory details</span></div></div>';
-      if (miss.indexOf('expY') > -1) h += '<div class="field field--missing"><span class="field-label">Total work experience</span><div class="su-2"><button class="field-control su-sel" type="button" data-fix="expY"><span class="su-sel-v" data-ph="Years"></span>' + IC.caret + '</button><button class="field-control su-sel" type="button" data-fix="expM"><span class="su-sel-v" data-ph="Months">' + (P.expM == null ? '' : esc(labelOf('expM', P.expM))) + '</span>' + IC.caret + '</button></div></div>';
-      if (miss.indexOf('salary') > -1) h += '<div class="field field--missing"><span class="field-label">Current salary <span class="su-opt">(Annually)</span></span><button class="field-control su-sel" type="button" data-fix="salary"><span class="su-sel-v" data-ph="Select salary"></span>' + IC.caret + '</button></div>';
-      if (miss.indexOf('notice') > -1) h += '<fieldset class="su-chipset"><legend class="field-label">Notice period</legend><div class="su-chip-row" data-fixchips="notice">' + Object.keys(NOTICE).map(function (k) { return '<button class="chip" type="button" aria-pressed="false" data-v="' + k + '">' + NOTICE[k] + '</button>'; }).join('') + '</div></fieldset>';
-      h += '</div>';
-    }
-    h += '<dl class="su-kv"><dt>Gender</dt><dd' + (P.gender ? '' : ' class="is-empty"') + '>' + esc(P.gender || 'Not added') + '</dd><dt>Email</dt><dd>' + esc(P.email) + '</dd><dt>Phone</dt><dd>+91 ' + esc(fmtPhone(P.phone)) + '</dd></dl>';
-    $('#basicOut').innerHTML = h;
-    $$('[data-fixchips]', $('#basicOut')).forEach(function (row) { chipsSingle(row, null, function (v) { P.notice = v; renderVerify(); toast('Notice period added', 'success'); }); });
-    // employment
-    $('#empOut').innerHTML = P.emp.length ? P.emp.map(function (e) {
-      var m = empMissing(e), meta = [e.type ? ETYPE[e.type] : '', empDur(e)].filter(Boolean);
-      return '<div class="su-item" data-kind="emp" data-id="' + e.id + '"><div class="su-item-b"><p class="su-item-t">' + esc(e.role) + '</p><p class="su-item-s">' + esc(e.co + (e.city ? ', ' + e.city : '')) + '</p>' +
-        (meta.length ? '<p class="su-item-m">' + meta.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('') + '</p>' : '') +
-        (m ? '<p class="su-miss"><span>' + IC.alert + esc(m) + '</span><button class="chip" type="button" data-act="item-edit">Add</button></p>' : '') +
-        '</div><button class="su-more" type="button" data-act="item-menu" aria-label="Options for ' + esc(e.role) + '">' + IC.more + '</button></div>';
-    }).join('') : '<p class="su-empty">' + (P.fresher ? 'No work experience. That’s fine for freshers.' : 'Add your current and past jobs.') + '<button class="chip" type="button" data-act="add-emp">Add</button></p>';
-    // education
-    $('#eduOut').innerHTML = P.edu.length ? P.edu.map(function (e) {
-      var m = eduMissing(e), meta = [e.ctype ? CTYPE[e.ctype] : '', e.from ? e.from + ' – ' + (e.pursuing ? 'Present' : (e.to || '')) : '', e.score && e.grade && e.grade !== 'pass' ? e.score + (e.grade === 'pct' ? '%' : ' ' + GRADE_UNIT[e.grade]) : ''].filter(Boolean);
-      return '<div class="su-item" data-kind="edu" data-id="' + e.id + '"><div class="su-item-b"><p class="su-item-t">' + esc(e.course) + '</p><p class="su-item-s">' + esc(e.uni) + '</p>' +
-        (meta.length ? '<p class="su-item-m">' + meta.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('') + '</p>' : '') +
-        (m ? '<p class="su-miss"><span>' + IC.alert + esc(m) + '</span><button class="chip" type="button" data-act="item-edit">Add</button></p>' : '') +
-        '</div><button class="su-more" type="button" data-act="item-menu" aria-label="Options for ' + esc(e.course) + '">' + IC.more + '</button></div>';
-    }).join('') : '<p class="su-empty">Add your highest qualification.<button class="chip" type="button" data-act="add-edu">Add</button></p>';
-    // skills
-    $('#skillOut').innerHTML = P.skills.length ? '<div class="su-skills">' + P.skills.map(function (s, i) {
-      return '<span class="chip chip--removable">' + esc(s) + '<button class="chip-x" type="button" data-act="skill-x" data-i="' + i + '" aria-label="Remove ' + esc(s) + '">' + IC.x + '</button></span>';
-    }).join('') + '</div>' + (P.skills.length < 3 ? '<p class="su-miss"><span>' + IC.alert + 'Add at least 3 skills</span></p>' : '') : '<p class="su-empty">Add at least 3 skills.<button class="chip" type="button" data-act="add-skill">Add</button></p>';
-  }
-  $('#basicOut').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-fix]'); if (!b) return;
-    var k = b.getAttribute('data-fix');
-    openPick(k, P[k], function (v) { P[k] = v; if (k === 'expY' && P.expM == null) P.expM = 0; renderVerify(); toast((k === 'salary' ? 'Salary' : 'Experience') + ' added', 'success'); }, b);
-  });
-  function firstProblem() {
-    if (basicMissing(P).length) return $('#cBasic');
-    if (!P.fresher && !P.emp.length) return $('#cEmp');
-    if (P.emp.some(empMissing)) return $('#cEmp');
-    if (!P.edu.length || P.edu.some(eduMissing)) return $('#cEdu');
-    if (P.skills.length < 3) return $('#cSkill');
-    return null;
-  }
-  $('#vBtn').addEventListener('click', function () {
-    var bad = firstProblem();
-    if (bad) {
-      bad.scrollIntoView({ block: 'start', behavior: 'smooth' });
-      bad.classList.remove('is-flash'); void bad.offsetWidth; bad.classList.add('is-flash');
-      toast('Add the missing details to continue', 'warning'); return;
-    }
-    var done = busy($('#vBtn'), 'Saving your profile');
-    later(function () { done(); showDone('profile'); }, 900);
-  });
-
-  /* item menu · delete */
-  var menuItem = null;
-  function findItem(kind, id) { return (kind === 'emp' ? P.emp : P.edu).filter(function (x) { return x.id === id; })[0]; }
-  doc.addEventListener('click', function (e) {
-    var a = e.target.closest('[data-act]'); if (!a) return;
-    var act = a.getAttribute('data-act'), it = a.closest('.su-item');
-    switch (act) {
-      case 'item-menu':
-        menuItem = { kind: it.getAttribute('data-kind'), id: +it.getAttribute('data-id') };
-        var x = findItem(menuItem.kind, menuItem.id);
-        $('#menuTitle').textContent = menuItem.kind === 'emp' ? x.role : x.course;
-        Sheet.open('#menuSheet', { trigger: a }); break;
-      case 'item-edit':
-        var k = it.getAttribute('data-kind'), item = findItem(k, +it.getAttribute('data-id'));
-        k === 'emp' ? openEmp(item, a) : openEdu(item, a); break;
-      case 'menu-edit':
-        var mi = findItem(menuItem.kind, menuItem.id); Sheet.close('#menuSheet', 'edit');
-        setTimeout(function () { menuItem.kind === 'emp' ? openEmp(mi) : openEdu(mi); }, 260); break;
-      case 'menu-del':
-        var di = findItem(menuItem.kind, menuItem.id);
-        $('#delTitle').innerHTML = 'Delete this <span class="accent">' + (menuItem.kind === 'emp' ? 'job?' : 'course?') + '</span>';
-        $('#delMsg').innerHTML = 'Remove <b>“' + esc(menuItem.kind === 'emp' ? di.role : di.course) + '”</b> from your ' + (menuItem.kind === 'emp' ? 'employment' : 'education') + ' history?';
-        Sheet.close('#menuSheet', 'delete'); setTimeout(function () { Sheet.open('#delSheet'); }, 260); break;
-      case 'skill-x': P.skills.splice(+a.getAttribute('data-i'), 1); renderVerify(); break;
-      case 'add-emp': openEmp(null, a); break;
-      case 'add-edu': openEdu(null, a); break;
-      case 'add-skill': openSkills(a); break;
-      case 'edit-basic': openEb(a); break;
-    }
-  });
-  $('#delBtn').addEventListener('click', function () {
-    var list = menuItem.kind === 'emp' ? P.emp : P.edu;
-    for (var i = 0; i < list.length; i++) if (list[i].id === menuItem.id) list.splice(i, 1);
-    Sheet.close('#delSheet', 'deleted'); renderVerify();
-    toast(menuItem.kind === 'emp' ? 'Employment record deleted' : 'Education record deleted', 'success');
-  });
-
-  /* edit basic details */
-  var E = {}, ebSheet = $('#ebSheet');
-  var ebSel = { expY: $('[data-pick="expY"]', ebSheet), expM: $('[data-pick="expM"]', ebSheet), salary: $('[data-pick="salary"]', ebSheet), loc: $('[data-pick="loc"]', ebSheet) };
-  var ebFresh = $('[data-bind="fresher"]', ebSheet), ebNotice = $('[data-single="notice"]', ebSheet), ebGender = $('[data-single="gender"]', ebSheet);
-  function openEb(trigger) {
-    E = { expY: P.expY, expM: P.expM, fresher: P.fresher, salary: P.salary, loc: P.loc, notice: P.notice, gender: P.gender };
-    syncEb(); Sheet.open(ebSheet, { trigger: trigger });
-  }
-  function syncEb() {
-    setSel(ebSel.expY, E.expY == null ? '' : labelOf('expY', E.expY)); setSel(ebSel.expM, E.expM == null ? '' : labelOf('expM', E.expM));
-    setSel(ebSel.salary, salText(E.salary)); setSel(ebSel.loc, E.loc);
-    ebFresh.checked = !!E.fresher; [ebSel.expY, ebSel.expM, ebSel.salary].forEach(function (b) { b.disabled = !!E.fresher; });
-    chipsSingle(ebNotice, E.notice); chipsSingle(ebGender, E.gender);
-  }
-  Object.keys(ebSel).forEach(function (k) { ebSel[k].addEventListener('click', function () { openPick(k, E[k], function (v) { E[k] = v; syncEb(); }, ebSel[k]); }); });
-  ebFresh.addEventListener('change', function () { E.fresher = ebFresh.checked; if (E.fresher) { E.expY = 0; E.expM = 0; E.salary = null; } syncEb(); });
-  chipsSingle(ebNotice, null, function (v) { E.notice = v; });
-  chipsSingle(ebGender, null, function (v) { E.gender = v; });
-  $('[data-act="locate"]', ebSheet).addEventListener('click', function (e) {
-    e.stopPropagation(); var b = this; b.classList.add('is-busy');
-    later(function () { b.classList.remove('is-busy'); E.loc = 'Gurugram, Haryana'; syncEb(); toast('Location detected: Gurugram', 'success'); }, 900);
-  });
-  $('#ebBtn').addEventListener('click', function () {
-    if (!E.fresher && (E.expY == null || E.salary == null)) { toast('Add your experience and salary', 'warning'); return; }
-    if (!E.notice) { toast('Pick a notice period', 'warning'); return; }
-    Object.keys(E).forEach(function (k) { P[k] = E[k]; });
-    if (P.fresher) { P.expY = 0; P.expM = 0; P.salary = null; }
-    if (P.expM == null) P.expM = 0;
-    Sheet.close(ebSheet, 'saved'); renderVerify(); toast('Basic details updated', 'success');
-  });
-
-  /* education */
-  var D = {}, eduSheet = $('#eduSheet'), eUni = $('#eUni'), eScore = $('#eScore');
-  var eSel = { course: $('[data-pick="course"]', eduSheet), eFrom: $('[data-pick="eFrom"]', eduSheet), eTo: $('[data-pick="eTo"]', eduSheet), grade: $('[data-pick="grade"]', eduSheet) };
-  var eType = $('[data-single="ctype"]', eduSheet), ePur = $('[data-bind="ePursuing"]', eduSheet);
-  function openEdu(item, trigger) {
-    D = item ? { id: item.id, course: item.course, ctype: item.ctype, uni: item.uni, eFrom: item.from, eTo: item.to, pursuing: !!item.pursuing, grade: item.grade, score: item.score } : { id: null, course: null, ctype: null, uni: '', eFrom: null, eTo: null, pursuing: false, grade: null, score: '' };
-    $('#eduTitle').textContent = item ? 'Edit education' : 'Add education';
-    eUni.value = D.uni || ''; eScore.value = D.score || '';
-    syncEdu(); Sheet.open(eduSheet, { trigger: trigger });
-  }
-  function syncEdu() {
-    setSel(eSel.course, D.course); setSel(eSel.eFrom, D.eFrom ? '' + D.eFrom : ''); setSel(eSel.eTo, D.pursuing ? 'Present' : (D.eTo ? '' + D.eTo : ''));
-    eSel.eTo.disabled = !!D.pursuing; ePur.checked = !!D.pursuing;
-    setSel(eSel.grade, D.grade ? labelOf('grade', D.grade) : '');
-    $('#eScoreF').hidden = !D.grade || D.grade === 'pass';
-    chipsSingle(eType, D.ctype); eduReady();
-  }
-  function eduValid() { return !!D.course && !!D.ctype && eUni.value.trim().length > 1 && !!D.eFrom && (D.pursuing || (!!D.eTo && D.eTo >= D.eFrom)); }
-  function eduReady() { $('#eduBtn').disabled = !eduValid(); }
-  Object.keys(eSel).forEach(function (k) { eSel[k].addEventListener('click', function () { openPick(k, D[k], function (v) { D[k] = v; syncEdu(); }, eSel[k]); }); });
-  chipsSingle(eType, null, function (v) { D.ctype = v; eduReady(); });
-  ePur.addEventListener('change', function () { D.pursuing = ePur.checked; syncEdu(); });
-  eUni.addEventListener('input', eduReady);
-  $('#eduBtn').addEventListener('click', function () {
-    if (!eduValid()) return;
-    var rec = { id: D.id || ++uid, course: D.course, ctype: D.ctype, uni: eUni.value.trim(), from: D.eFrom, to: D.pursuing ? null : D.eTo, pursuing: D.pursuing, grade: D.grade, score: eScore.value.trim() };
-    var i = P.edu.map(function (x) { return x.id; }).indexOf(rec.id);
-    if (i > -1) P.edu[i] = rec; else P.edu.unshift(rec);
-    Sheet.close(eduSheet, 'saved'); renderVerify(); toast(i > -1 ? 'Education updated' : 'Education added', 'success');
-  });
-
-  /* employment */
-  var W = {}, empSheet = $('#empSheet'), wRole = $('#wRole'), wCo = $('#wCo');
-  var wSel = { dept: $('[data-pick="dept"]', empSheet), ind: $('[data-pick="ind"]', empSheet), dojM: $('[data-pick="dojM"]', empSheet), dojY: $('[data-pick="dojY"]', empSheet), lwdM: $('[data-pick="lwdM"]', empSheet), lwdY: $('[data-pick="lwdY"]', empSheet) };
-  var wType = $('[data-single="etype"]', empSheet), wCur = $('[data-single="wCur"]', empSheet);
-  function openEmp(item, trigger) {
-    W = item ? { id: item.id, type: item.type, role: item.role, co: item.co, city: item.city, dept: item.dept, ind: item.ind, cur: item.cur, dojM: item.dojM, dojY: item.dojY, lwdM: item.lwdM, lwdY: item.lwdY }
-      : { id: null, type: null, role: '', co: '', city: '', dept: null, ind: null, cur: null, dojM: null, dojY: null, lwdM: null, lwdY: null };
-    $('#empTitle').textContent = item ? 'Edit employment' : 'Add employment';
-    wRole.value = W.role || ''; wCo.value = W.co || '';
-    syncEmp(); Sheet.open(empSheet, { trigger: trigger });
-  }
-  function syncEmp() {
-    chipsSingle(wType, W.type); chipsSingle(wCur, W.cur == null ? null : (W.cur ? 'yes' : 'no'));
-    setSel(wSel.dept, W.dept); setSel(wSel.ind, W.ind);
-    setSel(wSel.dojM, W.dojM == null ? '' : MONTHS[W.dojM]); setSel(wSel.dojY, W.dojY ? '' + W.dojY : '');
-    setSel(wSel.lwdM, W.lwdM == null ? '' : MONTHS[W.lwdM]); setSel(wSel.lwdY, W.lwdY ? '' + W.lwdY : '');
-    $('#lwdF').hidden = W.cur !== false;
-    empReady();
-  }
-  function lwdBad() { return W.cur === false && W.lwdY != null && W.lwdM != null && W.dojY != null && W.dojM != null && (W.lwdY * 12 + W.lwdM) < (W.dojY * 12 + W.dojM); }
-  function empValid() {
-    return !!W.type && wRole.value.trim().length > 1 && wCo.value.trim().length > 1 && !!W.dept && !!W.ind && W.cur != null && W.dojM != null && !!W.dojY &&
-      (W.cur || (W.lwdM != null && !!W.lwdY && !lwdBad()));
-  }
-  function empReady() {
-    var m = $('#lwdMsg'), bad = lwdBad();
-    $('#lwdF').classList.toggle('field--invalid', bad); m.hidden = !bad; m.innerHTML = bad ? IC.alert + '<span>Last working day can’t be before your joining date</span>' : '';
-    $('#empBtn').disabled = !empValid();
-  }
-  Object.keys(wSel).forEach(function (k) { wSel[k].addEventListener('click', function () { openPick(k, W[k], function (v) { W[k] = v; syncEmp(); }, wSel[k]); }); });
-  chipsSingle(wType, null, function (v) { W.type = v; empReady(); });
-  chipsSingle(wCur, null, function (v) { W.cur = v === 'yes'; syncEmp(); });
-  [wRole, wCo].forEach(function (i) { i.addEventListener('input', empReady); });
-  $('#empBtn').addEventListener('click', function () {
-    if (!empValid()) return;
-    var rec = { id: W.id || ++uid, type: W.type, role: wRole.value.trim(), co: wCo.value.trim(), city: W.city || '', dept: W.dept, ind: W.ind, cur: W.cur, dojM: W.dojM, dojY: W.dojY, lwdM: W.cur ? null : W.lwdM, lwdY: W.cur ? null : W.lwdY };
-    var i = P.emp.map(function (x) { return x.id; }).indexOf(rec.id);
-    if (i > -1) P.emp[i] = rec; else P.emp.unshift(rec);
-    Sheet.close(empSheet, 'saved'); renderVerify(); toast(i > -1 ? 'Employment updated' : 'Employment added', 'success');
-  });
-
-  /* skills */
-  var skTok = tokenField($('#skTok'), function (v) {
-    $('#skBtn').disabled = v.length < 3;
-    $('#skHelp').textContent = v.length < 3 ? 'Add ' + (3 - v.length) + ' more to save' : v.length + ' of 15 added';
-  });
-  function openSkills(trigger) { skTok.set(P.skills); Sheet.open('#skillSheet', { trigger: trigger }); }
-  $('#skBtn').addEventListener('click', function () { P.skills = skTok.get(); Sheet.close('#skillSheet', 'saved'); renderVerify(); toast('Skills updated', 'success'); });
-
-  /* ── 4 · job preferences ──────────────────────────────────────────── */
-  var roleTok = tokenField($('#roleTok')), locTok = tokenField($('#locTok')), expSal = null, expSalBtn = $('[data-pick="expSal"]');
-  function score() {
-    var s = 40;
-    if (!basicMissing(P).length) s += 18;
-    if (P.fresher || (P.emp.length && !P.emp.some(empMissing))) s += 16;
-    if (P.edu.length && !P.edu.some(eduMissing)) s += 14;
-    if (P.skills.length >= 3) s += 10;
-    return Math.min(98, s);
-  }
-  function renderPrefs() {
-    var s = score(), lvl = s >= 80 ? 'High' : s >= 55 ? 'Medium' : 'Low';
-    $('#pPct').textContent = s + '%'; $('#pLvl').textContent = lvl; $('#pLvl').className = 'badge ' + (s >= 80 ? 'badge--positive' : 'badge--notice');
-    var ring = $('#pRing'); ring.style.setProperty('--p', 0);
-    var t0 = performance.now();
-    (function step(t) { var k = Math.min(1, (t - t0) / 700); ring.style.setProperty('--p', Math.round(s * (1 - Math.pow(1 - k, 3)))); if (k < 1) requestAnimationFrame(step); })(t0);
-    if (!roleTok.get().length && P.emp[0]) roleTok.set([P.emp[0].role]);
-    if (!locTok.get().length && P.loc) locTok.set([P.loc]);
-  }
-  expSalBtn.addEventListener('click', function () { openPick('expSal', expSal, function (v) { expSal = v; setSel(expSalBtn, salText(v)); }, expSalBtn); });
-  $('#pBtn').addEventListener('click', function () {
-    var done = busy($('#pBtn'), 'Finding your jobs');
-    var role = roleTok.get()[0] || (P.emp[0] && P.emp[0].role) || '';
-    var q = new URLSearchParams({ name: firstName() });
-    if (role) q.set('q', role);
-    var loc = locTok.get()[0]; if (loc) q.set('loc', loc.split(',')[0]);
-    later(function () { done(); location.replace(CFG.recommendedUrl + '?' + q.toString()); }, 900);
-  });
+  function upError(h, f) { $('#upErrH').textContent = h; $('#upErrF').textContent = f.name + ' · ' + fmtSize(f.size); upState('error'); }
+  /* coming back here (browser back from page 2 restores this page from the back-forward cache): a fresh upload card */
+  window.addEventListener('pageshow', function (e) { if (e.persisted) resetUpload(); });
 
   /* ── actions ──────────────────────────────────────────────────────── */
   doc.addEventListener('click', function (e) {
@@ -2184,69 +2183,21 @@ window.ShineSignupConfig = (function () {
       case 'login': e.preventDefault(); Sheet.closeAll('login'); go(CFG.loginUrl || 'login-flow.html'); break;
       case 'pick': pick(); break;
       case 'cancel-upload': resetUpload(); toast('Upload cancelled'); break;
-      case 'manual':
-        e.preventDefault(); mode = 'manual'; cancelParse();
-        var open = function () { mode = 'manual'; openBasic(blankProfile()); };
-        if (current !== 'start') { Sheet.closeAll('manual'); route('start'); setTimeout(open, 320); }
-        else if (Sheet.top && Sheet.top()) { Sheet.closeAll('manual'); setTimeout(open, 320); }
-        else open();
-        break;
-      case 'retry': Sheet.closeAll('retry'); cancelParse(); route('start'); setTimeout(pick, 350); break;
-      case 'reupload': e.preventDefault(); created ? toast('Your details are saved. Upload a new resume from your profile anytime.') : route('start'); break;
-      case 'exit': Sheet.open('#exitSheet', { trigger: a }); break;
-      case 'exit-yes': Sheet.closeAll('exit'); location.replace(CFG.welcomeUrl + '?name=' + encodeURIComponent(firstName())); break;
-      case 'later': location.replace(CFG.welcomeUrl + '?name=' + encodeURIComponent(firstName())); break;
-      case 'to-verify': history.back(); break;
-      case 'otp-change': e.preventDefault(); Sheet.close('#otpSheet', 'change'); setTimeout(function () { bPhone.focus(); try { bPhone.select(); } catch (x) {} }, 320); break;
-      case 'resend':
-        clearTimeout(otp.clr); otp.wrong = false; otp.tries = 0; otpInput.disabled = false; otpInput.value = ''; $('#otpAlert').innerHTML = '';
-        otpWrap.classList.remove('otp--invalid', 'otp--locked'); otpBtn.disabled = true; renderBoxes(); startTimer(); otpInput.focus();
-        toast('New OTP sent', 'success'); break;
+      case 'manual': e.preventDefault(); resetUpload(); go(CFG.manualUrl || 'signup-manual.html'); break;
     }
   });
-  $('#failSheet').addEventListener('shine:sheet-closed', function (e) { if (e.target.id === 'failSheet' && current === 'parsing' && e.detail.reason !== 'route') route('start'); });
 
-  /* ── demo data ────────────────────────────────────────────────────── */
-  function glow(el) { if (!el) return; el.classList.remove('is-demo-filled'); void el.offsetWidth; el.classList.add('is-demo-filled'); setTimeout(function () { el.classList.remove('is-demo-filled'); }, 1200); }
-  function copyText(t, host) {
-    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t);
-    return new Promise(function (res, rej) {
-      var ta = doc.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
-      host.appendChild(ta); ta.select(); var ok = false; try { ok = doc.execCommand('copy'); } catch (x) {} ta.remove(); ok ? res() : rej();
-    });
-  }
-  function useDemo(kind, v) {
-    var wasOpen = Sheet.isOpen('#guideSheet');
-    Sheet.close('#guideSheet', 'use');
-    var wait = wasOpen ? 300 : 0;
-    if (kind === 'file') {
-      var f = JSON.parse(v);
-      setTimeout(function () { if (current !== 'start') route('start'); takeFile(f); }, wait); return;
-    }
-    if (kind === 'otp') {
-      if (!Sheet.isOpen('#otpSheet') || otpInput.disabled) { toast('Ask for an OTP first, then use this one', 'warning'); return; }
-      otpInput.value = v; otpInput.dispatchEvent(new Event('input')); glow(otpWrap); return;
-    }
-    if (kind === 'email' || kind === 'phone') {
-      if (!Sheet.isOpen(bSheet)) { toast('Open the basic details step first', 'warning'); return; }
-      var inp = kind === 'email' ? bEmail : bPhone;
-      setTimeout(function () { inp.value = v; inp.dispatchEvent(new Event('input')); inp.focus(); glow(inp.closest('.field-control')); }, wait);
-    }
-  }
+  /* ── demo data (sample files · simulate) ──────────────────────────── */
   doc.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-g]');
+    var b = e.target.closest('[data-g="use"]');
     if (b) {
-      var it = b.closest('.g-item'), v = it.getAttribute('data-value');
-      if (b.getAttribute('data-g') === 'use') return useDemo(it.getAttribute('data-kind'), v);
-      copyText(v, b.closest('.bs, .guide') || doc.body).then(function () {
-        b.classList.add('is-done'); var old = b.innerHTML; b.innerHTML = IC.check; toast('Copied ' + it.querySelector('.g-v').textContent, 'success');
-        clearTimeout(b._t); b._t = setTimeout(function () { b.classList.remove('is-done'); b.innerHTML = old; }, 1400);
-      }, function () { toast('Couldn’t copy. Tap Use instead', 'error'); });
+      var it = b.closest('.g-item'), wasOpen = Sheet.isOpen('#guideSheet');
+      Sheet.close('#guideSheet', 'use');
+      if (it.getAttribute('data-kind') === 'file') { var f = JSON.parse(it.getAttribute('data-value')); setTimeout(function () { takeFile(f); }, wasOpen ? 300 : 0); }
       return;
     }
     var t = e.target.closest('[data-sim]'); if (t) {
-      var k = t.getAttribute('data-sim'); SIM[k] = !SIM[k];
-      $$('[data-sim="' + k + '"]').forEach(function (n) { n.setAttribute('aria-checked', SIM[k]); });
+      var k = t.getAttribute('data-sim'); SIM[k] = !SIM[k]; store('shine.su.sim', SIM); syncSim();
       toast(t.querySelector('span').textContent + (SIM[k] ? ': on' : ': off'));
     }
   });
@@ -2255,10 +2206,10 @@ window.ShineSignupConfig = (function () {
   gs.addEventListener('shine:sheet-closed', function (e) { if (e.target === gs) doc.body.classList.remove('guide-open'); });
 
   /* ── boot ─────────────────────────────────────────────────────────── */
-  route('start', { replace: true, focus: false });
-  window.__signup = { P: function () { return P; }, route: route, openBasic: openBasic, parsed: parsedProfile, SIM: SIM };   // test hook
+  syncSim();
+  var tc = doc.querySelector('meta[name="theme-color"]'); if (tc) tc.content = '#0C1731';   // the dark hero reaches the status bar
+  window.__signup = { takeFile: takeFile, SIM: SIM };   // test hook
 })();
-
 </script>
 <script data-kbfoot>
 /* keyboard detector for the forgot / new-password footer: the page height drops by more than 150px while the keyboard is up */
@@ -2277,7 +2228,7 @@ window.ShineSignupConfig = (function () {
 /* demo-data key: shown only where its data can be used — the visible screen, or the sheet on top, must be one that
    takes demo data (user, 2026-10-19). Re-checked whenever a screen, sheet or upload state changes. */
 (function () {
-  var R = {views:{start:1},sheets:{basicSheet:1,otpSheet:1},off:function(v){var b=document.getElementById('upBox');return v==='start'&&b&&b.getAttribute('data-state')==='busy'}}, html = document.documentElement, q = 0;
+  var R = {views:{start:1},sheets:{},off:function(v){var b=document.getElementById('upBox');return v==='start'&&b&&b.getAttribute('data-state')==='busy'}}, html = document.documentElement, q = 0;
   function view() {
     var vs = document.querySelectorAll('.view[data-view]'), n = null;
     for (var i = 0; i < vs.length; i++) if (!vs[i].hidden) n = vs[i].getAttribute('data-view');
