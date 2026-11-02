@@ -2940,8 +2940,8 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
                 <label class="field-label" for="moEdInst">University / Institute / Board</label>
                 <div class="field-control"><input class="field-input" id="moEdInst" placeholder="Select your university or institute" required></div>
               </div>
-              <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-min="1970-01-01" data-max="today" data-required data-k="start" data-error-empty="Enter the start date"><legend class="field-label">Start date</legend></fieldset>
-              <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-min="1970-01-01" data-max="today+6y" data-required data-k="end" data-error-empty="Enter the end date"><legend class="field-label">End date <span class="optional">(or expected)</span></legend></fieldset>
+              <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-order="desc" data-min="1970-01-01" data-max="today" data-required data-k="start" data-error-empty="Enter the start date"><legend class="field-label">Start date</legend></fieldset>
+              <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-order="desc" data-min="1970-01-01" data-max="today+6y" data-required data-k="end" data-error-empty="Enter the end date" data-error-min="The end date can’t be before the start date"><legend class="field-label">End date <span class="optional">(or expected)</span></legend></fieldset>
               <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Grading system" data-k="grade">
                 <label class="field-label" for="moEdGrade">Grading system <span class="optional">(optional)</span></label>
                 <div class="field-control"><input class="field-input" id="moEdGrade" placeholder="Select grading system"></div>
@@ -2981,8 +2981,8 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
                 <div class="field-control"><input class="field-input" id="moEmInd" placeholder="Select an industry" required></div>
               </div>
               <fieldset class="field field--sm pf-choice" data-choice="current" data-error-empty="Tell us if you work here now"><legend class="field-label">Do you work here now?</legend><div class="pf-chips" role="radiogroup" aria-label="Do you work here now?"></div></fieldset>
-              <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-min="1970-01-01" data-max="today" data-required data-k="start" data-error-empty="Enter the date you joined"><legend class="field-label">Date of joining</legend></fieldset>
-              <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-min="1970-01-01" data-max="today" data-required data-k="end" data-error-empty="Enter your last working day" hidden><legend class="field-label">Last working day</legend></fieldset>
+              <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-order="desc" data-min="1970-01-01" data-max="today" data-required data-k="start" data-error-empty="Enter the date you joined"><legend class="field-label">Date of joining</legend></fieldset>
+              <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-order="desc" data-min="1970-01-01" data-max="today" data-required data-k="end" data-error-empty="Enter your last working day" data-error-min="The last working day can’t be before the date of joining" hidden><legend class="field-label">Last working day</legend></fieldset>
             </div>
           </div>
           <button class="btn btn--link btn--sm btn--flush mo-add" type="button" data-act="emp-add"><svg aria-hidden="true" focusable="false" data-icon="ic_plus-outline" viewBox="0 0 20 20" fill="none"><path d="M17 10C17 10.2228 16.9115 10.4364 16.754 10.594C16.5964 10.7515 16.3828 10.84 16.16 10.84H10.84V16.16C10.84 16.3828 10.7515 16.5964 10.594 16.754C10.4364 16.9115 10.2228 17 10 17C9.77722 17 9.56356 16.9115 9.40603 16.754C9.2485 16.5964 9.16 16.3828 9.16 16.16V10.84H3.84C3.61722 10.84 3.40356 10.7515 3.24603 10.594C3.0885 10.4364 3 10.2228 3 10C3 9.77722 3.0885 9.56356 3.24603 9.40603C3.40356 9.2485 3.61722 9.16 3.84 9.16H9.16V3.84C9.16 3.61722 9.2485 3.40356 9.40603 3.24603C9.56356 3.0885 9.77722 3 10 3C10.2228 3 10.4364 3.0885 10.594 3.24603C10.7515 3.40356 10.84 3.61722 10.84 3.84V9.16H16.16C16.3828 9.16 16.5964 9.2485 16.754 9.40603C16.9115 9.56356 17 9.77722 17 10Z" fill="currentColor"/></svg>Add another job</button>
@@ -6163,7 +6163,20 @@ window.__MO_CFG = {
   }
 
   /* Education */
+  /* start → end (user 2026-11-02: month + year picked from the bottom sheet, as Date of birth and Last working day — the
+     multi-input component's data-pick="sheet"): the end's sheet starts at the start's month — earlier months and years are
+     faded; an end already picked that is now before the start says so at once */
+  function linkDates(f) {
+    var a = k(f, 'start'), b = k(f, 'end'), MIN = b.getAttribute('data-min');
+    a.addEventListener('shine:field', function () {
+      var v = F(a).value(); b.setAttribute('data-min', v ? v + '-01' : MIN);
+      var p = F(b).parts(), e = p[0] && p[1] ? p[1] + '-' + p[0] : '';   // the end as picked (value() is '' once it falls outside the range)
+      if (e && v && e < v && !b.hidden) FLD.set(b, 'invalid', b.getAttribute('data-error-min'));
+      else if (FLD.isInvalid(b) && e && (!v || e >= v)) FLD.set(b, null);
+    });
+  }
   var EF = $('#fEdu'), edType = choice('ctype', EF);
+  linkDates(EF);
   chips(edType, [['Full time', 'Full time'], ['Part time', 'Part time'], ['Distance', 'Distance']]);
   F(k(EF, 'level')).options(EDU_OPTS);
   F(k(EF, 'inst')).options(D.UNIS.map(function (u) { return { value: u[0], label: u[0], hint: u[1] }; }));
@@ -6202,6 +6215,7 @@ window.__MO_CFG = {
 
   /* Employment */
   var MF = $('#fEmp'), emCur = choice('current', MF);
+  linkDates(MF);
   chips(emCur, [['yes', 'Yes'], ['no', 'No']]);
   F(k(MF, 'title')).options(D.ROLES);
   F(k(MF, 'dept')).options(D.DEPTS.map(function (d) { return { value: d[0], label: d[1] }; }));
