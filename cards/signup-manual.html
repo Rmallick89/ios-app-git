@@ -2776,6 +2776,26 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 /* a heading focused by script (step change) shows no ring — keyboard focus on controls still does */
 .stp-title[tabindex="-1"]:focus, .mo-nudge-h:focus { outline: none; }
 
+/* Last working day (notice period = Serving notice period · user 2026-11-02) — the boxes are picked, not typed;
+   #lwdSheet's body = the profile-index LWD picker: one part at a time as a grid of chips (day 7 · month 3 · year 4 across) */
+.mo-lwd .field-input { cursor: pointer; caret-color: transparent; }
+.lwd-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--spacing-inline-md); }
+.lwd-grid[data-part="m"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.lwd-grid[data-part="y"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.lwd-chip {
+  display: grid; place-items: center; min-width: 0; height: 44px; padding: 0; border: 0; border-radius: var(--size-radius-lg);
+  background: var(--surface-neutral-muted); color: var(--content-neutral-base);
+  font: var(--weight-semibold) var(--type-body-md-size)/1 var(--font-brand); font-variant-numeric: tabular-nums;
+  cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+.lwd-grid[data-part="y"] .lwd-chip { height: 40px; font-size: var(--type-body-sm-size); }
+@media (hover: hover) { .lwd-chip:not(:disabled):not([aria-pressed="true"]):hover { background: var(--surface-neutral-state-hover); } }
+.lwd-chip:active:not(:disabled) { transform: scale(.97); }
+.lwd-chip[aria-pressed="true"] { background: var(--surface-brand-brand-intense); color: var(--content-on-fill-dark-base); }
+.lwd-chip:disabled { background: transparent; color: var(--content-neutral-faded); opacity: .45; cursor: not-allowed; }
+.lwd-chip:focus-visible { outline: 2px solid var(--stroke-neutral-focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .lwd-chip { transition: none; } }
+
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shine Cards"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-startup-image" href="icons/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1260x2736.png" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})</script>
 </head>
@@ -2826,6 +2846,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
               <label class="field-label" for="moNotice">Notice period</label>
               <div class="field-control"><input class="field-input" id="moNotice" placeholder="Select notice period" required></div>
             </div>
+            <fieldset class="field field--sm field-multi mo-lwd" data-field="date" data-parts="dmy" data-min="today" data-max="today+1y" data-trailing="ic_caret-down-outline" data-trailing-at="each" data-trailing-label="Pick a day|Pick a month|Pick a year" data-required data-error-empty="Select your last working day" data-k="lwd" hidden><legend class="field-label">Last working day</legend></fieldset>
           </div>
           <div class="field field--sm" data-field="combo" data-combo="inline" data-combo-free data-k="loc" data-error-empty="Enter your current location">
             <label class="field-label" for="moLoc">Current location</label>
@@ -3094,6 +3115,21 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     <div class="bs-head bs-head--md"><div class="bs-heading"><h2 class="bs-title">Demo data</h2></div><button class="bs-close" type="button" data-bs-close aria-label="Close"><svg aria-hidden="true" focusable="false" data-icon="ic_close-outline" viewBox="0 0 20 20" fill="none"><path d="M16.2528 3.00257L16.3599 3.01371L16.3814 3.01543L16.4028 3.02228L16.5056 3.05313L16.5253 3.05999L16.5433 3.06942L16.6582 3.12941L16.6753 3.14398L16.7584 3.21254L16.7747 3.22625L16.7884 3.24253L16.857 3.32566L16.8716 3.3428L16.9316 3.45764L16.941 3.47564L16.947 3.49535L16.9787 3.59819L16.9855 3.61876L16.9873 3.64104L16.9984 3.74816L17.0001 3.76959L16.9984 3.79101L16.9873 3.89814L16.9855 3.92042L16.9787 3.94099L16.947 4.04383L16.941 4.06354L16.9316 4.08154L16.8716 4.19638L16.857 4.21352L16.7884 4.29665L16.7816 4.30522L11.0859 10L16.7816 15.6956L16.7884 15.7042L16.857 15.7873L16.8716 15.8045L16.9316 15.9193L16.941 15.9373L16.947 15.957L16.9787 16.0599L16.9855 16.0804L16.9873 16.1027L16.9984 16.2098L17.0001 16.2313L16.9984 16.2527L16.9873 16.3598L16.9855 16.3812L16.9787 16.4027L16.947 16.5055L16.941 16.5252L16.9316 16.5432L16.8716 16.6581L16.857 16.6752L16.7884 16.7583L16.7747 16.7746L16.7584 16.7883L16.6753 16.8569L16.6582 16.8714L16.5433 16.9314L16.5253 16.9409L16.5056 16.9469L16.4028 16.9786L16.3814 16.9854L16.3599 16.9871L16.2528 16.9983L16.2314 17L16.21 16.9983L16.1028 16.9871L16.0806 16.9854L16.06 16.9786L15.9571 16.9469L15.9374 16.9409L15.9194 16.9314L15.8046 16.8714L15.7875 16.8569L15.7043 16.7883L15.6958 16.7815L10.0001 11.0858L4.30534 16.7815L4.29676 16.7883L4.21364 16.8569L4.1965 16.8714L4.08166 16.9314L4.06366 16.9409L4.04395 16.9469L3.94111 16.9786L3.92054 16.9854L3.89826 16.9871L3.79113 16.9983L3.76971 17L3.74828 16.9983L3.64116 16.9871L3.61888 16.9854L3.59831 16.9786L3.49547 16.9469L3.47576 16.9409L3.45776 16.9314L3.34292 16.8714L3.32578 16.8569L3.24265 16.7883L3.22637 16.7746L3.21266 16.7583L3.1441 16.6752L3.12953 16.6581L3.06954 16.5432L3.06011 16.5252L3.05325 16.5055L3.0224 16.4027L3.01555 16.3812L3.01383 16.3598L3.00269 16.2527L3.00098 16.2313L3.00269 16.2098L3.01383 16.1027L3.01555 16.0804L3.0224 16.0599L3.05325 15.957L3.06011 15.9373L3.06954 15.9193L3.12953 15.8045L3.1441 15.7873L3.21266 15.7042L3.21951 15.6956L3.22637 15.6879L8.91344 10L3.21866 4.30522L3.21266 4.29665L3.1441 4.21352L3.12953 4.19638L3.06954 4.08154L3.06011 4.06354L3.05325 4.04383L3.0224 3.94099L3.01555 3.92042L3.01383 3.89814L3.00269 3.79101L3.00098 3.76959L3.00269 3.74816L3.01383 3.64104L3.01555 3.61876L3.0224 3.59819L3.05325 3.49535L3.06011 3.47564L3.06954 3.45764L3.12953 3.3428L3.1441 3.32566L3.21266 3.24253L3.22637 3.22625L3.24265 3.21254L3.32578 3.14398L3.34292 3.12941L3.45776 3.06942L3.47576 3.05999L3.49547 3.05313L3.59831 3.02228L3.61888 3.01543L3.64116 3.01371L3.74828 3.00257L3.76971 3L3.79113 3.00257L3.89826 3.01371L3.92054 3.01543L3.94111 3.02228L4.04395 3.05313L4.06366 3.05999L4.08166 3.06942L4.1965 3.12941L4.21364 3.14398L4.29676 3.21254L4.30534 3.21854L10.0001 8.91332L15.688 3.22625L15.6958 3.21939L15.7043 3.21254L15.7875 3.14398L15.8046 3.12941L15.9194 3.06942L15.9374 3.05999L15.9571 3.05313L16.06 3.02228L16.0806 3.01543L16.1028 3.01371L16.21 3.00257L16.2314 3L16.2528 3.00257Z" fill="currentColor"/></svg></button></div>
   </div>
   <div class="bs-body bs-body--gutter"><div class="mo-g" id="demoBody"></div></div>
+</div>
+
+<!-- Last working day picker (notice period = Serving notice period · user 2026-11-02) — the bottom-sheet component:
+     title bar · Medium · close · no bottom section. Its body is the profile-index LWD picker: one part at a time
+     (day · month · year) as a grid of chips; a tap picks, then the next empty part; closes when the date is complete. -->
+<div class="bs bs--pad-bottom" id="lwdSheet" hidden>
+  <div class="bs-top"><div class="bs-handle" aria-hidden="true"></div>
+    <div class="bs-head bs-head--md">
+      <div class="bs-heading"><h2 class="bs-title">Select <span class="accent" data-lwd-name>day</span></h2></div>
+      <button class="bs-close" type="button" data-bs-close aria-label="Close"><svg aria-hidden="true" focusable="false" data-icon="ic_close-outline" viewBox="0 0 20 20" fill="none"><path d="M16.2528 3.00257L16.3599 3.01371L16.3814 3.01543L16.4028 3.02228L16.5056 3.05313L16.5253 3.05999L16.5433 3.06942L16.6582 3.12941L16.6753 3.14398L16.7584 3.21254L16.7747 3.22625L16.7884 3.24253L16.857 3.32566L16.8716 3.3428L16.9316 3.45764L16.941 3.47564L16.947 3.49535L16.9787 3.59819L16.9855 3.61876L16.9873 3.64104L16.9984 3.74816L17.0001 3.76959L16.9984 3.79101L16.9873 3.89814L16.9855 3.92042L16.9787 3.94099L16.947 4.04383L16.941 4.06354L16.9316 4.08154L16.8716 4.19638L16.857 4.21352L16.7884 4.29665L16.7816 4.30522L11.0859 10L16.7816 15.6956L16.7884 15.7042L16.857 15.7873L16.8716 15.8045L16.9316 15.9193L16.941 15.9373L16.947 15.957L16.9787 16.0599L16.9855 16.0804L16.9873 16.1027L16.9984 16.2098L17.0001 16.2313L16.9984 16.2527L16.9873 16.3598L16.9855 16.3812L16.9787 16.4027L16.947 16.5055L16.941 16.5252L16.9316 16.5432L16.8716 16.6581L16.857 16.6752L16.7884 16.7583L16.7747 16.7746L16.7584 16.7883L16.6753 16.8569L16.6582 16.8714L16.5433 16.9314L16.5253 16.9409L16.5056 16.9469L16.4028 16.9786L16.3814 16.9854L16.3599 16.9871L16.2528 16.9983L16.2314 17L16.21 16.9983L16.1028 16.9871L16.0806 16.9854L16.06 16.9786L15.9571 16.9469L15.9374 16.9409L15.9194 16.9314L15.8046 16.8714L15.7875 16.8569L15.7043 16.7883L15.6958 16.7815L10.0001 11.0858L4.30534 16.7815L4.29676 16.7883L4.21364 16.8569L4.1965 16.8714L4.08166 16.9314L4.06366 16.9409L4.04395 16.9469L3.94111 16.9786L3.92054 16.9854L3.89826 16.9871L3.79113 16.9983L3.76971 17L3.74828 16.9983L3.64116 16.9871L3.61888 16.9854L3.59831 16.9786L3.49547 16.9469L3.47576 16.9409L3.45776 16.9314L3.34292 16.8714L3.32578 16.8569L3.24265 16.7883L3.22637 16.7746L3.21266 16.7583L3.1441 16.6752L3.12953 16.6581L3.06954 16.5432L3.06011 16.5252L3.05325 16.5055L3.0224 16.4027L3.01555 16.3812L3.01383 16.3598L3.00269 16.2527L3.00098 16.2313L3.00269 16.2098L3.01383 16.1027L3.01555 16.0804L3.0224 16.0599L3.05325 15.957L3.06011 15.9373L3.06954 15.9193L3.12953 15.8045L3.1441 15.7873L3.21266 15.7042L3.21951 15.6956L3.22637 15.6879L8.91344 10L3.21866 4.30522L3.21266 4.29665L3.1441 4.21352L3.12953 4.19638L3.06954 4.08154L3.06011 4.06354L3.05325 4.04383L3.0224 3.94099L3.01555 3.92042L3.01383 3.89814L3.00269 3.79101L3.00098 3.76959L3.00269 3.74816L3.01383 3.64104L3.01555 3.61876L3.0224 3.59819L3.05325 3.49535L3.06011 3.47564L3.06954 3.45764L3.12953 3.3428L3.1441 3.32566L3.21266 3.24253L3.22637 3.22625L3.24265 3.21254L3.32578 3.14398L3.34292 3.12941L3.45776 3.06942L3.47576 3.05999L3.49547 3.05313L3.59831 3.02228L3.61888 3.01543L3.64116 3.01371L3.74828 3.00257L3.76971 3L3.79113 3.00257L3.89826 3.01371L3.92054 3.01543L3.94111 3.02228L4.04395 3.05313L4.06366 3.05999L4.08166 3.06942L4.1965 3.12941L4.21364 3.14398L4.29676 3.21254L4.30534 3.21854L10.0001 8.91332L15.688 3.22625L15.6958 3.21939L15.7043 3.21254L15.7875 3.14398L15.8046 3.12941L15.9194 3.06942L15.9374 3.05999L15.9571 3.05313L16.06 3.02228L16.0806 3.01543L16.1028 3.01371L16.21 3.00257L16.2314 3L16.2528 3.00257Z" fill="currentColor"/></svg></button>
+    </div>
+  </div>
+  <div class="bs-body bs-body--gutter">
+    <div class="lwd-grid" data-lwd-grid role="group" aria-label="Day"></div>
+  </div>
 </div>
 
 <script data-component="top-app-bar">
@@ -5537,6 +5573,156 @@ window.__MO_CFG = {
     welcomeUrl: 'signup-welcome.html'                     // the end: Add your resume (upload or skip) → Welcome to Shine
   };
 </script>
+<script data-page="notice-lwd">
+/* ═══ SHINE APP · SIGN UP — NOTICE PERIOD + LAST WORKING DAY (user 2026-11-02) ═══════════════════════════════
+   Shared by signup-manual.html (Basic details) and signup-resume.html (Almost there · Edit basic details).
+   Notice period (combo box · sheet): Immediate joiner · Serving notice period · 15 days · 1 month · 2 months · 3 months.
+   "Serving notice period" opens a Last working day field under it: the multi-input component (3 boxes, a caret in each).
+   A tap on a box opens #lwdSheet (the bottom-sheet component) on that part — day · month · year as a grid of chips (the
+   profile-index LWD picker's content). A tap picks, then the sheet moves to the next empty part; it closes once the
+   date is complete. The date runs from today to a year from today (the field's data-min / data-max):
+     · a chip is off when no real date in that range can come of it — judged on the parts above it (year › month › day):
+       past months of this year, days a month doesn't have (31 Apr · 29 Feb in a year that isn't a leap year), days
+       before today in this month, days after the limit next year
+     · picking a year or a month that rules out a part already picked below it (31 → Feb, Nov 1 → this year once it
+       has gone) clears that part and goes back to it — never a dead end, never an impossible date
+   → window.MoNotice = { OPTIONS, SERVING, label(code, lwd), attach(root) → { sync(), read(), write(code, lwd) } } */
+(function () {
+  'use strict';
+  var doc = document, F = window.ShineField, S = window.ShineSheet;
+  var OPTIONS = [['Immediate', 'Immediate joiner'], ['Serving notice', 'Serving notice period'], ['15 days', '15 days'],
+                 ['1 month', '1 month'], ['2 months', '2 months'], ['3 months', '3 months']];
+  var SERVING = 'Serving notice';
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var MONTH = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var NAME = { d: 'day', m: 'month', y: 'year' }, ORDER = ['d', 'm', 'y'];
+  var sheet = doc.getElementById('lwdSheet'); if (!sheet || !F || !S) return;
+  var grid = sheet.querySelector('[data-lwd-grid]'), nameEl = sheet.querySelector('[data-lwd-name]');
+  var cur = null, part = 'd', closing = false;
+
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+  function key(y, m, d) { return y * 10000 + m * 100 + d; }
+  function daysIn(m, y) { return new Date(y, m, 0).getDate(); }
+  function range() {                                     // today … a year from today (as the field's data-max="today+1y")
+    var a = new Date(), b = new Date(); b.setFullYear(b.getFullYear() + 1);
+    return { lo: key(a.getFullYear(), a.getMonth() + 1, a.getDate()), hi: key(b.getFullYear(), b.getMonth() + 1, b.getDate()), y0: a.getFullYear(), y1: b.getFullYear() };
+  }
+  /* is there a real date in range with these parts? (null = not picked yet: any value) */
+  function possible(q) {
+    var r = range();
+    for (var y = r.y0; y <= r.y1; y++) {
+      if (q.y != null && q.y !== y) continue;
+      for (var m = 1; m <= 12; m++) {
+        if (q.m != null && q.m !== m) continue;
+        var n = daysIn(m, y);
+        for (var d = 1; d <= n; d++) {
+          if (q.d != null && q.d !== d) continue;
+          var kk = key(y, m, d); if (kk >= r.lo && kk <= r.hi) return true;
+        }
+      }
+    }
+    return false;
+  }
+  function boxes(fs) { var o = {}; [].forEach.call(fs.querySelectorAll('.field-input'), function (i) { o[i.getAttribute('data-part')] = i; }); return o; }
+  function picked(fs) { var b = boxes(fs), o = {}; ORDER.forEach(function (p) { o[p] = b[p] && b[p].value ? +b[p].value : null; }); return o; }
+  function put(fs, p, v) {                               // write one box the way typing would (the component formats, checks, emits)
+    var i = boxes(fs)[p]; if (!i) return;
+    i.value = v == null ? '' : p === 'y' ? String(v) : pad(v);
+    i.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  /* a chip is off when nothing in range can come of it — judged on the parts ABOVE it only (year › month › day) */
+  function off(p, v, q) {
+    var t = { y: q.y, m: q.m, d: q.d }; t[p] = v;
+    if (p === 'y') { t.m = null; t.d = null; } else if (p === 'm') t.d = null;
+    return !possible(t);
+  }
+  function render(p) {
+    part = p; var q = picked(cur), r = range(), list = [];
+    if (p === 'd') for (var d = 1; d <= 31; d++) list.push([d, String(d), d + '']);
+    if (p === 'm') MON.forEach(function (s, i) { list.push([i + 1, s, MONTH[i]]); });
+    if (p === 'y') for (var y = r.y0; y <= r.y1; y++) list.push([y, String(y), y + '']);
+    nameEl.textContent = NAME[p]; grid.setAttribute('data-part', p); grid.setAttribute('aria-label', 'Last working day: ' + NAME[p]);
+    grid.innerHTML = list.map(function (c) {
+      var dis = off(p, c[0], q);
+      return '<button class="lwd-chip" type="button" data-v="' + c[0] + '" aria-pressed="' + (q[p] === c[0]) + '" aria-label="' + c[2] + '"' + (dis ? ' disabled' : '') + '>' + c[1] + '</button>';
+    }).join('');
+  }
+  function next(after) {                                 // the next part still empty, in box order (day · month · year)
+    var q = picked(cur), i = ORDER.indexOf(after);
+    for (var n = 1; n <= 3; n++) { var p = ORDER[(i + n) % 3]; if (q[p] == null) return p; }
+    return null;
+  }
+  grid.addEventListener('click', function (e) {
+    var b = e.target.closest('.lwd-chip'); if (!b || b.disabled || !cur || closing) return;
+    var v = +b.getAttribute('data-v'), fs = cur;
+    [].forEach.call(grid.querySelectorAll('.lwd-chip'), function (c) { c.setAttribute('aria-pressed', c === b ? 'true' : 'false'); });
+    put(fs, part, v);
+    var q = picked(fs), back = null;                     // a higher part picked: drop what it rules out below it, and go back to it
+    if (part === 'y' && q.m != null && !possible({ y: q.y, m: q.m, d: null })) { put(fs, 'm', null); q.m = null; back = 'm'; }
+    if (part !== 'd' && q.d != null && !possible(q)) { put(fs, 'd', null); q.d = null; back = 'd'; }
+    var to = back || next(part);
+    if (to) { setTimeout(function () { if (cur === fs) render(to); }, 140); return; }
+    closing = true; setTimeout(function () { S.close(sheet); }, 160);   // the date is complete: the pick shows, then the sheet goes
+  });
+  sheet.addEventListener('shine:sheet-closed', function (e) { if (e.target === sheet) { cur = null; closing = false; } });
+
+  function open(fs, p) {
+    if (cur) return; cur = fs; closing = false;
+    render(p);
+    S.open(sheet, { trigger: boxes(fs)[p] });
+  }
+  function setup(fs) {
+    if (fs.__lwd) return; fs.__lwd = true;
+    var b = boxes(fs);
+    ORDER.forEach(function (p) {
+      var i = b[p]; if (!i) return;
+      i.readOnly = true; i.setAttribute('inputmode', 'none'); i.setAttribute('aria-haspopup', 'dialog');
+      i.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); open(fs, p); } });
+    });
+    /* the boxes are picked, not typed, so the group's own "left the group" check is replaced: it ran when the picker took
+       focus (a half-date error behind the sheet) and, with the focus back on a box after a pick, it wiped the "Select your
+       last working day" a submit had just shown. Here: leaving the group with a half-picked date says what is missing. */
+    fs.addEventListener('focusout', function (e) {
+      e.stopPropagation();
+      setTimeout(function () {
+        if (cur === fs || fs.contains(doc.activeElement)) return;
+        var p = picked(fs), n = (p.d != null) + (p.m != null) + (p.y != null);
+        if (n && n < 3) { var t = F.get(fs).check(false); if (t) F.set(fs, 'invalid', t); }
+      }, 0);
+    }, true);
+    fs.addEventListener('click', function (e) {          // the box or its caret: open the picker on that part
+      var c = e.target.closest('.field-control'); if (!c || !fs.contains(c)) return;
+      var i = c.querySelector('.field-input'); if (!i || i.disabled) return;
+      open(fs, i.getAttribute('data-part'));
+    });
+  }
+
+  function label(code, lwd) {                            // what a card shows: "1 month" · "Serving till 15 Dec 2026"
+    if (code === SERVING && lwd) { var t = /^(\d{4})-(\d{2})-(\d{2})$/.exec(lwd); if (t) return 'Serving till ' + (+t[3]) + ' ' + MON[+t[2] - 1] + ' ' + t[1]; }
+    for (var i = 0; i < OPTIONS.length; i++) if (OPTIONS[i][0] === code) return OPTIONS[i][1];
+    return code || '';
+  }
+  function attach(root) {
+    var n = root.querySelector('[data-k="notice"]'), fs = root.querySelector('[data-k="lwd"]');
+    F.get(n).options(OPTIONS.map(function (o) { return { value: o[0], label: o[1] }; }));
+    F.get(fs); setup(fs);                                // get() draws the boxes now (the component wires a field when first asked)
+    function sync() {                                    // the date only while "Serving notice period" is picked (and the block is shown)
+      var on = F.get(n).value() === SERVING && !(n.closest('[hidden]'));
+      fs.hidden = !on;
+      [].forEach.call(fs.querySelectorAll('.field-input'), function (i) { i.disabled = !on; });
+      if (!on) F.set(fs, null);
+    }
+    n.addEventListener('shine:combo', function () { setTimeout(sync, 0); });
+    sync();
+    return {
+      sync: sync,
+      read: function () { var c = F.get(n).value() || null; return { notice: c, lwd: c === SERVING ? (F.get(fs).value() || null) : null }; },
+      write: function (code, lwd) { if (code) F.get(n).set(code); else F.get(n).clear(); if (lwd) F.get(fs).set(lwd); else F.get(fs).clear(); sync(); }
+    };
+  }
+  window.MoNotice = { OPTIONS: OPTIONS, SERVING: SERVING, label: label, attach: attach };
+})();
+</script>
 <script>
 /* ═══ SHINE APP · SIGN UP › MANUAL ONBOARDING — page script · sample v1 (2026-11-01) ═══════════════════════
    Steps: basic → (OTP · account created) → edu → emp (experienced only) → skills → prefs → nudge → welcome (no “Setting up your profile” screen — user, 2026-11-01).
@@ -5677,7 +5863,6 @@ window.__MO_CFG = {
 
   /* ── data (as Profile's lists) ── */
   var D = window.__MO_DATA;
-  var NOTICE = [['Immediate', 'Immediate joiner'], ['15 days', '15 days'], ['30 days', '30 days'], ['60 days', '60 days'], ['90 days', '90 days'], ['Serving notice', 'Serving notice period']];
   var DISABILITY = ['None', 'Locomotor', 'Visual', 'Hearing', 'Speech & language', 'Intellectual', 'Multiple', 'Other'];
   var EDU_OPTS = []; D.EDU.forEach(function (g) { g[1].forEach(function (o) { EDU_OPTS.push({ value: o[0], label: o[1], hint: g[0] }); }); });
   var DB = { emails: { 'ramaraj.lingam@gmail.com': 1 }, phones: { '9876543210': 1 }, otp: '1234' };
@@ -5765,11 +5950,11 @@ window.__MO_CFG = {
   var B = $('#fBasic'), bExp = choice('exp', B), bGender = choice('gender', B);
   chips(bExp, [['fresher', 'I’m a fresher'], ['exp', 'I have work experience']]);
   chips(bGender, [['Male', 'Male'], ['Female', 'Female'], ['Transgender', 'Transgender'], ['Non-binary', 'Non-binary'], ['Prefer not to say', 'Prefer not to say']]);
-  F(k(B, 'notice')).options(NOTICE.map(function (n) { return { value: n[0], label: n[1] }; }));
+  var notice = window.MoNotice.attach(B);                 // notice period + Last working day when serving it (shared · src/lwd.js)
   F(k(B, 'loc')).options(D.CITIES);
   F(k(B, 'disability')).options(DISABILITY);
-  show(k(B, 'expBlock'), false);
-  bExp.addEventListener('pf:choice', function (e) { st.fresher = e.detail.value === 'fresher' ? true : e.detail.value === 'exp' ? false : null; show(k(B, 'expBlock'), st.fresher === false); progress(); });
+  show(k(B, 'expBlock'), false); notice.sync();
+  bExp.addEventListener('pf:choice', function (e) { st.fresher = e.detail.value === 'fresher' ? true : e.detail.value === 'exp' ? false : null; show(k(B, 'expBlock'), st.fresher === false); notice.sync(); progress(); });
 
   function basicCheck() {
     var ok = FLD.validate(B);
@@ -6162,7 +6347,7 @@ window.__MO_CFG = {
   /* ═══ demo data (prototype helper) ═══════════════════════════════════════════════════════════════════ */
   var PERSONA = {
     exp: {
-      basic: { name: 'Ramalingam Narayan Murthy', email: 'nm.ramalingam@gmail.com', phone: '7996835849', exp: 'exp', years: { years: 7, months: 3 }, salary: 1450000, notice: '30 days', loc: 'Gurugram, Haryana', gender: 'Male', dob: '1995-10-18', dis: 'None' },
+      basic: { name: 'Ramalingam Narayan Murthy', email: 'nm.ramalingam@gmail.com', phone: '7996835849', exp: 'exp', years: { years: 7, months: 3 }, salary: 1450000, notice: '1 month', loc: 'Gurugram, Haryana', gender: 'Male', dob: '1995-10-18', dis: 'None' },
       edu: [{ level: 'B.E./B.Tech. - Computer Science', levelLabel: 'B.E./B.Tech. — Computer Science', ctype: 'Full time', inst: 'IIT Delhi', start: '2012-07', end: '2016-05', grade: 'CGPA out of 10', marks: '8.5' }],
       emp: [{ title: 'Product Manager', company: 'XYZ Technologies Pvt. Ltd.', dept: 'Product Management', deptLabel: 'Product Management', ind: 'FinTech', indLabel: 'FinTech', current: true, start: '2022-03', end: '' },
             { title: 'Associate Product Manager', company: 'Blinkit', dept: 'Product Management', deptLabel: 'Product Management', ind: 'Internet / E-commerce', indLabel: 'Internet / E-commerce', current: false, start: '2018-07', end: '2022-02' }],
@@ -6181,7 +6366,7 @@ window.__MO_CFG = {
     var b = PERSONA[p].basic; st.persona = p;
     F(k(B, 'name')).set(b.name); if (!st.created) { F(k(B, 'email')).set(b.email); F(k(B, 'phone')).set(b.phone); }
     setChoice(bExp, b.exp);
-    if (b.exp === 'exp') { F(k(B, 'exp')).set(b.years); setSalary(k(B, 'salary'), b.salary); F(k(B, 'notice')).set(b.notice); }
+    if (b.exp === 'exp') { F(k(B, 'exp')).set(b.years); setSalary(k(B, 'salary'), b.salary); notice.write(b.notice, b.lwd || ''); }
     F(k(B, 'loc')).set(b.loc); setChoice(bGender, b.gender); F(k(B, 'dob')).set(b.dob); F(k(B, 'disability')).set(b.dis);
     $$('.field', B).forEach(function (f) { if (!f.closest('[data-salary]')) FLD.set(f, null); });
   }
