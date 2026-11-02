@@ -2637,8 +2637,10 @@ html.mo-no-demo .mo-key, .mo-key[hidden] { display: none !important; }
 
 /* a group of fields under an eyebrow (Optional) — Eyebrow / sm, 1 px separator above, like card rows */
 /* optional details (Date of birth · Disability) — the card component, grey fill: no shadow, no edge, white fields on it
-   (user's pick 2026-11-02 of 6 samples, then 4 surfaces · "optional-card-2-grey"); heading Heading / sm + an "Optional" badge */
-.mo-opt { --card-shadow: none; --card-stroke: transparent; --card-surface: var(--surface-neutral-muted); display: flex; flex-direction: column; gap: var(--spacing-stack-xl); margin-top: var(--spacing-stack-xs); }
+   (user's pick 2026-11-02 of 6 samples, then 4 surfaces · "optional-card-2-grey"); heading Heading / sm + an "Optional" badge.
+   Edge (user 2026-11-02 "a subtle border … semantic token"): stroke.neutral.base (cool-neutral/200) — stroke.neutral.muted is
+   cool-neutral/100, the same as the card's surface.neutral.muted fill, so it would not show. */
+.mo-opt { --card-shadow: none; --card-stroke: var(--stroke-neutral-base); --card-surface: var(--surface-neutral-muted); display: flex; flex-direction: column; gap: var(--spacing-stack-xl); margin-top: var(--spacing-stack-xs); }
 .mo-opt-h { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-inline-md); }
 .mo-opt-t { margin: 0; font: var(--card-header-font); color: var(--card-header-color); }
 .mo-opt-badge { display: inline-flex; align-items: center; height: 22px; padding: 0 var(--spacing-inset-md); border-radius: var(--size-radius-full); background: var(--surface-neutral-raised); color: var(--content-neutral-muted); font: var(--weight-bold) var(--type-label-md-size)/1 var(--font-brand); white-space: nowrap; }
