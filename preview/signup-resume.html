@@ -22,7 +22,7 @@
     1 signup-flow.html    the sign-up screen: upload resume (→ 2) · fill details manually (→ 3) · log in
     2 signup-resume.html  this flow
     3 signup-manual.html  fill details manually
-  Components: App-login/app-components, inlined verbatim (fields Small · bottom sheet incl. full-screen · alert · cards · top bar).
+  Components: Shine App/App-components, inlined verbatim (fields Small · bottom sheet incl. full-screen · alert · cards · top bar).
   Review: ?st=verify · ?st=prefs (+ &sim=partial for missing details) · ?demo=0 hides the demo key.
 -->
 
@@ -2532,12 +2532,11 @@ button { font: inherit; color: inherit; }
 .mo { position: relative; max-width: 480px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; display: flex; flex-direction: column; background: var(--surface-neutral-base); }
 .mo-view { flex: 1 0 auto; display: flex; flex-direction: column; }
 
-/* ── Top bar (top-app-bar title bar, user's pick: sample 2 "Eyebrow + edge line", 2026-11-01) — PAGE-LOCAL parts ──
-   back · eyebrow "STEP 1 OF 5" over the title · end: demo key + Help me fill · the progress on the bar's bottom edge
+/* ── Top bar (top-app-bar title bar, user's pick: sample 2 "Eyebrow + edge line", 2026-11-01; the eyebrow removed 2026-11-02) — PAGE-LOCAL parts ──
+   back · title · end: demo key + Help me fill · the progress on the bar's bottom edge
    (it takes the place of the scroll hairline). One row, no slot below. */
 .mo-tt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .mo-tt .stp-title { min-width: 0; }
-.mo-eb { font: var(--weight-bold) var(--type-eyebrow-sm-size)/var(--type-eyebrow-sm-line) var(--font-brand); letter-spacing: var(--type-eyebrow-sm-track); text-transform: uppercase; color: var(--content-neutral-faded); white-space: nowrap; }   /* Eyebrow / sm 10 */
 .mo-h-edge::after { display: none; }   /* the progress track is the edge line */
 .mo-edge { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--stroke-neutral-muted); }
 .mo-prog-track { flex: 1; height: 4px; border-radius: var(--size-radius-full); background: var(--surface-neutral-muted); overflow: hidden; }   /* A.10 Progress · sm */
@@ -2620,6 +2619,25 @@ html.mo-no-demo .mo-key, .mo-key[hidden] { display: none !important; }
 /* result sheet — Account created · Profile created (user 2026-11-01): the App-login bottom sheet carrying the JD page's
    result pattern (apply-flow .apf-status): a 72 success badge with two ripples, the sheet's Large title + Body / md sub
    centred, one Primary inline. Sizes as the apply flow (badge 72 ⚠️ proposed size.status.badge · icon 40 size.icon.3xl). */
+/* Job preferences — the resume flow's numbered questions (rs/samples.py PICK_CSS, as is · user 2026-11-02) */
+.pk-q { padding: var(--spacing-stack-xl) 0; border-top: var(--size-stroke-thin) solid var(--stroke-neutral-muted); }
+.pk-q:first-child { border-top: 0; padding-top: var(--spacing-stack-xs); }
+.pk-qh { display: flex; align-items: center; gap: var(--spacing-inline-md); margin-bottom: var(--spacing-stack-md); font: var(--weight-bold) var(--type-body-md-size)/var(--type-body-md-line) var(--font-brand); color: var(--content-neutral-base); }
+.pk-qh b { display: grid; place-items: center; width: 24px; height: 24px; border-radius: var(--size-radius-full); background: var(--surface-brand-brand-intense); color: var(--content-on-fill-dark-base); font-size: 12px; }
+.pk-qh span { font-weight: var(--weight-medium); color: var(--content-neutral-faded); }
+.pk-more { margin-top: var(--spacing-stack-md); }
+.pk-q fieldset.pf-choice { margin: 0; padding: 0; border: 0; min-width: 0; }
+
+/* Help me fill → resume mid-flow (user 2026-11-02): reading sheet + the "filled from your resume" note on the steps it filled */
+.mo-read-ic { display: grid; place-items: center; width: 64px; height: 64px; border-radius: var(--size-radius-full); background: var(--surface-brand-brand-subtle); color: var(--content-neutral-brand); }
+.mo-read-ic svg { width: 28px; height: 28px; animation: moReadBob 1.2s ease-in-out infinite; }
+.mo-read-bar { position: relative; display: block; width: 160px; height: 4px; margin-top: var(--spacing-stack-xl); border-radius: var(--size-radius-full); background: var(--surface-neutral-muted); overflow: hidden; }
+.mo-read-bar i { position: absolute; top: 0; bottom: 0; width: 40%; border-radius: inherit; background: var(--surface-brand-brand-intense); animation: moReadBar 1.1s ease-in-out infinite; }
+@keyframes moReadBob { 50% { transform: translateY(-3px); } }
+@keyframes moReadBar { 0% { left: -40%; } 100% { left: 100%; } }
+@media (prefers-reduced-motion: reduce) { .mo-read-ic svg, .mo-read-bar i { animation: none; } .mo-read-bar i { left: 30%; } }
+.mo-cv[hidden] { display: none; }
+html.mo-has-cv .stp-end [data-act="help"] { display: none; }   /* the resume is in: nothing left for "Help me fill" to do */
 .su-done { --su-pos-intense: var(--color-system-green-700);   /* surface.status.positive-intense ⚠️ page-local (as apply-flow) */ }
 .su-status {
   position: relative; display: flex; flex-direction: column; align-items: center; padding-top: var(--spacing-section-lg); text-align: center;
@@ -2783,7 +2801,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 .su-step-ic svg{width: var(--size-icon-lg); height: var(--size-icon-lg); display: none;}
 .su-step.is-active{color: var(--content-on-fill-dark-base); background: rgba(255, 255, 255, 0.08);}
 .su-step.is-active .su-step-ic{background: transparent;}
-.su-step.is-active .su-step-ic::before{content: ""; position: absolute; inset: 0px; border-radius: 50%; border-top-style: ; border-top-width: ; border-right-color: ; border-right-style: ; border-right-width: ; border-bottom-color: ; border-bottom-style: ; border-bottom-width: ; border-left-color: ; border-left-style: ; border-left-width: ; border-image-source: ; border-image-slice: ; border-image-width: ; border-image-outset: ; border-image-repeat: ; border-top-color: var(--content-inverse-brand); animation: 0.8s linear 0s infinite normal none running auSpin;}
+.su-step.is-active .su-step-ic::before{content: ""; position: absolute; inset: 0px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.18); border-top-color: var(--c-brand-300); animation: 0.8s linear 0s infinite normal none running auSpin;}
 .su-step.is-done{color: var(--content-on-fill-dark-base);}
 .su-step.is-done .su-step-ic{background: transparent; color: var(--c-green-500); font-size: 0px;}
 .su-step.is-done .su-step-ic svg{display: block;}
@@ -2838,6 +2856,10 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
   0% { transform: translateY(8px); }
   100% { transform: translateY(46px); }
 }
+
+/* user 2026-11-02 · the list sat 40px in (the browser's own <ol> indent): rows, dividers and the "Reading" fill now run edge to edge of the card;
+   the spinner on the step being read was missing (its ring had lost its border) */
+.su-steps{padding: 0; margin-bottom: 0;}
 
 /* ═══ SIGN UP · 2 — RESUME FLOW · page-local (App-login components above; tokens only) ═══════════════════════ */
 html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resume: the splash navy reaches the status bar (as before) */
