@@ -2565,7 +2565,12 @@ html.mo-no-demo .mo-key, .mo-key[hidden] { display: none !important; }
 .field-label .optional { font-weight: var(--weight-medium); color: var(--content-neutral-faded); }
 
 /* a group of fields under an eyebrow (Optional) — Eyebrow / sm, 1 px separator above, like card rows */
-.mo-group { display: flex; flex-direction: column; gap: var(--spacing-stack-xl); padding-top: var(--spacing-stack-xl); border-top: var(--size-stroke-thin) solid var(--stroke-neutral-base); }
+/* optional details (Date of birth · Disability) — the card component, grey fill: no shadow, no edge, white fields on it
+   (user's pick 2026-11-02 of 6 samples, then 4 surfaces · "optional-card-2-grey"); heading Heading / sm + an "Optional" badge */
+.mo-opt { --card-shadow: none; --card-stroke: transparent; --card-surface: var(--surface-neutral-muted); display: flex; flex-direction: column; gap: var(--spacing-stack-xl); margin-top: var(--spacing-stack-xs); }
+.mo-opt-h { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-inline-md); }
+.mo-opt-t { margin: 0; font: var(--card-header-font); color: var(--card-header-color); }
+.mo-opt-badge { display: inline-flex; align-items: center; height: 22px; padding: 0 var(--spacing-inset-md); border-radius: var(--size-radius-full); background: var(--surface-neutral-raised); color: var(--content-neutral-muted); font: var(--weight-bold) var(--type-label-md-size)/1 var(--font-brand); white-space: nowrap; }
 .mo-eyebrow { font: var(--weight-bold) var(--type-eyebrow-sm-size)/var(--type-eyebrow-sm-line) var(--font-brand); letter-spacing: var(--type-eyebrow-sm-track); text-transform: uppercase; color: var(--content-neutral-faded); }
 
 /* PAGE-LOCAL · choice chips — A.06 Chip md, single or multi choice (the same chip as Profile's editors) */
@@ -2853,14 +2858,15 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
             <div class="field-control"><input class="field-input" id="moLoc" placeholder="City, State" autocomplete="off" required></div>
           </div>
           <fieldset class="field field--sm pf-choice" data-choice="gender" data-error-empty="Choose your gender"><legend class="field-label">Gender</legend><div class="pf-chips" role="radiogroup" aria-label="Gender"></div></fieldset>
-          <div class="mo-group" role="group" aria-label="Optional details">
-            <p class="mo-eyebrow">Optional</p>
+          <!-- optional details: the card component, grey fill (user's pick 2026-11-02 · optional-card-2-grey) -->
+          <section class="card mo-opt" aria-labelledby="moOptH">
+            <div class="mo-opt-h"><h2 class="mo-opt-t" id="moOptH">More about you</h2><span class="mo-opt-badge">Optional</span></div>
             <fieldset class="field field--sm field-multi" data-field="date" data-parts="dmy" data-min="1950-01-01" data-max="today-15y" data-autocomplete="bday" data-k="dob"><legend class="field-label">Date of birth</legend></fieldset>
             <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Disability" data-k="disability">
               <label class="field-label" for="moDis">Disability</label>
               <div class="field-control"><input class="field-input" id="moDis" placeholder="Select (if any)"></div>
             </div>
-          </div>
+          </section>
         </div>
       </section>
 
