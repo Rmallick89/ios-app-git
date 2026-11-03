@@ -2770,6 +2770,17 @@ html.mo-has-cv .stp-end [data-act="help"] { display: none; }   /* the resume is 
   radial-gradient(70% 38% at 50% 52%, var(--surface-brand-brand-subtle), transparent 70%),
   linear-gradient(var(--surface-brand-brand-faint), var(--surface-neutral-base) 46%); }
 .sp-bar { margin: 0 calc(-1 * var(--spacing-layout-sm)); background: transparent !important; }
+/* the status bar on this screen (user 2026-11-03, iPhone + Android screenshot: an off-white bar over the blue-tinted top):
+   it takes the screen's top colour, surface.brand.brand-faint — the first stop of .sp-bg — the way the top-app-bar
+   component's status-bar strip does it (v3.0.5):
+     · iPhone: Safari colours the status bar from the solid background-color of a fixed, full-width box at the top edge
+       (read only when the box is over 10 px tall — so 16 + the safe area, clipped to show just the safe area) · the
+       body's background (a home-screen app, overscroll) and theme-color follow while the screen is up (page script)
+     · Android app: the shell's bar sampler reads the colour at the top edge — this strip, then .sp-bg's first stop */
+.sp-strip { position: fixed; top: 0; left: 0; right: 0; z-index: 81; pointer-events: none; height: calc(var(--mo-safe-top) + 16px);
+  -webkit-clip-path: inset(0 0 16px 0); clip-path: inset(0 0 16px 0); background-color: var(--surface-brand-brand-faint); }
+html.bs-lock .sp-strip { display: none; }                 /* a bottom sheet's own strip takes over while it is open */
+html.mo-on-nudge, html.mo-on-nudge body { background-color: var(--surface-brand-brand-faint); }
 .sp-bar::after { display: none; }
 .sp-body { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: stretch; justify-content: center; padding: var(--spacing-stack-xs) 0 var(--spacing-stack-md); }   /* the group sits in the middle of the room left */
 
@@ -3042,6 +3053,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
        cards without one stay dim · Resume = Visibility · Upload resume (buttons atom Primary) · Skip for now (Secondary) -->
   <div class="mo-view mo-nudge sp" data-view="nudge" hidden>
     <span class="sp-bg" aria-hidden="true"></span>
+    <span class="sp-strip" aria-hidden="true"></span>   <!-- the status bar takes the screen's top colour (iPhone + Android app) -->
     <header class="stp stp--title sp-bar"><div class="stp-row"><button class="btn btn--muted btn--sm btn--icon btn--icon-lg btn--pill stp-back" type="button" data-act="back" aria-label="Back"><svg aria-hidden="true" focusable="false" data-icon="ic_arrow-left-outline" viewBox="0 0 20 20" fill="none"><path d="M8.28818 4C8.06711 4 7.85504 4.08781 7.69869 4.24414L2.24414 9.69869C2.16676 9.77603 2.1058 9.86783 2.06392 9.96857C2.02209 10.0696 2 10.1786 2 10.2882C2.00002 10.3976 2.0213 10.506 2.06303 10.6069C2.1049 10.7077 2.16655 10.8002 2.24414 10.8777L7.69869 16.3322C7.85507 16.4885 8.06724 16.5763 8.28818 16.5763C8.50916 16.5763 8.7213 16.4885 8.87766 16.3322C9.03392 16.176 9.12171 15.9637 9.1218 15.7427C9.1218 15.5217 9.03387 15.3095 8.87766 15.1532L4.84624 11.1218H16.1664C16.3873 11.1218 16.5997 11.0337 16.7559 10.8777C16.9121 10.7214 17 10.5091 17 10.2882C17 10.0672 16.9121 9.85496 16.7559 9.69869C16.5996 9.54246 16.3873 9.45455 16.1664 9.45455H4.84535L8.87766 5.42312C9.03398 5.26679 9.1218 5.05473 9.1218 4.83363C9.1218 4.61252 9.03399 4.40046 8.87766 4.24414C8.72133 4.08782 8.50929 4 8.28818 4Z" fill="currentColor"/></svg></button></div></header>
     <div class="mo-nudge-body sp-body">
       <div class="sp-fact"><span class="sp-tag"><svg aria-hidden="true" focusable="false" data-icon="ic_info-solid" viewBox="0 0 20 20" fill="none"><path d="M10 2C8.41775 2 6.87103 2.46919 5.55544 3.34824C4.23985 4.22729 3.21447 5.47672 2.60897 6.93853C2.00347 8.40034 1.84504 10.0089 2.15372 11.5607C2.4624 13.1126 3.22433 14.538 4.34315 15.6569C5.46197 16.7757 6.88743 17.5376 8.43928 17.8463C9.99113 18.155 11.5997 17.9965 13.0615 17.391C14.5233 16.7855 15.7727 15.7602 16.6518 14.4446C17.5308 13.129 18 11.5822 18 10C17.9978 7.87895 17.1542 5.84542 15.6544 4.34562C14.1546 2.84581 12.121 2.00224 10 2ZM9.69231 5.69231C9.87488 5.69231 10.0533 5.74644 10.2051 5.84787C10.3569 5.9493 10.4753 6.09347 10.5451 6.26214C10.615 6.43081 10.6333 6.61641 10.5976 6.79547C10.562 6.97453 10.4741 7.139 10.345 7.2681C10.2159 7.39719 10.0515 7.48511 9.87239 7.52072C9.69333 7.55634 9.50773 7.53806 9.33906 7.46819C9.17039 7.39833 9.02623 7.28002 8.9248 7.12822C8.82337 6.97642 8.76923 6.79795 8.76923 6.61538C8.76923 6.37057 8.86649 6.13578 9.0396 5.96267C9.21271 5.78956 9.44749 5.69231 9.69231 5.69231ZM10.6154 14.3077C10.289 14.3077 9.97591 14.178 9.7451 13.9472C9.51429 13.7164 9.38462 13.4033 9.38462 13.0769V10C9.22141 10 9.06488 9.93516 8.94947 9.81976C8.83407 9.70435 8.76923 9.54782 8.76923 9.38461C8.76923 9.2214 8.83407 9.06488 8.94947 8.94947C9.06488 8.83406 9.22141 8.76923 9.38462 8.76923C9.71104 8.76923 10.0241 8.8989 10.2549 9.12971C10.4857 9.36053 10.6154 9.67358 10.6154 10V13.0769C10.7786 13.0769 10.9351 13.1418 11.0505 13.2572C11.1659 13.3726 11.2308 13.5291 11.2308 13.6923C11.2308 13.8555 11.1659 14.012 11.0505 14.1274C10.9351 14.2429 10.7786 14.3077 10.6154 14.3077Z" fill="currentColor"/></svg>Do you know?</span><p>Top recruiters skip profiles without a resume.</p></div>
@@ -5965,9 +5977,19 @@ window.__MO_CFG = {
   function steps() { return st.fresher ? ['basic', 'edu', 'skills', 'prefs'] : ['basic', 'edu', 'emp', 'skills', 'prefs']; }
   var main = $('#moMain'), foot = $('#moFoot'), next = $('#moNext');
 
+  /* status bar (user 2026-11-03): on Add your resume it continues the screen's blue-tinted top — html.mo-on-nudge turns the
+     body (iPhone home-screen app, overscroll) surface.brand.brand-faint and theme-color follows; back to the page colour after */
+  var PAGE_TC = (function () { var m = doc.querySelector('meta[name="theme-color"]'); return m ? m.getAttribute('content') : '#FAF9F6'; })();
+  function barTone(nudge) {
+    html.classList.toggle('mo-on-nudge', nudge);
+    var m = doc.querySelector('meta[name="theme-color"]'), s = $('.sp-strip');
+    if (m) m.setAttribute('content', nudge && s ? hex(getComputedStyle(s).backgroundColor) : PAGE_TC);
+  }
+  function hex(rgb) { var c = (rgb.match(/\d+/g) || []).slice(0, 3); return c.length < 3 ? PAGE_TC : '#' + c.map(function (n) { return ('0' + (+n).toString(16)).slice(-2); }).join('').toUpperCase(); }
   function view(name) {
     $$('[data-view]').forEach(function (v) { v.hidden = v.getAttribute('data-view') !== name; });
     html.classList.toggle('mo-no-key', name !== 'steps');
+    barTone(name === 'nudge');
     $('#toast').classList.remove('show');
     window.scrollTo(0, 0);
     measure();
