@@ -24,6 +24,11 @@
     3 signup-manual.html  fill details manually
   Components: Shine App/App-components, inlined verbatim (fields Small · bottom sheet incl. full-screen · alert · cards · top bar).
   Review: ?st=verify · ?st=prefs (+ &sim=partial for missing details) · ?demo=0 hides the demo key.
+  Standard fields (2026-11-04, user — the same in App-login): salary helper = the amount in words, no hyphens, a capital first
+  ("Nine lakh eighty five thousand eight hundred ninety nine rupees"); expected salary = a list in lakhs (bottom sheet: 1 Lac ·
+  1.5 Lacs … 50 Lacs · 51 … 99 Lacs · 1 Cr+); the current salary shows as ₹9,85,899; job type
+  Full time · Part time · Contractual · Freelance · Internship; work mode Remote · In Office · Hybrid; disability None ·
+  Loco Motor Disability · Visual Impairment · Hearing Impairment · Other, with their subtext.
 -->
 
 <style data-component="buttons">
@@ -3060,7 +3065,7 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
         <div class="field field--sm pk-more" data-field="combo" data-combo="inline" data-combo-free id="pkLocMore"><label class="field-label field-label--hidden" for="pkLocIn">Another city</label><div class="field-control"><input class="field-input" id="pkLocIn" placeholder="Another city? Search" autocomplete="off"></div></div>
       </section>
       <section class="pk-q"><p class="pk-qh"><b>3</b>Expected salary <span>· a year</span></p>
-        <div class="field field--sm" data-field="text" data-salary id="pkSal"><label class="field-label field-label--hidden" for="pkSalIn">Expected annual salary</label><div class="field-control"><span class="field-prefix" aria-hidden="true">₹</span><input class="field-input" id="pkSalIn" inputmode="numeric" autocomplete="off" placeholder="Enter amount"></div></div>
+        <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Expected annual salary" data-combo-placeholder="Search, e.g. 35" id="pkSal"><label class="field-label field-label--hidden" for="pkSalIn">Expected annual salary</label><div class="field-control"><input class="field-input" id="pkSalIn" placeholder="Select"></div></div>
       </section>
       <section class="pk-q"><p class="pk-qh"><b>4</b>Job type <span>· optional</span></p>
         <fieldset class="pf-choice" data-choice="ptype" data-multi><legend class="mo-sr">Job type</legend><div class="pf-chips"></div></fieldset>
@@ -6057,13 +6062,13 @@ window.__MO_CFG = {
   }
   var ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
   var TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-  function two(n) { return n < 20 ? ONES[n] : TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : ''); }
+  function two(n) { return n < 20 ? ONES[n] : TENS[Math.floor(n / 10)] + (n % 10 ? ' ' + ONES[n % 10] : ''); }   // no hyphen: "eighty five" (user, 2026-11-04)
   function three(n) { return n >= 100 ? ONES[Math.floor(n / 100)] + ' hundred' + (n % 100 ? ' ' + two(n % 100) : '') : two(n); }
   function words(num) {
     if (!num || num > 9999999999) return '';
     var cr = Math.floor(num / 1e7), lk = Math.floor(num % 1e7 / 1e5), th = Math.floor(num % 1e5 / 1e3), h = num % 1e3, p = [];
     if (cr) p.push(two(cr) + ' crore'); if (lk) p.push(two(lk) + ' lakh'); if (th) p.push(two(th) + ' thousand'); if (h) p.push(three(h));
-    var s = p.join(' '); return s.charAt(0).toUpperCase() + s.slice(1) + ' rupees';
+    var s = p.join(' '); return s.charAt(0).toUpperCase() + s.slice(1) + ' rupees';   // "Nine lakh eighty five thousand eight hundred ninety nine rupees" (user, 2026-11-04)
   }
   function salaryHelp(input) { var n = +digits(input.value); if (!FLD.isInvalid(input)) FLD.set(input, n ? 'helper' : null, n ? words(n) : ''); }
   doc.addEventListener('input', function (e) {
@@ -6073,6 +6078,14 @@ window.__MO_CFG = {
   });
   doc.addEventListener('focusout', function (e) { var i = e.target; if (i.closest && i.closest('[data-salary]')) setTimeout(function () { salaryHelp(i); }, 0); });
   function setSalary(field, n) { F(field).set(n ? grouping(String(n)) : ''); salaryHelp($('.field-input', field)); }
+
+  /* expected salary — a list in lakhs, picked from a bottom sheet (user, 2026-11-04): 1 Lac · 1.5 Lacs … 50 Lacs (½ lakh
+     steps) · 51 … 99 Lacs · 1 Cr+. The value is the amount in rupees; lacsSnap puts any amount on the list. */
+  function lacsLabel(n) { n = +n || 0; if (!n) return ''; var l = Math.round(n / 5e4) / 2; return l >= 100 ? '1 Cr+' : l + (l === 1 ? ' Lac' : ' Lacs'); }
+  function lacsSnap(n) { n = +n || 0; if (!n) return ''; var l = n / 1e5; l = l >= 100 ? 100 : l > 50 ? Math.round(l) : Math.max(1, Math.round(l * 2) / 2); return String(Math.round(l * 1e5)); }
+  var LACS = (function () { var o = [], l; for (l = 1; l <= 50; l += 0.5) o.push(l); for (l = 51; l < 100; l++) o.push(l); o.push(100);
+    return o.map(function (x) { var n = Math.round(x * 1e5); return { value: String(n), label: lacsLabel(n) }; }); })();
+  function setESal(field, n) { var v = lacsSnap(n); if (v) F(field).set(v); else F(field).clear(); }
 
   /* ── tag fields: the tags atom (as Profile) ── */
   function tagList(host, list) {
@@ -6117,7 +6130,12 @@ window.__MO_CFG = {
   /* ── data (as Profile's lists) ── */
   var D = window.__MO_DATA;
   var NOTICE = window.MoNotice.OPTIONS;                    // Immediate joiner · Serving notice period (+ Last working day) · 15 days · 1 month · 2 months · 3 months — src/lwd.js (user 2026-11-02)
-  var DISABILITY = ['None', 'Locomotor', 'Visual', 'Hearing', 'Speech & language', 'Intellectual', 'Multiple', 'Other'];
+  /* disability — the standard options (user, 2026-11-04; = App-login Profile), each with its subtext in the list */
+  var DISABILITY = [{ value: 'None', label: 'None' },
+    { value: 'Loco Motor Disability', label: 'Loco Motor Disability', hint: 'Limb loss, Cerebral Palsy, Muscular Dystrophy' },
+    { value: 'Visual Impairment', label: 'Visual Impairment', hint: 'Low vision, Blindness' },
+    { value: 'Hearing Impairment', label: 'Hearing Impairment', hint: 'Partial/Complete hearing loss' },
+    { value: 'Other', label: 'Other' }];
   var EDU_OPTS = []; D.EDU.forEach(function (g) { g[1].forEach(function (o) { EDU_OPTS.push({ value: o[0], label: o[1], hint: g[0] }); }); });
   var DB = { emails: { 'ramaraj.lingam@gmail.com': 1, 'designkhk@gmail.com': 1 }, phones: { '9876543210': 1, '7564678585': 1 }, otp: '1234' };   // already on Shine (the log-in demo accounts)
 
@@ -6169,7 +6187,7 @@ window.__MO_CFG = {
     return [y ? y + (y > 1 ? ' years' : ' year') : '', m ? m + (m > 1 ? ' months' : ' month') : ''].filter(Boolean).join(', ') || '0 years';
   }
   function lpa(n) { if (!n) return ''; var v = n / 100000; return (v % 1 ? v.toFixed(1).replace(/\.0$/, '') : v) + ' LPA'; }
-  function salText(p) { return p.fresher ? '' : p.salary ? '₹' + grouping(String(p.salary)) + ' a year' : ''; }
+  function salText(p) { return p.fresher ? '' : p.salary ? '₹' + grouping(String(p.salary)) : ''; }   // ₹9,85,899 — as the Profile card (user, 2026-11-04)
   function ym(iso) { if (!iso) return ''; var q = iso.split('-'); return MON[+q[1] - 1] + ' ' + q[0]; }
   function months(a, b) { if (!a) return 0; var x = a.split('-'), y = b ? b.split('-') : [new Date().getFullYear(), new Date().getMonth() + 1]; return (+y[0] - +x[0]) * 12 + (+y[1] - +x[1]); }
   function dur(m) { if (m <= 0) return ''; var y = Math.floor(m / 12), mo = m % 12; return [y ? y + (y > 1 ? ' yrs' : ' yr') : '', mo ? mo + (mo > 1 ? ' mos' : ' mo') : ''].filter(Boolean).join(' '); }
@@ -6583,10 +6601,10 @@ window.__MO_CFG = {
     var locs = $('#locHost') && TagField($('#locHost'), { options: D.CITIES.map(cityName), max: 4, maxText: 'You can add up to 4 locations', suggest: '#locSuggest', suggestMax: 5,
       suggestions: function () { return [cityName(PF.loc), 'Bengaluru', 'Delhi', 'Mumbai', 'Hyderabad', 'Pune', 'Noida'].filter(Boolean); } });
     var sal = $('[data-k="esal"]'), pt = choice('ptype', doc), pm = choice('pmode', doc);
-    if (pt) chips(pt, [['Permanent', 'Permanent'], ['Contractual', 'Contractual'], ['Freelance', 'Freelance'], ['Internship', 'Internship']]);
-    if (pm) chips(pm, [['Onsite', 'Onsite'], ['Hybrid', 'Hybrid'], ['Remote', 'Remote']]);
-    function write() { if (roles) roles.set(PR.roles); if (locs) locs.set(PR.locs); if (sal) setSalary(sal, PR.esal || 0); if (pt) setChoice(pt, PR.types.slice()); if (pm) setChoice(pm, PR.modes.slice()); }
-    function read() { if (roles) PR.roles = roles.list(); if (locs) PR.locs = locs.list(); if (sal) PR.esal = +digits(F(sal).value()) || null; if (pt) PR.types = getChoice(pt); if (pm) PR.modes = getChoice(pm); }
+    if (pt) chips(pt, [['Full time', 'Full time'], ['Part time', 'Part time'], ['Contractual', 'Contractual'], ['Freelance', 'Freelance'], ['Internship', 'Internship']]);
+    if (pm) chips(pm, [['Remote', 'Remote'], ['In Office', 'In Office'], ['Hybrid', 'Hybrid']]);
+    function write() { if (roles) roles.set(PR.roles); if (locs) locs.set(PR.locs); if (sal) { F(sal).options(LACS); setESal(sal, PR.esal || 0); } if (pt) setChoice(pt, PR.types.slice()); if (pm) setChoice(pm, PR.modes.slice()); }
+    function read() { if (roles) PR.roles = roles.list(); if (locs) PR.locs = locs.list(); if (sal) PR.esal = +F(sal).value() || null; if (pt) PR.types = getChoice(pt); if (pm) PR.modes = getChoice(pm); }
     function ping() { setTimeout(function () { read(); if (onChange) onChange(); }, 0); }
     [$('#roleHost'), $('#locHost'), sal, pt, pm].forEach(function (n) { if (!n) return; ['input', 'shine:combo', 'click', 'pf:choice'].forEach(function (ev) { n.addEventListener(ev, ping); }); });
     return { write: write, read: read, roles: roles, locs: locs,
@@ -6623,11 +6641,12 @@ window.__MO_CFG = {
   F(rm).options(D.ROLES); F(lm).options(D.CITIES.map(cityName));
   rm.addEventListener('shine:combo', function (e) { var v = e.detail.label || e.detail.value; setTimeout(function () { addOpt(bRoles, roleOpts, 3, v, 'roles'); F(rm).clear(); FLD.set(rm, null); }, 0); });
   lm.addEventListener('shine:combo', function (e) { var v = e.detail.label || e.detail.value; setTimeout(function () { addOpt(bLocs, locOpts, 4, v, 'cities'); F(lm).clear(); FLD.set(lm, null); }, 0); });
-  chips(bType, [['Permanent', 'Permanent'], ['Contractual', 'Contractual'], ['Freelance', 'Freelance'], ['Internship', 'Internship']]);
-  chips(bMode, [['Onsite', 'Onsite'], ['Hybrid', 'Hybrid'], ['Remote', 'Remote']]);
+  chips(bType, [['Full time', 'Full time'], ['Part time', 'Part time'], ['Contractual', 'Contractual'], ['Freelance', 'Freelance'], ['Internship', 'Internship']]);
+  chips(bMode, [['Remote', 'Remote'], ['In Office', 'In Office'], ['Hybrid', 'Hybrid']]);
   /* salary: one field — the hint is a step above their current salary */
   var salF = $('#pkSal'), salIn = $('#pkSalIn');
-  function salHint() { var cur = PF.fresher ? 0 : +PF.salary || 0, v = cur ? cur * 1.1 : 300000, unit = v >= 1000000 ? 100000 : 50000; return 'e.g. ' + grouping(String(Math.ceil(v / unit) * unit)); }
+  F(salF).options(LACS);                                           // expected salary: the lakhs list
+  function salHint() { var cur = PF.fresher ? 0 : +PF.salary || 0, v = cur ? cur * 1.1 : 300000, unit = v >= 1000000 ? 100000 : 50000; return 'e.g. ' + lacsLabel(Math.ceil(v / unit) * unit); }   // a step above the current salary, on the lakhs list
   var PICK = {
     render: function () {
       if (!roleOpts.length) {
@@ -6636,9 +6655,9 @@ window.__MO_CFG = {
       }
       salIn.placeholder = salHint();
       chips(bRoles, roleOpts); chips(bLocs, locOpts); setChoice(bRoles, PR.roles.slice()); setChoice(bLocs, PR.locs.slice());
-      setSalary(salF, PR.esal || 0); setChoice(bType, PR.types.slice()); setChoice(bMode, PR.modes.slice()); pkCounts();
+      setESal(salF, PR.esal || 0); setChoice(bType, PR.types.slice()); setChoice(bMode, PR.modes.slice()); pkCounts();
     },
-    read: function () { PR.roles = getChoice(bRoles); PR.locs = getChoice(bLocs); PR.esal = +digits(salIn.value) || null; PR.types = getChoice(bType); PR.modes = getChoice(bMode); },
+    read: function () { PR.roles = getChoice(bRoles); PR.locs = getChoice(bLocs); PR.esal = +F(salF).value() || null; PR.types = getChoice(bType); PR.modes = getChoice(bMode); },
     focus: function (k) { (k === 'roles' ? bRoles : bLocs).scrollIntoView({ block: 'center', behavior: 'smooth' }); }
   };
 

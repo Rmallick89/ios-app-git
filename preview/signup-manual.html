@@ -25,6 +25,11 @@
     3 signup-manual.html  this page
   Components: Shine App/App-components, inlined verbatim (all fields Small). Demo data: the key in the top bar · OTP 1234 ·
   ?demo=0 hides it · ?st=nudge opens on the resume screen (review).
+  Standard fields (2026-11-04, user — the same in App-login): salary helper = the amount in words, no hyphens, a capital first
+  ("Nine lakh eighty five thousand eight hundred ninety nine rupees"); expected salary = a list in lakhs (bottom sheet: 1 Lac ·
+  1.5 Lacs … 50 Lacs · 51 … 99 Lacs · 1 Cr+); the current salary shows as ₹9,85,899; job type
+  Full time · Part time · Contractual · Freelance · Internship; work mode Remote · In Office · Hybrid; disability None ·
+  Loco Motor Disability · Visual Impairment · Hearing Impairment · Other, with their subtext.
 -->
 
 <style data-component="buttons">
@@ -2683,6 +2688,8 @@ html.mo-no-demo .mo-key, .mo-key[hidden] { display: none !important; }
 .mo-entries .hcard-list:empty { display: none; }
 .mo-entry-head { display: flex; align-items: center; justify-content: space-between; min-height: 24px; margin-bottom: var(--spacing-stack-xl); }
 .mo-entry-head .mo-eyebrow { font: var(--card-eyebrow-font, var(--weight-bold) 12px/12px var(--font-brand)); letter-spacing: var(--card-eyebrow-track, 1px); color: var(--card-eyebrow-color, var(--content-neutral-faded)); }
+.mo-entry-acts { display: flex; gap: var(--spacing-inline-lg); margin-top: var(--spacing-stack-xxl); }   /* Cancel · Save — the buttons atom, md, side by side (safe choice left) */
+.mo-entry-acts[hidden] { display: none; }
 .mo-add { align-self: flex-start; }
 .mo-add svg { width: 16px; height: 16px; }
 
@@ -2940,7 +2947,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
         <div class="mo-entries">
           <div class="hcard-list" id="eduList"></div>
           <div class="card mo-entry" id="eduCard">
-            <div class="mo-entry-head"><p class="mo-eyebrow" data-k="eduNo">Education 1</p><button class="btn btn--link btn--sm btn--flush" type="button" data-act="edu-cancel" hidden>Cancel</button></div>
+            <div class="mo-entry-head"><p class="mo-eyebrow" data-k="eduNo">Education 1</p></div>
             <div class="pf-form" id="fEdu">
               <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Education" data-k="level" data-error-empty="Select your education">
                 <label class="field-label" for="moEdLevel">Education</label>
@@ -2962,6 +2969,10 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
                 <div class="field-control"><input class="field-input" id="moEdMarks" placeholder="e.g. 80" autocomplete="off" inputmode="decimal" required></div>
               </div>
             </div>
+            <div class="mo-entry-acts" data-k="eduActs" hidden>   <!-- editing a saved entry / adding another (user 2026-11-03: Save + Cancel) -->
+              <button class="btn btn--secondary btn--md btn--fill" type="button" data-act="edu-cancel">Cancel</button>
+              <button class="btn btn--primary btn--md btn--fill" type="button" data-act="edu-save">Save</button>
+            </div>
           </div>
           <button class="btn btn--link btn--sm btn--flush mo-add" type="button" data-act="edu-add"><svg aria-hidden="true" focusable="false" data-icon="ic_plus-outline" viewBox="0 0 20 20" fill="none"><path d="M17 10C17 10.2228 16.9115 10.4364 16.754 10.594C16.5964 10.7515 16.3828 10.84 16.16 10.84H10.84V16.16C10.84 16.3828 10.7515 16.5964 10.594 16.754C10.4364 16.9115 10.2228 17 10 17C9.77722 17 9.56356 16.9115 9.40603 16.754C9.2485 16.5964 9.16 16.3828 9.16 16.16V10.84H3.84C3.61722 10.84 3.40356 10.7515 3.24603 10.594C3.0885 10.4364 3 10.2228 3 10C3 9.77722 3.0885 9.56356 3.24603 9.40603C3.40356 9.2485 3.61722 9.16 3.84 9.16H9.16V3.84C9.16 3.61722 9.2485 3.40356 9.40603 3.24603C9.56356 3.0885 9.77722 3 10 3C10.2228 3 10.4364 3.0885 10.594 3.24603C10.7515 3.40356 10.84 3.61722 10.84 3.84V9.16H16.16C16.3828 9.16 16.5964 9.2485 16.754 9.40603C16.9115 9.56356 17 9.77722 17 10Z" fill="currentColor"/></svg>Add another education</button>
         </div>
@@ -2973,7 +2984,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
         <div class="mo-entries">
           <div class="hcard-list" id="empList"></div>
           <div class="card mo-entry" id="empCard">
-            <div class="mo-entry-head"><p class="mo-eyebrow" data-k="empNo">Job 1</p><button class="btn btn--link btn--sm btn--flush" type="button" data-act="emp-cancel" hidden>Cancel</button></div>
+            <div class="mo-entry-head"><p class="mo-eyebrow" data-k="empNo">Job 1</p></div>
             <div class="pf-form" id="fEmp">
               <div class="field field--sm" data-field="combo" data-combo="inline" data-combo-free data-k="title" data-error-empty="Enter your job title">
                 <label class="field-label" for="moEmTitle">Job title</label>
@@ -2994,6 +3005,10 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
               <fieldset class="field field--sm pf-choice" data-choice="current" data-error-empty="Tell us if you work here now"><legend class="field-label">Do you work here now?</legend><div class="pf-chips" role="radiogroup" aria-label="Do you work here now?"></div></fieldset>
               <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-order="desc" data-min="1970-01-01" data-max="today" data-required data-k="start" data-error-empty="Enter the date you joined"><legend class="field-label">Date of joining</legend></fieldset>
               <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-order="desc" data-min="1970-01-01" data-max="today" data-required data-k="end" data-error-empty="Enter your last working day" data-error-min="The last working day can’t be before the date of joining" hidden><legend class="field-label">Last working day</legend></fieldset>
+            </div>
+            <div class="mo-entry-acts" data-k="empActs" hidden>   <!-- editing a saved entry / adding another (user 2026-11-03: Save + Cancel) -->
+              <button class="btn btn--secondary btn--md btn--fill" type="button" data-act="emp-cancel">Cancel</button>
+              <button class="btn btn--primary btn--md btn--fill" type="button" data-act="emp-save">Save</button>
             </div>
           </div>
           <button class="btn btn--link btn--sm btn--flush mo-add" type="button" data-act="emp-add"><svg aria-hidden="true" focusable="false" data-icon="ic_plus-outline" viewBox="0 0 20 20" fill="none"><path d="M17 10C17 10.2228 16.9115 10.4364 16.754 10.594C16.5964 10.7515 16.3828 10.84 16.16 10.84H10.84V16.16C10.84 16.3828 10.7515 16.5964 10.594 16.754C10.4364 16.9115 10.2228 17 10 17C9.77722 17 9.56356 16.9115 9.40603 16.754C9.2485 16.5964 9.16 16.3828 9.16 16.16V10.84H3.84C3.61722 10.84 3.40356 10.7515 3.24603 10.594C3.0885 10.4364 3 10.2228 3 10C3 9.77722 3.0885 9.56356 3.24603 9.40603C3.40356 9.2485 3.61722 9.16 3.84 9.16H9.16V3.84C9.16 3.61722 9.2485 3.40356 9.40603 3.24603C9.56356 3.0885 9.77722 3 10 3C10.2228 3 10.4364 3.0885 10.594 3.24603C10.7515 3.40356 10.84 3.61722 10.84 3.84V9.16H16.16C16.3828 9.16 16.5964 9.2485 16.754 9.40603C16.9115 9.56356 17 9.77722 17 10Z" fill="currentColor"/></svg>Add another job</button>
@@ -3028,7 +3043,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
             <div class="field field--sm pk-more" data-field="combo" data-combo="inline" data-combo-free id="pkLocMore"><label class="field-label field-label--hidden" for="moPLoc">Another city</label><div class="field-control"><input class="field-input" id="moPLoc" placeholder="Another city? Search" autocomplete="off"></div></div>
           </section>
           <section class="pk-q"><p class="pk-qh"><b>3</b>Expected salary <span>· a year</span></p>
-            <div class="field field--sm" data-field="text" data-salary data-k="esal" data-error-empty="Enter your expected salary"><label class="field-label field-label--hidden" for="moESal">Expected annual salary</label><div class="field-control"><span class="field-prefix" aria-hidden="true">₹</span><input class="field-input" id="moESal" inputmode="numeric" autocomplete="off" placeholder="Enter amount" required></div></div>
+            <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Expected annual salary" data-combo-placeholder="Search, e.g. 35" data-k="esal" data-error-empty="Choose your expected salary"><label class="field-label field-label--hidden" for="moESal">Expected annual salary</label><div class="field-control"><input class="field-input" id="moESal" placeholder="Select" required></div></div>
           </section>
           <section class="pk-q"><p class="pk-qh"><b>4</b>Job type <span>· optional</span></p>
             <fieldset class="pf-choice" data-choice="ptype" data-multi><legend class="mo-sr">Job type</legend><div class="pf-chips"></div></fieldset>
@@ -5907,13 +5922,13 @@ window.__MO_CFG = {
   }
   var ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
   var TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-  function two(n) { return n < 20 ? ONES[n] : TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : ''); }
+  function two(n) { return n < 20 ? ONES[n] : TENS[Math.floor(n / 10)] + (n % 10 ? ' ' + ONES[n % 10] : ''); }   // no hyphen: "eighty five" (user, 2026-11-04)
   function three(n) { return n >= 100 ? ONES[Math.floor(n / 100)] + ' hundred' + (n % 100 ? ' ' + two(n % 100) : '') : two(n); }
   function words(num) {
     if (!num || num > 9999999999) return '';
     var cr = Math.floor(num / 1e7), lk = Math.floor(num % 1e7 / 1e5), th = Math.floor(num % 1e5 / 1e3), h = num % 1e3, p = [];
     if (cr) p.push(two(cr) + ' crore'); if (lk) p.push(two(lk) + ' lakh'); if (th) p.push(two(th) + ' thousand'); if (h) p.push(three(h));
-    var s = p.join(' '); return s.charAt(0).toUpperCase() + s.slice(1) + ' rupees';
+    var s = p.join(' '); return s.charAt(0).toUpperCase() + s.slice(1) + ' rupees';   // "Nine lakh eighty five thousand eight hundred ninety nine rupees" (user, 2026-11-04)
   }
   function salaryHelp(input) { var n = +digits(input.value); if (!FLD.isInvalid(input)) FLD.set(input, n ? 'helper' : null, n ? words(n) : ''); }
   doc.addEventListener('input', function (e) {
@@ -5923,6 +5938,14 @@ window.__MO_CFG = {
   });
   doc.addEventListener('focusout', function (e) { var i = e.target; if (i.closest && i.closest('[data-salary]')) setTimeout(function () { salaryHelp(i); }, 0); });
   function setSalary(field, n) { F(field).set(n ? grouping(String(n)) : ''); salaryHelp($('.field-input', field)); }
+
+  /* expected salary — a list in lakhs, picked from a bottom sheet (user, 2026-11-04): 1 Lac · 1.5 Lacs … 50 Lacs (½ lakh
+     steps) · 51 … 99 Lacs · 1 Cr+. The value is the amount in rupees; lacsSnap puts any amount on the list. */
+  function lacsLabel(n) { n = +n || 0; if (!n) return ''; var l = Math.round(n / 5e4) / 2; return l >= 100 ? '1 Cr+' : l + (l === 1 ? ' Lac' : ' Lacs'); }
+  function lacsSnap(n) { n = +n || 0; if (!n) return ''; var l = n / 1e5; l = l >= 100 ? 100 : l > 50 ? Math.round(l) : Math.max(1, Math.round(l * 2) / 2); return String(Math.round(l * 1e5)); }
+  var LACS = (function () { var o = [], l; for (l = 1; l <= 50; l += 0.5) o.push(l); for (l = 51; l < 100; l++) o.push(l); o.push(100);
+    return o.map(function (x) { var n = Math.round(x * 1e5); return { value: String(n), label: lacsLabel(n) }; }); })();
+  function setESal(field, n) { var v = lacsSnap(n); if (v) F(field).set(v); else F(field).clear(); }
 
   /* ── tag fields: the tags atom (as Profile) ── */
   function tagList(host, list) {
@@ -5966,7 +5989,12 @@ window.__MO_CFG = {
 
   /* ── data (as Profile's lists) ── */
   var D = window.__MO_DATA;
-  var DISABILITY = ['None', 'Locomotor', 'Visual', 'Hearing', 'Speech & language', 'Intellectual', 'Multiple', 'Other'];
+  /* disability — the standard options (user, 2026-11-04; = App-login Profile), each with its subtext in the list */
+  var DISABILITY = [{ value: 'None', label: 'None' },
+    { value: 'Loco Motor Disability', label: 'Loco Motor Disability', hint: 'Limb loss, Cerebral Palsy, Muscular Dystrophy' },
+    { value: 'Visual Impairment', label: 'Visual Impairment', hint: 'Low vision, Blindness' },
+    { value: 'Hearing Impairment', label: 'Hearing Impairment', hint: 'Partial/Complete hearing loss' },
+    { value: 'Other', label: 'Other' }];
   var EDU_OPTS = []; D.EDU.forEach(function (g) { g[1].forEach(function (o) { EDU_OPTS.push({ value: o[0], label: o[1], hint: g[0] }); }); });
   var DB = { emails: { 'ramaraj.lingam@gmail.com': 1 }, phones: { '9876543210': 1 }, otp: '1234' };
 
@@ -6146,12 +6174,14 @@ window.__MO_CFG = {
   function has1(f) { var i = $('.field-input', f), v = F(f).value(); return !!(v && (typeof v !== 'object' || v.total)) || !!(i && !f.matches('.field-multi') && i.value.trim()); }   // a field with something in it (typed text counts for a combo)
   function EntryStep(cfg) {
     var items = [], editing = -1, open = true;
-    var list = $(cfg.list), card = $(cfg.card), form = $(cfg.form), cancel = $('[data-act="' + cfg.kind + '-cancel"]'), addBtn = $('[data-act="' + cfg.kind + '-add"]');
+    var list = $(cfg.list), card = $(cfg.card), form = $(cfg.form), cancel = $('[data-act="' + cfg.kind + '-cancel"]'), saveBtn = $('[data-act="' + cfg.kind + '-save"]'), acts = k(card, cfg.kind + 'Acts'), addBtn = $('[data-act="' + cfg.kind + '-add"]');
     function render() {
+      if (card.parentNode === list) list.parentNode.insertBefore(card, list.nextSibling);   // back under the list before it is redrawn
       list.innerHTML = items.map(function (it, i) { return i === editing ? '' : hcard(cfg.summary(it), i, cfg.kind); }).join('');
+      if (editing > -1) list.insertBefore(card, list.children[editing] || null);   // editing opens IN PLACE: the card keeps its spot in the list (user 2026-11-03)
       card.hidden = !open;
       k(card, cfg.kind + 'No').textContent = cfg.noun + ' ' + (editing > -1 ? editing + 1 : items.length + 1);
-      cancel.hidden = !(open && items.length && (editing > -1 || items.length));
+      acts.hidden = !(open && items.length);              // Cancel + Save: editing a saved one, or adding another (the first one is saved by Continue)
       sync();
       moreBelow();
     }
@@ -6170,6 +6200,7 @@ window.__MO_CFG = {
     function sync() { addBtn.disabled = open && cfg.filled(form) < 3; }
     ['input', 'change', 'shine:combo', 'shine:field', 'pf:choice'].forEach(function (t) { form.addEventListener(t, function () { setTimeout(sync, 0); }); });
     cancel.addEventListener('click', function () { editing = -1; open = false; cfg.reset(form); render(); });
+    saveBtn.addEventListener('click', function () { save(); });
     return {
       enter: function () { if (!items.length) { open = true; } render(); },
       save: save,
@@ -6303,8 +6334,9 @@ window.__MO_CFG = {
   /* the resume flow's Job preferences (user 2026-11-02): 1 Roles · 2 Cities — chips to tap, a search for anything else ·
      3 Expected salary · 4 Job type · 5 Work mode (both optional). Roles, cities and salary are needed to go on. */
   var P = $('#fPrefs'), jpType = choice('ptype', P), jpMode = choice('pmode', P);
-  chips(jpType, [['Permanent', 'Permanent'], ['Contractual', 'Contractual'], ['Freelance', 'Freelance'], ['Internship', 'Internship']]);
-  chips(jpMode, [['Onsite', 'Onsite'], ['Hybrid', 'Hybrid'], ['Remote', 'Remote']]);
+  chips(jpType, [['Full time', 'Full time'], ['Part time', 'Part time'], ['Contractual', 'Contractual'], ['Freelance', 'Freelance'], ['Internship', 'Internship']]);
+  chips(jpMode, [['Remote', 'Remote'], ['In Office', 'In Office'], ['Hybrid', 'Hybrid']]);
+  F(k(P, 'esal')).options(LACS);                                   // expected salary: the lakhs list
   function roleHints() {
     var cur = empStep.items().map(function (x) { return x.title; });
     var base = cur.length ? cur : (st.fresher ? ['Business Analyst', 'Data Analyst', 'Marketing Executive', 'Sales Executive', 'Content Writer'] : []);
@@ -6348,7 +6380,7 @@ window.__MO_CFG = {
   var locs = ChipPick(choice('locs', P), $('#pkLocMore'), { max: 4, label: 'cities', count: '#pkLocsN', show: 8, all: D.CITIES.map(cityName),
     base: function () { var c = F(k(B, 'loc')).value(); return uniq((c ? [cityName(c)] : []).concat(['Bengaluru', 'Delhi', 'Mumbai', 'Hyderabad', 'Pune', 'Noida', 'Chennai'])); } });
   /* salary: one field — the hint is a step above their current salary */
-  function salHint() { var cur = st.fresher ? 0 : +digits(F(k(B, 'salary')).value()) || 0, v = cur ? cur * 1.1 : 300000, unit = v >= 1000000 ? 100000 : 50000; return 'e.g. ' + grouping(String(Math.ceil(v / unit) * unit)); }
+  function salHint() { var cur = st.fresher ? 0 : +digits(F(k(B, 'salary')).value()) || 0, v = cur ? cur * 1.1 : 300000, unit = v >= 1000000 ? 100000 : 50000; return 'e.g. ' + lacsLabel(Math.ceil(v / unit) * unit); }   // a step above the current salary, on the lakhs list
   var prefsSeen = false;
   function prefsEnter() {
     roles.render(); locs.render();
@@ -6479,14 +6511,14 @@ window.__MO_CFG = {
       emp: [{ title: 'Product Manager', company: 'XYZ Technologies Pvt. Ltd.', dept: 'Product Management', deptLabel: 'Product Management', ind: 'FinTech', indLabel: 'FinTech', current: true, start: '2022-03', end: '' },
             { title: 'Associate Product Manager', company: 'Blinkit', dept: 'Product Management', deptLabel: 'Product Management', ind: 'Internet / E-commerce', indLabel: 'Internet / E-commerce', current: false, start: '2018-07', end: '2022-02' }],
       skills: ['Product Management', 'User Research', 'Stakeholder Management', 'SQL', 'A/B Testing'],
-      prefs: { roles: ['Sr. Product Manager', 'Group Product Manager'], locs: ['Gurugram', 'Bengaluru'], salary: 2400000, types: ['Permanent'], modes: ['Hybrid', 'Onsite'] }
+      prefs: { roles: ['Sr. Product Manager', 'Group Product Manager'], locs: ['Gurugram', 'Bengaluru'], salary: 2400000, types: ['Full time'], modes: ['In Office', 'Hybrid'] }
     },
     fresher: {
       basic: { name: 'Ananya Sharma', email: 'ananya.sharma@gmail.com', phone: '9811122334', exp: 'fresher', loc: 'Pune, Maharashtra', gender: 'Female', dob: '2003-04-12', dis: 'None' },
       edu: [{ level: 'BBA', levelLabel: 'BBA', ctype: 'Full time', inst: 'Symbiosis International', start: '2021-07', end: '2024-05', grade: '% Marks of 100', marks: '78' },
             { level: 'Class XII - Commerce', levelLabel: 'Class XII — Commerce', ctype: 'Full time', inst: 'CBSE', start: '2020-04', end: '2021-03', grade: '% Marks of 100', marks: '88' }],
       skills: ['Excel', 'Communication', 'Market Research', 'Business Development'],
-      prefs: { roles: ['Business Analyst', 'Marketing Executive'], locs: ['Pune', 'Mumbai'], salary: 400000, types: ['Permanent', 'Internship'], modes: ['Onsite'] }
+      prefs: { roles: ['Business Analyst', 'Marketing Executive'], locs: ['Pune', 'Mumbai'], salary: 400000, types: ['Full time', 'Internship'], modes: ['In Office'] }
     }
   };
   function fillBasic(p) {
@@ -6503,7 +6535,7 @@ window.__MO_CFG = {
     if (st.step === 'edu') eduStep.fill(d.edu);
     if (st.step === 'emp') empStep.fill(d.emp || PERSONA.exp.emp);
     if (st.step === 'skills') skills.set(d.skills);
-    if (st.step === 'prefs') { roles.set(d.prefs.roles); locs.set(d.prefs.locs); setSalary(k(P, 'esal'), d.prefs.salary); setChoice(jpType, d.prefs.types.slice()); setChoice(jpMode, d.prefs.modes.slice()); }
+    if (st.step === 'prefs') { roles.set(d.prefs.roles); locs.set(d.prefs.locs); setESal(k(P, 'esal'), d.prefs.salary); setChoice(jpType, d.prefs.types.slice()); setChoice(jpMode, d.prefs.modes.slice()); }
     say('Filled with demo data');
   }
   function row(kk, v, act, label) { return '<div class="mo-g-row"><span class="mo-g-txt"><span class="mo-g-k">' + kk + '</span><span class="mo-g-v">' + v + '</span></span><button class="btn btn--secondary btn--sm" type="button" data-demo="' + act + '" aria-label="' + esc(label || 'Use ' + kk) + '">Use</button></div>'; }
