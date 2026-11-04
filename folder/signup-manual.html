@@ -872,7 +872,9 @@ legend.field-label--hidden { float: none; width: 1px; }
 </style>
 <style data-component="combo-box">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.2.0
+   SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.3.0
+   v4.3.0 · list bottom sheet: the search box is part of the sheet's heading (bottom-sheet v3.2.0 · .bs-search) — the
+   shadow shows below it once the list scrolls (it was sticky at the top of the body).
    v4.2.0 · list bottom sheet: more room between the options — rows 56 tall, 16 above / below the text (were 48 / 12).
    v4.0.0 · with the inline dropdown component loaded (app-components/inline-dropdown), the inline list is that component
    (Small by default); the .field-pop list below is the fallback when it isn't loaded.
@@ -882,14 +884,15 @@ legend.field-label--hidden { float: none; width: 1px; }
 
      inline   [ Product de|                    ✕ ]        sheet   [ Bengaluru                     ⌄ ]
               ┌──────────────────────────────────┐                 ┌── Current city ────────────── ✕ ┐
-              │ Product Designer             ✓   │                 │ [ 🔍 Search                    ] │
+              │ Product Designer             ✓   │                 │ [ 🔍 Search                    ] │   ← in the heading
               │ Product Design Lead               │                 │ Bengaluru                    ✓  │
               └──────────────────────────────────┘                 │ Mumbai                           │
 
    Classes: .field[data-field="combo"] (+ .field--open while the list is open · .field-combo--sheet in sheet mode)
             .field-pop › .field-listbox › .field-option (.is-active · [aria-selected="true"]) › .field-option-text
             (+ mark · .field-option-hint) · .field-option-check · .field-list-note (no match · searching · heading)
-            sheet: .bs.field-sheet › .bs-body › .field.field-combo-sheet › .field-sheet-search + .field-listbox--sheet
+            sheet: .bs.field-sheet › .bs-top › .bs-search › .field.field-sheet-search (the search box, v4.3.0)
+                   .bs.field-sheet › .bs-body › .field.field-combo-sheet › .field-listbox--sheet
    ═══════════════════════════════════════════════════════════════════════ */
 
 .field, .field-sheet {
@@ -963,10 +966,9 @@ legend.field-label--hidden { float: none; width: 1px; }
    and as many options as fit stay in view — never behind the keyboard */
 .bs.field-sheet { height: var(--fld-sheet-h, auto); }
 .bs-kb .bs.field-sheet:not(.bs--nested):not(.field-sheet--plain) { height: calc(var(--bs-vvh, 100vh) - 16px - var(--bs-top-room, 0px) + var(--bs-kb, 0px)); }   /* v4.1.1: room for the bottom sheet's floating × (v3.0.0) */
-.field-sheet-search {
-  position: sticky; top: 0; z-index: 1; padding: 4px 0 8px;                                /* room for the focus ring · spacing.stack.xs */
-  background: var(--bs-surface-neutral-raised, var(--fld-bg));
-}
+/* v4.3.0 · the search box lives in the sheet's heading (bottom-sheet .bs-search), not in the body: title + search stay
+   put, the list scrolls under them and the heading's shadow falls below the box (user, 2026-11-04) */
+.field-sheet-search { gap: 0; }
 .field-listbox--sheet .field-option { position: relative; min-height: var(--fld-opt-h-sheet); padding: var(--fld-opt-py-sheet) var(--fld-opt-px); margin: 0 calc(-1 * var(--fld-opt-px)); border-radius: var(--fld-opt-radius); }
 .field-listbox--sheet .field-option + .field-option::before {                            /* A.11 separator between rows (size.stroke.thin · stroke.neutral.muted) */
   content: ""; position: absolute; top: 0; left: var(--fld-opt-px); right: var(--fld-opt-px); height: 1px; background: var(--fld-row-line); pointer-events: none;
@@ -1402,6 +1404,7 @@ legend.field-label--hidden { float: none; width: 1px; }
 <style data-component="bottom-sheet">
 /* ═══════════════════════════════════════════════════════════════════════
    SHINE · BOTTOM SHEET  (app component · App-login)            v3.0.0
+   + v3.2.0's search in the heading (.bs-search) — this page keeps v3.0.0's own eyebrow badge (no badges atom here)
    The one container behind every slide-up panel in the logged-in app — in TWO VARIATIONS:
      1 · BOTTOM SHEET  .bs            slides up from the bottom edge, the page shows above it
                                       (pickers, confirmations, nudges, OTP, short asks)
@@ -1556,6 +1559,7 @@ legend.field-label--hidden { float: none; width: 1px; }
   --bs-handle-top: var(--bs-spacing-inset-lg);           /* sheet edge → handle (v2.4: 8 → 12) */
   --bs-head-pad-top: var(--bs-spacing-inset-xl);         /* handle → heading               */
   --bs-head-pad-bottom: var(--bs-spacing-stack-xxl);     /* title bar → content (v2.6: 20 → 24) */
+  --bs-search-pad-bottom: var(--bs-spacing-stack-md);    /* search in the heading → content (v3.2.0) */
   --bs-display-pad-top: var(--bs-spacing-inset-xxl);     /* handle → display heading (v2.4: 16 → 22) */
   --bs-display-to-body: var(--bs-spacing-section-lg);    /* display heading → content (v2.6: 24 → 32) */
   --bs-close-offset: var(--bs-spacing-inset-xl);         /* display close from top / right */
@@ -1928,6 +1932,17 @@ html.in-app .bs, html.in-app .bs-statusbar { --bs-safe: 0px; --bs-safe-top: 0px;
 
 /* top section lifts (elevation.neutral.lifted — "sticky headers") only once content scrolls under it */
 .bs.is-scrolled > .bs-top { box-shadow: var(--bs-elevation-neutral-lifted); }
+
+/* v3.2.0 · SEARCH IN THE HEADING (user, 2026-11-04 — "search input field should be part of heading section of bottom
+   sheets and when user start to scroll then shadow appear below its container where input field & heading text placed").
+   A sheet whose content is searched (a list of options, a picker) keeps its search box in the TOP section, right under
+   the title bar: <div class="bs-top"> handle · .bs-head · <div class="bs-search">…a search field…</div> </div>.
+   Title + search are one block that never scrolls; the body (the list) scrolls under it, and the top section's lift
+   above shows BELOW the search — never between the title and the box, no rows peeking above the box.
+   Title → box = the title bar's own bottom (stack.xxl 24) · box → content = stack.md 12 · sides = the gutter.
+   Dragging the top section still dismisses the sheet; a tap in the box focuses it (the drag skips inputs). */
+.bs-search { flex-shrink: 0; position: relative; padding: 0 var(--bs-gutter) var(--bs-search-pad-bottom); }
+.bs-search[hidden] { display: none !important; }
 
 /* sheets without a bottom section still clear the home indicator */
 .bs--pad-bottom { padding-bottom: max(var(--bs-inline-end), calc(var(--bs-safe) + var(--bs-sticky-pad))); }   /* v2.5.1: same end as an inline bottom (24 · safe area + 16) */
@@ -4875,7 +4890,8 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 })(window.ShineField);
 </script>
 <script data-component="combo-box">
-/* SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.1.1
+/* SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.3.0
+   v4.3.0 · the list sheet builds its search box in the sheet's heading (bottom-sheet v3.2.0 · .bs-search)
    Needs field-base.css + field-base.js and combo-box.css. The sheet mode also needs the bottom-sheet component
    (app-components/bottom-sheet: bottom-sheet.css + bottom-sheet.js); without it the list opens inline.
    v4.1.0 · the sheet's search box takes the field's own size (Small in the app: 40 tall).
@@ -5043,7 +5059,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     }
     function scrollTo(li, center) {                       // keep the active row in view inside its scroller
       var sc = mode === 'sheet' ? sheet.querySelector('.bs-body') : pop; if (!sc) return;
-      var r = li.getBoundingClientRect(), b = sc.getBoundingClientRect(), pad = mode === 'sheet' ? sheet.querySelector('.field-sheet-search').offsetHeight : 0;
+      var r = li.getBoundingClientRect(), b = sc.getBoundingClientRect(), pad = 0;   // v4.3.0: the sheet's search sits in its heading, nothing covers the list
       if (center && (r.top < b.top + pad || r.bottom > b.bottom)) sc.scrollTop += r.top - b.top - pad - (b.height - pad - r.height) / 2;
       else if (r.top < b.top + pad) sc.scrollTop -= b.top + pad - r.top;
       else if (r.bottom > b.bottom) sc.scrollTop += r.bottom - b.bottom;
@@ -5113,17 +5129,17 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
       return el.getAttribute('data-error') || 'Choose one from the list';
     }
 
-    /* ── sheet: the bottom-sheet component, title bar · Medium heading, search pinned at the top, tap to pick ── */
+    /* ── sheet: the bottom-sheet component, title bar · Medium heading + the search box in the heading (v4.3.0), tap to pick ── */
     function buildSheet() {
       if (sheet) return;
-      var sid = 'fld-combo-' + n + '-search', lid = 'fld-combo-' + n + '-sheet';
+      var sid = 'fld-combo-' + n + '-search', lid = 'fld-combo-' + n + '-sheet', sz = (el.className.match(/\bfield--(sm|md|lg|xl)\b/) || [])[1] || 'md';
       sheet = doc.createElement('div'); sheet.className = 'bs bs--pad-bottom field-sheet'; sheet.hidden = true;
       sheet.innerHTML = '<div class="bs-top"><div class="bs-handle" aria-hidden="true"></div><div class="bs-head bs-head--md"><div class="bs-heading"><h2 class="bs-title">' + esc(title) + '</h2></div>' +
-        '<button class="bs-close" type="button" data-bs-close aria-label="Close">' + IC['ic_close-outline'] + '</button></div></div>' +
-        '<div class="bs-body bs-body--gutter"><div class="field field--' + ((el.className.match(/\bfield--(sm|md|lg|xl)\b/) || [])[1] || 'md') + ' field-combo-sheet"><div class="field-sheet-search"><label class="field-label field-label--hidden" for="' + sid + '">Search ' + esc(name) + '</label>' +
+        '<button class="bs-close" type="button" data-bs-close aria-label="Close">' + IC['ic_close-outline'] + '</button></div>' +
+        '<div class="bs-search"><div class="field field--' + sz + ' field-sheet-search"><label class="field-label field-label--hidden" for="' + sid + '">Search ' + esc(name) + '</label>' +
         '<div class="field-control"><span class="field-icon" aria-hidden="true">' + IC['ic_search-outline'] + '</span><input class="field-input" id="' + sid + '" type="text" role="combobox" aria-autocomplete="list" aria-expanded="true" aria-controls="' + lid + '" autocomplete="off" spellcheck="false" enterkeyhint="search" data-bs-autofocus placeholder="' + esc(el.getAttribute('data-combo-placeholder') || 'Search') + '">' +
-        '<button class="field-trailing" type="button" data-combo-btn="clear" aria-label="Clear search" hidden>' + IC['ic_close-outline'] + '</button></div></div>' +
-        '<ul class="field-listbox field-listbox--sheet" role="listbox" id="' + lid + '" aria-label="' + esc(title) + '"></ul><span class="sr-only" aria-live="polite"></span></div></div>';
+        '<button class="field-trailing" type="button" data-combo-btn="clear" aria-label="Clear search" hidden>' + IC['ic_close-outline'] + '</button></div></div></div></div>' +
+        '<div class="bs-body bs-body--gutter"><div class="field field--' + sz + ' field-combo-sheet"><ul class="field-listbox field-listbox--sheet" role="listbox" id="' + lid + '" aria-label="' + esc(title) + '"></ul><span class="sr-only" aria-live="polite"></span></div></div>';
       doc.body.appendChild(sheet);
       sIn = sheet.querySelector('.field-input'); sLb = sheet.querySelector('.field-listbox'); sLive = sheet.querySelector('[aria-live]');
       var sClear = sheet.querySelector('[data-combo-btn]');
@@ -5142,7 +5158,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     function openSheet() {
       if (isOpen || input.disabled) return;
       buildSheet(); isOpen = true; el.classList.add('field--open');
-      var srch = wantSearch(), box = sheet.querySelector('.field-sheet-search');
+      var srch = wantSearch(), box = sheet.querySelector('.bs-search');   // v4.3.0: the heading's search slot
       box.hidden = !srch; sheet.classList.toggle('field-sheet--plain', !srch);
       if (srch) sIn.setAttribute('data-bs-autofocus', ''); else sIn.removeAttribute('data-bs-autofocus');
       sIn.value = ''; sheet.querySelector('[data-combo-btn]').hidden = true;
