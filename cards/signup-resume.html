@@ -26,7 +26,7 @@
   Review: ?st=verify · ?st=prefs (+ &sim=partial for missing details) · ?demo=0 hides the demo key.
   Standard fields (2026-11-04, user — the same in App-login): salary helper = the amount in words, no hyphens, a capital first
   ("Nine lakh eighty five thousand eight hundred ninety nine rupees"); expected salary = a list in lakhs (bottom sheet: 1 Lac ·
-  1.5 Lacs … 50 Lacs · 51 … 99 Lacs · 1 Cr+); the current salary shows as ₹9,85,899; job type
+  1.5 Lacs … 50 Lacs · 51 … 99 Lacs · 1 Cr+); the current salary shows as 9,85,899 (no ₹, no "a year"); job type
   Full time · Part time · Contractual · Freelance · Internship; work mode Remote · In Office · Hybrid; disability None ·
   Loco Motor Disability · Visual Impairment · Hearing Impairment · Other, with their subtext.
 -->
@@ -871,7 +871,8 @@ legend.field-label--hidden { float: none; width: 1px; }
 </style>
 <style data-component="combo-box">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.1.1
+   SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.2.0
+   v4.2.0 · list bottom sheet: more room between the options — rows 56 tall, 16 above / below the text (were 48 / 12).
    v4.0.0 · with the inline dropdown component loaded (app-components/inline-dropdown), the inline list is that component
    (Small by default); the .field-pop list below is the fallback when it isn't loaded.
    Search, then pick one from a list — the list opens INLINE (a dropdown under the box) or in a BOTTOM SHEET.
@@ -905,7 +906,9 @@ legend.field-label--hidden { float: none; width: 1px; }
   --fld-pop-radius: 12px;                   /* size.radius.lg — "modals, popovers" */
   --fld-pop-max: 272px;                     /* six rows + padding, then it scrolls */
   --fld-opt-h: 44px;                        /* size.control.md — a row in the dropdown */
-  --fld-opt-h-sheet: 48px;                  /* size.control.lg — a row in the sheet */
+  --fld-opt-h-sheet: 56px;                  /* size.control.xl — a row in the sheet (v4.2.0 · was lg 48) */
+  --fld-opt-py-sheet: 16px;                 /* spacing.inset.xl — above / below a row's text in the sheet (v4.2.0 · was inset.lg 12):
+                                               more room between the options (user, 2026-11-04) */
   --fld-opt-px: 8px;                        /* spacing.inset.md — row text lines up with the box's text */
   --fld-opt-radius: 8px;                    /* size.radius.md */
 }
@@ -963,7 +966,7 @@ legend.field-label--hidden { float: none; width: 1px; }
   position: sticky; top: 0; z-index: 1; padding: 4px 0 8px;                                /* room for the focus ring · spacing.stack.xs */
   background: var(--bs-surface-neutral-raised, var(--fld-bg));
 }
-.field-listbox--sheet .field-option { position: relative; min-height: var(--fld-opt-h-sheet); padding: 12px var(--fld-opt-px); margin: 0 calc(-1 * var(--fld-opt-px)); border-radius: var(--fld-opt-radius); }
+.field-listbox--sheet .field-option { position: relative; min-height: var(--fld-opt-h-sheet); padding: var(--fld-opt-py-sheet) var(--fld-opt-px); margin: 0 calc(-1 * var(--fld-opt-px)); border-radius: var(--fld-opt-radius); }
 .field-listbox--sheet .field-option + .field-option::before {                            /* A.11 separator between rows (size.stroke.thin · stroke.neutral.muted) */
   content: ""; position: absolute; top: 0; left: var(--fld-opt-px); right: var(--fld-opt-px); height: 1px; background: var(--fld-row-line); pointer-events: none;
 }
@@ -6187,7 +6190,7 @@ window.__MO_CFG = {
     return [y ? y + (y > 1 ? ' years' : ' year') : '', m ? m + (m > 1 ? ' months' : ' month') : ''].filter(Boolean).join(', ') || '0 years';
   }
   function lpa(n) { if (!n) return ''; var v = n / 100000; return (v % 1 ? v.toFixed(1).replace(/\.0$/, '') : v) + ' LPA'; }
-  function salText(p) { return p.fresher ? '' : p.salary ? '₹' + grouping(String(p.salary)) : ''; }   // ₹9,85,899 — as the Profile card (user, 2026-11-04)
+  function salText(p) { return p.fresher ? '' : p.salary ? grouping(String(p.salary)) : ''; }   // 9,85,899 — the number only, no ₹ / "a year" (the row's rupee icon says it) — as the Profile card (user, 2026-11-04)
   function ym(iso) { if (!iso) return ''; var q = iso.split('-'); return MON[+q[1] - 1] + ' ' + q[0]; }
   function months(a, b) { if (!a) return 0; var x = a.split('-'), y = b ? b.split('-') : [new Date().getFullYear(), new Date().getMonth() + 1]; return (+y[0] - +x[0]) * 12 + (+y[1] - +x[1]); }
   function dur(m) { if (m <= 0) return ''; var y = Math.floor(m / 12), mo = m % 12; return [y ? y + (y > 1 ? ' yrs' : ' yr') : '', mo ? mo + (mo > 1 ? ' mos' : ' mo') : ''].filter(Boolean).join(' '); }
