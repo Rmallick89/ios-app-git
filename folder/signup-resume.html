@@ -24,8 +24,9 @@
     3 signup-manual.html  fill details manually
   Components: Shine App/App-components, inlined verbatim (fields Small · bottom sheet incl. full-screen · alert · cards · top bar).
   Review: ?st=verify · ?st=prefs (+ &sim=partial for missing details) · ?demo=0 hides the demo key.
-  Standard fields (2026-11-04, user — the same in App-login): salary helper = the amount in words, no hyphens, a capital first
-  ("Nine lakh eighty five thousand eight hundred ninety nine rupees"); expected salary = a list in lakhs (bottom sheet: 1 Lac ·
+  Standard fields (2026-11-04, user — the same in App-login): current salary = the input fields atom's amount field (2026-11-05): Indian commas as you type, digits only, the amount in
+  words in green ("Seventy-Eight Lakh Ninety Thousand Eight Hundred Ninety-Eight Rupees"), ₹1 lakh – ₹1 crore, errors
+  "₹3 is too low. Annual salary must be at least ₹1 lakh." · "Enter your annual salary."; expected salary = a list in lakhs (bottom sheet: 1 Lac ·
   1.5 Lacs … 50 Lacs · 51 … 99 Lacs · 1 Cr+); the current salary shows as 9,85,899 (no ₹, no "a year"); job type
   Full time · Part time · Contractual · Freelance · Internship; work mode Remote · In Office · Hybrid; disability None ·
   Loco Motor Disability · Visual Impairment · Hearing Impairment · Other, with their subtext.
@@ -646,7 +647,7 @@
 </style>
 <style data-component="field-base">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · INPUT FIELDS · FIELD BASE  (app component · App-login · atoms/input-fields/)      v3.2.0
+   SHINE · INPUT FIELDS · FIELD BASE  (app component · App-login · atoms/input-fields/)      v3.3.0
    The shared layer under the five input field components — not a field on its own. Load it FIRST, then the
    component(s) the page uses:  normal-field · password-field · otp-field · combo-box · multi-input.
    Built on design-system A.01 Input (component-system.md), semantic tokens only, light and dark.
@@ -673,6 +674,7 @@
      .field-trailing                an icon-only button at the end — eye (password) · clear / caret (combo box) · a multi
                                     input's icon (.field-trailing--icon: a sign only, no button)
      .field-helper · .field-message quiet helper · error / success (icon + text); one at a time
+     .field-helper--positive        a helper in the positive colour, no icon (v3.3.0 — the amount in words under a salary)
      .field-aside                   a row under the field for one link (Forgot password?) — buttons atom Link
 
    ▶ BEFORE CHANGING IT: read README.md here and component-system.md A.01. Semantic tokens only.
@@ -818,6 +820,9 @@ legend.field-label--hidden { float: none; width: 1px; }
 }
 .field--invalid .field-message { color: var(--fld-neg-text); font-weight: 600; }
 .field--valid .field-message { color: var(--fld-pos-text); font-weight: 600; }
+/* v3.3.0 · a positive helper — the helper's own type (Body / sm), in content.status.positive, no icon: it confirms what was
+   typed (the amount in words under a salary field, user 2026-11-05) without the weight of a success message */
+.field-helper.field-helper--positive { color: var(--fld-pos-text); }
 
 /* a row for one link under the field (Forgot password?) — the link itself is the buttons atom */
 .field-aside { display: flex; justify-content: flex-end; margin-top: var(--fld-stack); }
@@ -3135,7 +3140,7 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
       <fieldset class="field field--sm pf-choice" data-choice="exp"><legend class="field-label">Work experience</legend><div class="pf-chips" role="radiogroup" aria-label="Work experience"></div></fieldset>
       <div class="pf-form" data-k="expBlock" hidden>
         <fieldset class="field field--sm field-multi" data-field="experience" data-k="exp" data-required data-error-empty="Enter your total work experience"><legend class="field-label">Total work experience</legend></fieldset>
-        <div class="field field--sm" data-field="text" data-salary data-k="salary" data-error-empty="Enter your current annual salary">
+        <div class="field field--sm" data-field="amount" data-salary data-k="salary" data-error-empty="Enter your annual salary.">
           <label class="field-label" for="bSalary">Current annual salary</label>
           <div class="field-control"><span class="field-prefix" aria-hidden="true">₹</span><input class="field-input" id="bSalary" inputmode="numeric" autocomplete="off" placeholder="14,00,000" required></div>
         </div>
@@ -3238,7 +3243,7 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
       <fieldset class="field field--sm pf-choice" data-choice="exp"><legend class="field-label">Work experience</legend><div class="pf-chips" role="radiogroup" aria-label="Work experience"></div></fieldset>
       <div class="pf-form" data-k="expBlock" hidden>
         <fieldset class="field field--sm field-multi" data-field="experience" data-k="exp" data-required data-error-empty="Enter your total work experience"><legend class="field-label">Total work experience</legend></fieldset>
-        <div class="field field--sm" data-field="text" data-salary data-k="salary" data-error-empty="Enter your current annual salary">
+        <div class="field field--sm" data-field="amount" data-salary data-k="salary" data-error-empty="Enter your annual salary.">
           <label class="field-label" for="eSalary">Current annual salary</label>
           <div class="field-control"><span class="field-prefix" aria-hidden="true">₹</span><input class="field-input" id="eSalary" inputmode="numeric" autocomplete="off" placeholder="14,00,000" required></div>
         </div>
@@ -4773,20 +4778,20 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
 </script>
 <script data-component="field-base">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · INPUT FIELDS · FIELD BASE  (app component · App-login · atoms/input-fields/)      v3.2.0
+   SHINE · INPUT FIELDS · FIELD BASE  (app component · App-login · atoms/input-fields/)      v3.3.0
    Pair with field-base.css. The shared engine under the five components — load it FIRST, then the script of each
    component the page uses: normal-field.js · password-field.js · otp-field.js · combo-box.js · multi-input.js.
    No dependencies (combo-box.js also uses the bottom sheet for its sheet mode).
 
    One way to write any field:  <div class="field field--md" data-field="email"> … </div>
-     data-field   text · email · phone · email phone (either)   → normal-field.js
+     data-field   text · email · phone · email phone (either) · amount (v3.3.0)   → normal-field.js
                   password (data-password="current | new | confirm")  → password-field.js
                   otp      (maxlength 6 | 4 on the input)        → otp-field.js
                   combo    (data-combo="inline | sheet | auto")   → combo-box.js
                   date · experience  (a <fieldset>)              → multi-input.js
 
    What every field shares:
-     Messages     ShineField.set(input | field, 'invalid' | 'valid' | 'helper' | null, text) — the one slot under the
+     Messages     ShineField.set(input | field, 'invalid' | 'valid' | 'helper' | 'positive' | null, text) — the one slot under the
                   field: icon + text, aria-invalid, aria-describedby; text may hold one link ("Register instead")
      The API      ShineField.get(field | input) → the component's api: { el, input, type, value(), set(v), clear(),
                   check(submit) → '' or the error text }
@@ -4833,8 +4838,8 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
     if ((state === 'invalid' || state === 'valid') && html) {
       m.className = 'field-message'; m.innerHTML = (state === 'valid' ? IC['ic_check-circle-solid'] : IC['ic_alert-solid']) + '<span>' + html + '</span>';
       m.hidden = false; m.setAttribute('role', state === 'invalid' ? 'alert' : 'status');
-    } else if (state === 'helper' && html) {
-      m.className = 'field-helper'; m.innerHTML = html; m.hidden = false; m.removeAttribute('role');
+    } else if ((state === 'helper' || state === 'positive') && html) {      // v3.3.0 · 'positive' = the helper in the positive colour
+      m.className = state === 'positive' ? 'field-helper field-helper--positive' : 'field-helper'; m.innerHTML = html; m.hidden = false; m.removeAttribute('role');
     } else { m.hidden = true; m.innerHTML = ''; m.removeAttribute('role'); }
     ins.forEach(function (i) { describe(i, m.id, !m.hidden); });
   }
@@ -4918,19 +4923,21 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
     return ok;
   }
 
-  global.ShineField = { version: '3.0.5', set: set, isInvalid: isInvalid, get: get, validate: validate, add: add, init: init,
+  global.ShineField = { version: '3.3.0', set: set, isInvalid: isInvalid, get: get, validate: validate, add: add, init: init,
     types: function () { return Object.keys(types); }, icons: IC,
     _: { fieldOf: fieldOf, idOf: idOf, describe: describe, inputsOf: inputsOf, emptyText: emptyText, nameOf: nameOf, required: required, emit: emit } };
 })(window);
 </script>
 <script data-component="normal-field">
-/* SHINE · INPUT FIELDS · NORMAL FIELD  (atoms/input-fields/normal-field/)      v3.0.5
+/* SHINE · INPUT FIELDS · NORMAL FIELD  (atoms/input-fields/normal-field/)      v3.1.0
    Needs field-base.css + field-base.js (load them first). No styles of its own (the +91 segment is field-base's).
-   One component, three types — the type is the only difference:
+   One component, four types — the type is the only difference (v3.1.0 adds amount — the annual salary):
 
      <div class="field field--md" data-field="text">    a name, a job title — anything typed once
      <div class="field field--md" data-field="email">   email keyboard, spaces dropped, lower-case
      <div class="field field--md" data-field="phone">   +91 in the field, 98765 43210, numeric keyboard
+     <div class="field field--md" data-field="amount">   ₹ in the field, 78,90,898, numeric keyboard, the amount in words
+                                                       (green) under it, 1 lakh – 1 crore (v3.1.0 · see setupAmount)
      <div class="field field--md" data-field="email phone">   either one (log in): digits bring +91 and the number
                                                        keyboard, letters the email keyboard
        <label class="field-label" for="x">Email address</label>
@@ -4950,7 +4957,7 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
 (function (F) {
   'use strict';
   if (!F) { console.warn('normal-field.js: load field-base.js first'); return; }
-  var doc = document, _ = F._;
+  var doc = document, _ = F._, global = window;
   var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
   function fmtPhone(d) { return d.length > 5 ? d.slice(0, 5) + ' ' + d.slice(5) : d; }
   function attr(i, k, v) { if (!i.hasAttribute(k)) i.setAttribute(k, v); }
@@ -5030,6 +5037,156 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
     return api;
   }
   F.add(['text', 'email', 'phone'], setup);
+
+  /* ── v3.1.0 · AMOUNT (user, 2026-11-05) — the current annual salary ─────────────────────────────────────────────
+       <div class="field field--sm" data-field="amount">    ₹ in the field (added when the page leaves it out)
+     · Indian commas as you type — 78,90,898; the commas come and go by themselves (backspace over one takes the
+       digit before it), the caret keeps its place between the digits
+     · digits only — the numeric keypad (inputmode numeric); a letter, a dot or a sign is not taken; a pasted
+       "₹12,34,567.50" / "12 34 567" keeps 12,34,567 (the paise dropped); a leading 0 never stays
+     · never more than data-max (default 1,00,00,000 · ₹1 crore): a digit that would go past it is not taken, a bigger
+       pasted amount is ignored
+     · under the box, live: the amount in words in the positive colour — "Seventy-Eight Lakh Ninety Thousand Eight
+       Hundred Ninety-Eight Rupees" (thousand · lakh · crore)
+     · checked when they leave the box and on submit, then live until it is right (the error takes the helper's place):
+         below data-min (default 1,00,000) → "₹3 is too low. Annual salary must be at least ₹1 lakh."  (data-error-min)
+         empty → "Enter your annual salary."  (data-error-empty; a `required` input — on submit, or when they clear it)
+     → ShineField.get(el) → { value() the digits ('' when empty) · number() · set(n | text) · clear() · valid() ·
+       check(submit) · display() 78,90,898 · words() }                                                              */
+  var ONES = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen',
+    'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+  var TENS = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+  function two(n) { return n < 20 ? ONES[n] : TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : ''); }       // Seventy-Eight
+  function three(n) { return n >= 100 ? ONES[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + two(n % 100) : '') : two(n); }
+  function inWords(num) {                                // 7890898 → "Seventy-Eight Lakh Ninety Thousand Eight Hundred Ninety-Eight Rupees"
+    num = Math.floor(+num || 0); if (num <= 0) return '';
+    var cr = Math.floor(num / 1e7), lk = Math.floor(num % 1e7 / 1e5), th = Math.floor(num % 1e5 / 1e3), h = num % 1e3, p = [];
+    if (cr) p.push((cr >= 1000 ? inWords(cr).replace(/ Rupees?$/, '') : cr >= 100 ? three(cr) : two(cr)) + ' Crore');
+    if (lk) p.push(two(lk) + ' Lakh'); if (th) p.push(two(th) + ' Thousand'); if (h) p.push(three(h));
+    return p.join(' ') + (num === 1 ? ' Rupee' : ' Rupees');
+  }
+  function group(d) {                                    // "7890898" → "78,90,898" (Indian: the last three, then twos)
+    if (d.length <= 3) return d;
+    var last = d.slice(-3), rest = d.slice(0, -3), g = [];
+    while (rest.length > 2) { g.unshift(rest.slice(-2)); rest = rest.slice(0, -2); }
+    if (rest) g.unshift(rest); return g.join(',') + ',' + last;
+  }
+  function digitsIn(s) { return String(s == null ? '' : s).replace(/\D/g, ''); }
+  function amountLabel(n) { return n % 1e7 === 0 ? '₹' + n / 1e7 + ' crore' : n % 1e5 === 0 ? '₹' + n / 1e5 + ' lakh' : '₹' + group(String(n)); }   // ₹1 lakh
+
+  function setupAmount(el) {
+    var input = el.querySelector('.field-input'); if (!input) return null;
+    var ctl = el.querySelector('.field-control'), prefix = el.querySelector('.field-prefix');
+    if (!prefix && ctl) { prefix = doc.createElement('span'); prefix.className = 'field-prefix'; prefix.textContent = '₹'; prefix.setAttribute('aria-hidden', 'true'); ctl.insertBefore(prefix, ctl.firstChild); }
+    input.setAttribute('type', 'text'); input.setAttribute('inputmode', 'numeric'); attr(input, 'autocomplete', 'off');
+    input.setAttribute('autocapitalize', 'off'); input.setAttribute('autocorrect', 'off'); input.setAttribute('spellcheck', 'false');
+    var MIN = +(el.getAttribute('data-min') || input.getAttribute('data-min')) || 100000;
+    var MAX = +(el.getAttribute('data-max') || input.getAttribute('data-max')) || 10000000;
+    var api = { input: input, type: 'amount', mode: 'amount', val: '' };
+    var last = '', sel = [0, 0], dirty = false, kind = '';
+
+    function tidy(d) { return digitsIn(d).replace(/^0+/, ''); }
+    function caretAfter(fmt, k) {                         // the place right after the k-th digit of the shown text
+      if (k <= 0) return 0; var seen = 0;
+      for (var i = 0; i < fmt.length; i++) if (/\d/.test(fmt[i]) && ++seen === k) return i + 1;
+      return fmt.length;
+    }
+    function digitsBefore(s, at) { return digitsIn(s.slice(0, at)).length; }
+    function put(d, k) {                                  // show the digits d grouped, the caret after its k-th digit
+      var f = group(d); input.value = f; last = f; api.val = tidy(d);
+      if (doc.activeElement === input) { var c = caretAfter(f, k); try { input.setSelectionRange(c, c); } catch (e) {} }
+      sel = [input.selectionStart || 0, input.selectionEnd || 0];
+    }
+    function restore() {                                  // the change is not taken: back to the last value and caret
+      input.value = last; try { input.setSelectionRange(sel[0], sel[1]); } catch (e) {}
+    }
+    function remember() { try { sel = [input.selectionStart, input.selectionEnd]; } catch (e) {} }
+
+    function problem() {                                  // '' when right · the error text otherwise (empty is handled apart)
+      var n = +api.val || 0; if (!api.val) return '';
+      if (n < MIN) return (input.getAttribute('data-error-min') || el.getAttribute('data-error-min') || '{amount} is too low. Annual salary must be at least {min}.')
+        .replace('{amount}', '₹' + group(api.val)).replace('{min}', amountLabel(MIN));
+      return '';
+    }
+    function emptyText() { return el.getAttribute('data-error-empty') || 'Enter your annual salary.'; }
+    function words() { return inWords(+api.val || 0); }
+    function helper() {                                   // the amount in words, green — or nothing
+      if (api.val) F.set(input, 'positive', words()); else F.set(input, null);
+    }
+    function showError(t) { F.set(input, 'invalid', t); }
+    function live() {                                     // after each change: an error shown stays live until it is right
+      if (F.isInvalid(input)) {
+        var p = problem();
+        if (p) { showError(p); return; }
+        if (!api.val && _.required(el) && dirty) { showError(emptyText()); return; }
+      }
+      helper();
+    }
+    function changed() { _.emit(el, 'shine:field', { type: 'amount', mode: 'amount', value: api.val, valid: !!api.val && !problem() }); }
+
+    input.addEventListener('focus', remember);
+    ['keydown', 'mousedown', 'mouseup', 'touchend', 'select', 'keyup'].forEach(function (n) { input.addEventListener(n, function () { setTimeout(remember, 0); }); });
+    input.addEventListener('beforeinput', function (e) {
+      remember(); kind = e.inputType || '';
+      // a letter, a dot, a sign … typed: not taken (a paste is cleaned in its own handler; a keyboard composing text
+      // may not let us cancel — the input handler below then undoes it)
+      if (/^insert(Text|ReplacementText)?$/.test(kind) && e.data != null && /\D/.test(e.data) && !/^\d[\d,\s]*$/.test(e.data)) { e.preventDefault(); }
+    });
+    input.addEventListener('paste', function (e) {
+      var t = (e.clipboardData || global.clipboardData) ? (e.clipboardData || global.clipboardData).getData('text') : null;
+      if (t == null) return;                              // no clipboard access: the input handler tidies it
+      e.preventDefault(); remember();
+      var cut = String(t).split(/[.]/)[0];               // ₹12,34,567.50 → 12,34,567 (no paise)
+      var add = digitsIn(cut), v = input.value, a = digitsBefore(v, sel[0]), b = digitsBefore(v, sel[1]), cur = digitsIn(v);
+      if (!add) return;
+      var d = tidy(cur.slice(0, a) + add + cur.slice(b));
+      if (+d > MAX) return;                               // a bigger amount is ignored
+      dirty = true; var lead = (cur.slice(0, a) + add).length - tidy(cur.slice(0, a) + add).length;
+      put(d, Math.max(0, a + add.length - lead)); live(); changed();
+    });
+    input.addEventListener('input', function () {
+      var raw = input.value, at = input.selectionStart == null ? raw.length : input.selectionStart;
+      var was = digitsIn(last), now = digitsIn(raw), k = digitsBefore(raw, at);
+      if (now === was && raw.length < last.length) {     // only a comma went: take the digit next to it instead
+        if (/Forward/.test(kind)) now = now.slice(0, k) + now.slice(k + 1);
+        else if (k > 0) { now = now.slice(0, k - 1) + now.slice(k); k -= 1; }
+      } else if (now === was && raw !== last) { restore(); kind = ''; return; }   // a letter or sign slipped in
+      // a 0 typed at the start is not taken; zeros left at the start by a deletion stay while they edit (1,00,000 → delete
+      // the 1 → 00,000, type 2 → 2,00,000) and go when they leave the box
+      var del = /^delete/.test(kind) || raw.length < last.length;
+      var d = del ? now : tidy(now), lead = del ? 0 : now.slice(0, k).length - tidy(now.slice(0, k)).length;
+      if (!del && now !== was && d === tidy(was) && tidy(now) === tidy(was)) { restore(); kind = ''; return; }
+      if (+d > MAX) { restore(); kind = ''; return; }    // past the maximum: not taken
+      kind = ''; dirty = true;
+      put(d, Math.max(0, k - lead)); live(); changed();
+    });
+    input.addEventListener('blur', function () {
+      if (input.disabled) return;
+      var t = tidy(input.value); if (input.value !== group(t)) { input.value = group(t); last = input.value; api.val = t; }   // 00,000 → empty
+      var p = problem();
+      if (p) showError(p);
+      else if (!api.val && dirty && _.required(el)) showError(emptyText());
+    });
+    function read() { api.val = tidy(input.value); }      // the number in the box (the box itself is left as it is)
+    api.value = function () { read(); return api.val; };
+    api.number = function () { read(); return +api.val || 0; };
+    api.valid = function () { read(); return !!api.val && !problem(); };
+    api.check = function (submit) { read(); if (!api.val) return submit && _.required(el) ? emptyText() : ''; return problem(); };
+    api.showError = showError;
+    api.set = function (v) {                              // a number (1400000) or text ("14,00,000", "₹14,00,000") — shown with its words
+      var d = typeof v === 'number' ? String(Math.max(0, Math.floor(v))) : tidy(String(v == null ? '' : v).split('.')[0]);
+      d = tidy(d); input.value = group(d); last = input.value; api.val = d; dirty = false;
+      F.set(input, null); helper(); changed();
+    };
+    api.clear = function () { api.set(''); };
+    api.display = function () { read(); return group(api.val); };
+    api.words = function () { read(); return words(); };
+    api.errorText = function () { read(); return problem(); };
+    read(); if (api.val) helper();
+    return api;
+  }
+  F.words = F.words || inWords;                          // ShineField.words(7890898) — the same words anywhere
+  F.add('amount', setupAmount);
 })(window.ShineField);
 </script>
 <script data-component="combo-box">
@@ -6079,24 +6236,10 @@ window.__MO_CFG = {
     var last = n.slice(-3), rest = n.slice(0, -3), g = []; while (rest.length > 2) { g.unshift(rest.slice(-2)); rest = rest.slice(0, -2); }
     if (rest) g.unshift(rest); return g.join(',') + ',' + last;
   }
-  var ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
-  var TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-  function two(n) { return n < 20 ? ONES[n] : TENS[Math.floor(n / 10)] + (n % 10 ? ' ' + ONES[n % 10] : ''); }   // no hyphen: "eighty five" (user, 2026-11-04)
-  function three(n) { return n >= 100 ? ONES[Math.floor(n / 100)] + ' hundred' + (n % 100 ? ' ' + two(n % 100) : '') : two(n); }
-  function words(num) {
-    if (!num || num > 9999999999) return '';
-    var cr = Math.floor(num / 1e7), lk = Math.floor(num % 1e7 / 1e5), th = Math.floor(num % 1e5 / 1e3), h = num % 1e3, p = [];
-    if (cr) p.push(two(cr) + ' crore'); if (lk) p.push(two(lk) + ' lakh'); if (th) p.push(two(th) + ' thousand'); if (h) p.push(three(h));
-    var s = p.join(' '); return s.charAt(0).toUpperCase() + s.slice(1) + ' rupees';   // "Nine lakh eighty five thousand eight hundred ninety nine rupees" (user, 2026-11-04)
-  }
-  function salaryHelp(input) { var n = +digits(input.value); if (!FLD.isInvalid(input)) FLD.set(input, n ? 'helper' : null, n ? words(n) : ''); }
-  doc.addEventListener('input', function (e) {
-    var i = e.target; if (!i.closest || !i.closest('[data-salary]')) return;
-    var end = i.selectionStart === i.value.length; i.value = grouping(i.value); if (end) try { i.setSelectionRange(i.value.length, i.value.length); } catch (x) {}
-    salaryHelp(i);
-  });
-  doc.addEventListener('focusout', function (e) { var i = e.target; if (i.closest && i.closest('[data-salary]')) setTimeout(function () { salaryHelp(i); }, 0); });
-  function setSalary(field, n) { F(field).set(n ? grouping(String(n)) : ''); salaryHelp($('.field-input', field)); }
+  /* current annual salary = the input fields atom's AMOUNT field (normal-field v3.1.0 · data-field="amount", user 2026-11-05):
+     ₹ prefix, Indian commas as you type, digits only, the amount in words in green under the box ("Seventy-Eight Lakh Ninety
+     Thousand Eight Hundred Ninety-Eight Rupees"), ₹1 lakh – ₹1 crore, its own errors. The page only fills it and reads it. */
+  function setSalary(field, n) { F(field).set(n || ''); }
 
   /* expected salary — a list in lakhs, picked from a bottom sheet (user, 2026-11-04): 1 Lac · 1.5 Lacs … 50 Lacs (½ lakh
      steps) · 51 … 99 Lacs · 1 Cr+. The value is the amount in rupees; lacsSnap puts any amount on the list. */
@@ -6403,7 +6546,7 @@ window.__MO_CFG = {
   function saveBasic() {
     var ok = FLD.validate(EBF) && eExp.check(); if (!ok) { firstInvalid(EBF); return; }
     PF.name = F(k(EBF, 'name')).value().replace(/\s+/g, ' ').trim(); PF.loc = F(k(EBF, 'loc')).value(); eExp.read(PF); PF.gender = getChoice(eGender) || '';
-    if (!PF.fresher) { var miss = basicMissing(); if (miss.length) { if (!PF.salary) msg(k(EBF, 'salary'), 'Enter your current annual salary'); if (!PF.notice) msg(k(EBF, 'notice'), 'Choose your notice period'); firstInvalid(EBF); return; } }
+    if (!PF.fresher) { var miss = basicMissing(); if (miss.length) { if (!PF.salary) msg(k(EBF, 'salary'), 'Enter your annual salary.'); if (!PF.notice) msg(k(EBF, 'notice'), 'Choose your notice period'); firstInvalid(EBF); return; } }
     after(EB, function () { changed('Basic details saved'); });
   }
   /* employment */
