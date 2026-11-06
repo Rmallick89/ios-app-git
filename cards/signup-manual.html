@@ -2812,7 +2812,7 @@ html.mo-has-cv .stp-end [data-act="help"] { display: none; }   /* the resume is 
 .mo-nudge { position: relative; isolation: isolate; flex: 1 0 auto; display: flex; flex-direction: column; padding: 0 var(--spacing-layout-sm); text-align: center; overflow: hidden; }
 .mo-nudge-h { font: var(--weight-extrabold) 28px/32px var(--font-brand); letter-spacing: -0.5px; color: var(--content-neutral-base); text-wrap: balance; }
 .mo-nudge-h:focus { outline: none; }
-.mo-nudge .mo-foot { gap: var(--spacing-stack-xs); padding-left: 0; padding-right: 0; padding-top: var(--spacing-stack-md); background: transparent; box-shadow: none; }
+.mo-nudge .mo-foot { gap: var(--spacing-stack-xs); padding-left: 0; padding-right: 0; padding-top: var(--spacing-stack-xxl); background: transparent; box-shadow: none; }   /* user 2026-11-06: right under the copy, a 24px gap — not pinned to the bottom edge */
 .sp-bg { position: absolute; z-index: -1; inset: 0; background:
   radial-gradient(70% 38% at 50% 52%, var(--surface-brand-brand-subtle), transparent 70%),
   linear-gradient(var(--surface-brand-brand-faint), var(--surface-neutral-base) 46%); }
@@ -2829,7 +2829,7 @@ html.mo-has-cv .stp-end [data-act="help"] { display: none; }   /* the resume is 
 html.bs-lock .sp-strip { display: none; }                 /* a bottom sheet's own strip takes over while it is open */
 html.mo-on-nudge, html.mo-on-nudge body { background-color: var(--surface-brand-brand-faint); }
 .sp-bar::after { display: none; }
-.sp-body { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: stretch; justify-content: center; padding: var(--spacing-stack-xs) 0 var(--spacing-stack-md); }   /* the group sits in the middle of the room left */
+.sp-body { flex: none; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; padding: var(--spacing-stack-xxl) 0 0; }   /* user 2026-11-06: the group starts 24px under the header (no longer centred in the room left); the button follows the copy */
 
 /* the fact — a bubble whose tail is the lamp */
 .sp-fact { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: var(--spacing-inset-lg) var(--spacing-inset-xl); border-radius: 18px; background: var(--surface-neutral-raised); box-shadow: 0 1px 2px rgb(13 17 23 / .05), 0 8px 20px -12px color-mix(in srgb, var(--surface-brand-brand-intense) 35%, transparent), inset 0 0 0 1px var(--stroke-neutral-muted); text-align: left; }
@@ -2839,7 +2839,7 @@ html.mo-on-nudge, html.mo-on-nudge body { background-color: var(--surface-brand-
 .sp-fact p { font: var(--weight-semibold) var(--type-body-md-size)/var(--type-body-md-line) var(--font-brand); color: var(--content-neutral-base); text-wrap: pretty; }
 
 /* the stage — grows to fill the room between the bubble and the copy */
-.sp-stage { position: relative; flex: 1 1 auto; min-height: 196px; max-height: 340px; margin: 0 0 var(--spacing-stack-xl); }
+.sp-stage { position: relative; flex: none; height: clamp(196px, 38vh, 300px); margin: 0 0 var(--spacing-stack-xl); }
 .sp-beam { position: absolute; left: 50%; top: 0; bottom: 20px; width: 264px; margin-left: -132px; clip-path: polygon(46.5% 0, 53.5% 0, 100% 100%, 0 100%);
   background: linear-gradient(color-mix(in srgb, var(--content-brand-glow) 62%, transparent), color-mix(in srgb, var(--stroke-brand-soft) 50%, transparent) 55%, color-mix(in srgb, var(--stroke-brand-soft) 0%, transparent)); }
 .sp-beam::after { content: ""; position: absolute; inset: 0; clip-path: polygon(48.5% 0, 51.5% 0, 70% 100%, 30% 100%); background: linear-gradient(color-mix(in srgb, var(--surface-neutral-raised) 70%, transparent), transparent 80%); }
@@ -2884,7 +2884,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 @keyframes spDust { from { opacity: 0; transform: translateY(10px); } to { opacity: .9; transform: translateY(-12px); } }
 @media (prefers-reduced-motion: reduce) { .sp *, .sp *::before, .sp *::after { animation: none !important; } }
 /* short phones (360 × 640): a smaller stage and heading, the same picture */
-@media (max-height: 700px) { .sp-stage { min-height: 176px; margin-bottom: var(--spacing-stack-md); } .sp-stage > :not(.sp-beam) { zoom: .9; } .mo-nudge-h { font-size: 24px; line-height: 28px; } .sp-fact { padding: 10px 14px; } }
+@media (max-height: 700px) { .sp-stage { height: 196px; margin-bottom: var(--spacing-stack-md); } .sp-stage > :not(.sp-beam) { zoom: .9; } .mo-nudge-h { font-size: 24px; line-height: 28px; } .sp-fact { padding: 10px 14px; } }
 
 @media (prefers-reduced-motion: reduce) { .btn .btn-spinner { animation-duration: 1.6s; } }
 
