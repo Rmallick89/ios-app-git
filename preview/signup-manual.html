@@ -2742,16 +2742,27 @@ html.mo-no-demo .mo-key, .mo-key[hidden] { display: none !important; }
 .ps-in { display: flex; flex-direction: column; align-items: center; padding-top: var(--spacing-stack-xxl); text-align: center; }
 .ps .bs-title { --bs-h-size: var(--bs-title-lg-size); --bs-h-lh: var(--bs-title-lg-lh); --bs-h-ls: var(--bs-title-lg-ls); }
 .ps-sub { margin: var(--spacing-stack-xs) 0 0; font: var(--weight-medium) var(--type-body-md-size)/20px var(--font-brand); color: var(--content-neutral-muted); text-wrap: pretty; }
-.ps-gauge { position: relative; display: block; width: 200px; height: 110px; margin-bottom: var(--spacing-stack-md); }
-.ps-gauge svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.ps-gauge path { fill: none; stroke-width: 14; stroke-linecap: round; }
-.ps-gauge .t { stroke: var(--surface-neutral-muted); }
-.ps-gauge .v { stroke: var(--surface-brand-brand-intense); stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 900ms cubic-bezier(.2, .7, .3, 1) 120ms; }
-.ps.is-shown .ps-gauge .v { stroke-dashoffset: calc(100 * (1 - var(--ps-pct, .83))); }   /* fills once the sheet is up */
-.ps-gauge-in { position: absolute; left: 0; right: 0; bottom: 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.ps-gauge-in b { font: var(--weight-extrabold) 28px/30px var(--font-brand); letter-spacing: -.5px; color: var(--content-neutral-base); }
-.ps-gauge-in em { font: var(--weight-semibold) var(--type-body-sm-size)/16px var(--font-brand); font-style: normal; color: var(--content-neutral-faded); }
-@media (prefers-reduced-motion: reduce) { .ps-gauge .v { transition: none; } }
+/* the dial — App-login Profile tab's strength dial (Profile/profile.html · .pf-dial, user 2026-11-06 "match dial UI with Profile tab"):
+   the same 380 × 220 arc cropped to 0 40 380 180, 22 wide, violet → pink → amber → electric-yellow gradient with its glow,
+   the pulsing pink knob, the score in Display / lg (no %) and PROFILE STRENGTH in Eyebrow / sm at the same spots (43 % · 83 %).
+   The Profile hero is dark; this sheet is light, so only the light-surface roles change: track surface.neutral.muted,
+   score content.neutral.base, label content.neutral.faded, the white knob gets a hairline so it reads on white. */
+.ps-dial { position: relative; width: min(280px, 100%); aspect-ratio: 380 / 180; margin-bottom: var(--spacing-stack-xl); }
+.ps-dial svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.ps-dial .track { stroke: var(--surface-neutral-muted); }
+.ps-dial .halo { fill: var(--stroke-decorative-pink); opacity: .5; transform-box: fill-box; transform-origin: center; animation: psPulse 2.6s cubic-bezier(.4, 0, .2, 1) infinite; }
+.ps-dial .core { fill: var(--surface-neutral-raised); stroke: var(--stroke-neutral-base); stroke-width: 1; }
+.ps-dial .pin { fill: var(--stroke-decorative-pink); }
+.ps-dial-score { position: absolute; left: 0; right: 0; top: 43%; margin: 0;
+  font: var(--weight-extrabold) var(--type-display-lg-size)/var(--type-display-lg-line) var(--font-brand); letter-spacing: var(--type-display-lg-track); color: var(--content-neutral-base); font-variant-numeric: tabular-nums; }
+.ps-dial-label { position: absolute; left: 0; right: 0; top: 83%; margin: 0;
+  font: var(--weight-bold) var(--type-eyebrow-sm-size)/var(--type-eyebrow-sm-line) var(--font-brand); letter-spacing: var(--type-eyebrow-sm-track); text-transform: uppercase; color: var(--content-neutral-faded); }
+@keyframes psPulse { 0%, 100% { transform: scale(1); opacity: .5; } 50% { transform: scale(1.25); opacity: .15; } }
+@media (prefers-reduced-motion: reduce) { .ps-dial .halo { animation: none; } }
+/* the +5 the button earns — as the Profile tab's next-step button (badges atom sm · positive, page-local: App-login's atom) */
+.ps-gain { display: inline-flex; align-items: center; gap: 2px; height: 16px; margin-left: 4px; padding: 0 6px; border-radius: var(--size-radius-full);
+  background: var(--surface-status-positive-subtle); color: var(--content-status-positive); font: 700 10px/10px var(--font-brand); font-variant-numeric: tabular-nums; }
+.ps-gain svg { width: 10px; height: 10px; }
 /* ▲ profile-sheet */
 
 /* Help me fill → resume mid-flow (user 2026-11-02): reading sheet + the "filled from your resume" note on the steps it filled */
@@ -3180,17 +3191,36 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 <!-- ▼ profile-sheet — Profile created (after the resume, user 2026-11-06 — their pick: the half gauge, buttons stacked):
      the bottom-sheet component · strong scrim · not dismissable (no ×, no drag, no backdrop): the two buttons are the way on —
      Add job preferences (→ the optional Job preferences step) · I'll do it later (→ welcome). The dial fills to how complete
-     the profile is (the steps done ÷ those + job preferences: 83% with a job, 80% for a fresher). -->
+     the profile is — the Profile tab's weightage (strength() below): 82 after onboarding, + DOB 1 · disability 1 if given. -->
 <div class="bs ps" id="profileSheet" data-bs-cta="inline" data-bs-scrim="strong" data-bs-dismiss="false" data-bs-drag="false" hidden>
   <div class="bs-body bs-body--gutter">
     <div class="ps-in">
-      <span class="ps-gauge" aria-hidden="true"><svg viewBox="0 0 200 110"><path class="t" d="M14 100 A86 86 0 0 1 186 100" pathLength="100"/><path class="v" d="M14 100 A86 86 0 0 1 186 100" pathLength="100"/></svg><span class="ps-gauge-in"><b data-ps-pct>83%</b><em>Profile strength</em></span></span>
-      <h2 class="bs-title">Profile <span class="accent">created.</span></h2>
-      <p class="ps-sub">Add job preferences to reach 100% and get roles that fit.</p>
+      <div class="ps-dial" id="psDial" role="img" aria-label="Profile strength 82 out of 100">
+        <svg viewBox="0 40 380 180" aria-hidden="true">
+          <defs>
+            <linearGradient id="psDialGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0"    style="stop-color: var(--stroke-decorative-violet)"/>
+              <stop offset="0.3"  style="stop-color: var(--stroke-decorative-pink)"/>
+              <stop offset="0.65" style="stop-color: var(--stroke-status-notice)"/>
+              <stop offset="1"    style="stop-color: var(--stroke-decorative-electric-yellow)"/>
+            </linearGradient>
+            <filter id="psDialGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <path class="track" d="M 40 220 A 150 150 0 0 1 340 220" fill="none" stroke-width="22"/>
+          <path class="fill" id="psDialFill" d="M 40 220 A 150 150 0 0 1 40 220" fill="none" stroke="url(#psDialGrad)" stroke-width="22" stroke-linecap="round" filter="url(#psDialGlow)"/>
+          <circle class="halo" id="psDialHalo" cx="40" cy="220" r="20"/>
+          <circle class="core" id="psDialCore" cx="40" cy="220" r="9"/>
+          <circle class="pin"  id="psDialPin"  cx="40" cy="220" r="4"/>
+        </svg>
+        <p class="ps-dial-score" aria-hidden="true" data-ps-pct>0</p>
+        <p class="ps-dial-label" aria-hidden="true">Profile strength</p>
+      </div>
+      <h2 class="bs-title">Profile <span class="accent">ready.</span></h2>
+      <p class="ps-sub">Just job preferences left. Then we pick the right roles from 2 lakh+ jobs.</p>
     </div>
     <div class="bs-bottom">
       <div class="bs-actions">
-        <button class="btn btn--primary btn--lg btn--block" type="button" data-act="profile-prefs">Add job preferences</button>
+        <button class="btn btn--primary btn--lg btn--block" type="button" data-act="profile-prefs">Add job preferences <span class="ps-gain" data-ps-gain>+5 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span></button>
         <button class="btn btn--secondary btn--lg btn--block" type="button" data-act="profile-later">I’ll do it later</button>
       </div>
     </div>
@@ -6672,18 +6702,74 @@ window.__MO_CFG = {
   function profileFacts() {                              // what a sample of the sheet may show: first name · steps done · how complete
     var name = (st.name || F(k(B, 'name')).value() || '').trim(), first = name.split(' ')[0] || 'there';
     var done = steps().filter(function (s) { return s !== 'prefs'; }).map(function (s) { return LABEL[s]; }).concat('Resume');
-    var pct = Math.round(done.length / (done.length + 1) * 100);
+    var pct = strength();
     var cur = empStep.items().filter(function (x) { return x.current; })[0] || empStep.items()[0], city = F(k(B, 'loc')).value();
     $$('[data-ps-first]').forEach(function (e) { e.textContent = first; });
     $$('[data-ps-initials]').forEach(function (e) { e.textContent = name ? name.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase() : 'You'; });
     $$('[data-ps-done]').forEach(function (e) { e.innerHTML = done.map(function (t) { return '<li>' + IC['ic_check-circle-solid'] + '<span>' + esc(t) + '</span></li>'; }).join(''); });
-    $$('[data-ps-pct]').forEach(function (e) { e.textContent = pct + '%'; });
+    $$('[data-ps-gain]').forEach(function (e) { var g = W.pref_role + W.pref_salary + W.pref_type + W.pref_location + W.pref_mode - prefsPts(); e.hidden = g <= 0; e.firstChild.nodeValue = '+' + g + ' '; });
+    var d = $('#psDial'); if (d) { d.setAttribute('aria-label', 'Profile strength ' + pct + ' out of 100'); d.setAttribute('data-score', pct); }
+    dialTo(0);
     $$('[data-ps-role]').forEach(function (e) { e.textContent = cur && cur.title ? cur.title : (st.fresher ? 'Freshers’ roles' : 'Roles for you'); });
     $$('[data-ps-city]').forEach(function (e) { e.textContent = city ? cityName(city) : 'Your city'; });
-    html.style.setProperty('--ps-pct', String(pct / 100));
+  }
+  /* Profile strength — the App-login Profile tab's weightage (Profile/profile.html › WEIGHTS · PRD "Profile Strength Widget",
+     user 2026-11-06): Primary 65 · Secondary 30 · Tertiary 5 = 100. Score = Σ captured × weight (a new account: no freshness
+     penalty). What manual onboarding captures:
+       resume 30 (required step) · name 5 · email 2.5 · phone 2.5 · current role 5 (the current job's title — else the latest)
+       · total experience 5 · current salary 5 · notice period 5 · location 5                                         Primary 65
+       · name + gender 2 · key skills 5 · employment 5 · education 5 · DOB 1 · disability 1 ("More about you", optional) Secondary
+       · languages 1 · photo 5 · links 5 — not asked in onboarding (the Profile tab's nudges ask)                       Secondary
+       · job preferences 5 (role · salary · job type · city · work mode, 1 each) — after this sheet, so 0 here          Tertiary
+     A fresher has no current role, salary, notice or employment to give — those count as complete (n/a), so a fresher's
+     score reads the same as an experienced user's: 82 after onboarding, 84 with DOB + disability. Email verification is
+     0-weight (as on the Profile tab); the phone is verified by the account OTP. */
+  var W = { resume: 30, name: 5, email: 2.5, phone: 2.5, role: 5, exp: 5, salary: 5, notice: 5, location: 5,
+            personal_base: 2, skills: 5, employment: 5, education: 5, dob: 1, language: 1, disability: 1, pic: 5, links: 5,
+            pref_role: 1, pref_salary: 1, pref_type: 1, pref_location: 1, pref_mode: 1 };
+  var prefsSaved = false;                                  // job preferences count once their step is saved (after this sheet)
+  function prefsPts() {
+    if (!prefsSaved) return 0;
+    return (roles.list().length ? W.pref_role : 0) + (F(k(P, 'esal')).value() ? W.pref_salary : 0) + (getChoice(jpType).length ? W.pref_type : 0)
+      + (locs.list().length ? W.pref_location : 0) + (getChoice(jpMode).length ? W.pref_mode : 0);
+  }
+  function strength() {
+    var v = function (n) { return F(k(B, n)).value(); }, fr = st.fresher === true, jobs = empStep.items(), s = 0;
+    var cur = jobs.filter(function (x) { return x.current; })[0] || jobs[0];
+    if (st.cv || html.classList.contains('mo-has-cv')) s += W.resume;
+    if ((v('name') || '').trim()) s += W.name;
+    if (v('email')) s += W.email;
+    if (v('phone')) s += W.phone;
+    if (fr || (cur && cur.title)) s += W.role;
+    if (fr || (v('exp') && v('exp').total)) s += W.exp;
+    if (fr || v('salary')) s += W.salary;
+    if (fr || v('notice')) s += W.notice;
+    if (v('loc')) s += W.location;
+    if (getChoice(bGender)) s += W.personal_base;
+    if (skills.list().length) s += W.skills;
+    if (fr || jobs.length) s += W.employment;
+    if (eduStep.items().length) s += W.education;
+    if (v('dob')) s += W.dob;
+    if (v('disability')) s += W.disability;
+    s += prefsPts();
+    return Math.max(0, Math.min(100, Math.round(s * 10) / 10));
+  }
+  /* the dial: Profile tab's drawDial — the arc to the score, the knob at its end — counted up when the sheet is up */
+  function dialTo(val) {
+    var a = Math.PI * val / 100, x = (190 - 150 * Math.cos(a)).toFixed(2), y = (220 - 150 * Math.sin(a)).toFixed(2), f = $('#psDialFill');
+    if (!f) return;
+    f.setAttribute('d', 'M 40 220 A 150 150 0 0 1 ' + x + ' ' + y);
+    ['psDialHalo', 'psDialCore', 'psDialPin'].forEach(function (id) { var c = $('#' + id); c.setAttribute('cx', x); c.setAttribute('cy', y); });
+    $$('[data-ps-pct]').forEach(function (e) { e.textContent = String(Math.round(val * 10) / 10); });
+  }
+  function dialRun() {
+    var to = +($('#psDial').getAttribute('data-score')) || 0;
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { dialTo(to); return; }
+    var t0 = 0, dur = 900;
+    (function f(t) { if (!t0) t0 = t; var p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3); dialTo(p < 1 ? Math.round(to * e) : to); if (p < 1) requestAnimationFrame(f); })(performance.now());
   }
   function openProfile() { profileFacts(); var p = $('#profileSheet'); p.classList.remove('is-shown'); openSheet(p); }
-  $('#profileSheet').addEventListener('shine:sheet-opened', function (e) { if (e.target.id === 'profileSheet') e.target.classList.add('is-shown'); });
+  $('#profileSheet').addEventListener('shine:sheet-opened', function (e) { if (e.target.id === 'profileSheet') { e.target.classList.add('is-shown'); dialRun(); } });
   function toPrefs() {                                    // the resume screen is done with: Back from preferences goes to Key skills
     var fromNudge = history.state && history.state.mo === 'nudge';
     go('prefs', !fromNudge); if (fromNudge) history.replaceState({ mo: 'prefs' }, '', '#prefs');
@@ -6733,7 +6819,7 @@ window.__MO_CFG = {
     if (s === 'emp') { if (!empStep.save()) return; if (!empStep.items().length) return; }
     if (s === 'skills') { if (skills.list().length < 3) { skills.error('Add at least 3 skills'); skills.combo.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
       if (st.cv) openProfile(); else toNudge(); return; }   // 2026-11-06 (user): the resume is next and required — or, already added (Help me fill), straight to Profile created
-    if (s === 'prefs') { if (!prefsCheck()) { firstInvalid(P); return; } toWelcome(); return; }   // optional now: Continue checks what they started, I'll do it later skips
+    if (s === 'prefs') { if (!prefsCheck()) { firstInvalid(P); return; } prefsSaved = true; toWelcome(); return; }   // optional now: Continue checks what they started, I'll do it later skips
     go(list[list.indexOf(s) + 1]);
   }
   doc.addEventListener('click', function (e) {
@@ -6828,7 +6914,7 @@ window.__MO_CFG = {
   history.replaceState({ mo: 'basic' }, '', '#basic');
   go('basic', false);
   if (/[?&]st=nudge\b/.test(location.search)) { st.created = true; st.fresher = false; st.name = 'Ananya Sharma'; toNudge(true); }   // review: open on the resume screen
-  window.__mo = { st: st, go: go, edu: eduStep, emp: empStep, skills: skills, roles: roles, locs: locs, fill: fillStep };   // test hook
+  window.__mo = { strength: function () { return strength(); }, st: st, go: go, edu: eduStep, emp: empStep, skills: skills, roles: roles, locs: locs, fill: fillStep };   // test hook
 })();
 
 </script>
