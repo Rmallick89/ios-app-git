@@ -2737,6 +2737,23 @@ html.mo-no-demo .mo-key, .mo-key[hidden] { display: none !important; }
 .pk-more { margin-top: var(--spacing-stack-md); }
 .pk-q fieldset.pf-choice { margin: 0; padding: 0; border: 0; min-width: 0; }
 
+/* ▼ profile-sheet */
+/* Profile created (user 2026-11-06 — their pick of 5 + 4 samples: the half gauge; Add job preferences on top, I'll do it later under it) */
+.ps-in { display: flex; flex-direction: column; align-items: center; padding-top: var(--spacing-stack-xxl); text-align: center; }
+.ps .bs-title { --bs-h-size: var(--bs-title-lg-size); --bs-h-lh: var(--bs-title-lg-lh); --bs-h-ls: var(--bs-title-lg-ls); }
+.ps-sub { margin: var(--spacing-stack-xs) 0 0; font: var(--weight-medium) var(--type-body-md-size)/20px var(--font-brand); color: var(--content-neutral-muted); text-wrap: pretty; }
+.ps-gauge { position: relative; display: block; width: 200px; height: 110px; margin-bottom: var(--spacing-stack-md); }
+.ps-gauge svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.ps-gauge path { fill: none; stroke-width: 14; stroke-linecap: round; }
+.ps-gauge .t { stroke: var(--surface-neutral-muted); }
+.ps-gauge .v { stroke: var(--surface-brand-brand-intense); stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 900ms cubic-bezier(.2, .7, .3, 1) 120ms; }
+.ps.is-shown .ps-gauge .v { stroke-dashoffset: calc(100 * (1 - var(--ps-pct, .83))); }   /* fills once the sheet is up */
+.ps-gauge-in { position: absolute; left: 0; right: 0; bottom: 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ps-gauge-in b { font: var(--weight-extrabold) 28px/30px var(--font-brand); letter-spacing: -.5px; color: var(--content-neutral-base); }
+.ps-gauge-in em { font: var(--weight-semibold) var(--type-body-sm-size)/16px var(--font-brand); font-style: normal; color: var(--content-neutral-faded); }
+@media (prefers-reduced-motion: reduce) { .ps-gauge .v { transition: none; } }
+/* ▲ profile-sheet */
+
 /* Help me fill → resume mid-flow (user 2026-11-02): reading sheet + the "filled from your resume" note on the steps it filled */
 .mo-read-ic { display: grid; place-items: center; width: 64px; height: 64px; border-radius: var(--size-radius-full); background: var(--surface-brand-brand-subtle); color: var(--content-neutral-brand); }
 .mo-read-ic svg { width: 28px; height: 28px; animation: moReadBob 1.2s ease-in-out infinite; }
@@ -3082,11 +3099,14 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     <footer class="mo-foot" id="moFoot">
       <p class="mo-terms" data-k="terms">By continuing, you agree to our <a href="#" data-act="terms">Terms</a> &amp; <a href="#" data-act="terms">Privacy Policy</a></p>
       <button class="btn btn--primary btn--lg btn--block" type="button" id="moNext" data-act="next">Continue</button>
+      <button class="btn btn--secondary btn--lg btn--block" type="button" data-act="prefs-later" data-k="later" hidden>I’ll do it later</button>   <!-- job preferences only: the step is optional (user 2026-11-06) -->
       <p class="mo-trust"><svg aria-hidden="true" focusable="false" data-icon="ic_check-circle-solid" viewBox="0 0 20 20" fill="none"><path d="M18 9.48516L17.8636 8.44631L17.7446 7.93559L17.5927 7.43401L17.1918 6.46656L16.9447 6.00435L16.3626 5.133L16.0303 4.72845L15.2889 3.98707L14.8844 3.65483L14.013 3.07271L13.5508 2.82558L12.5834 2.42469L12.0818 2.27275L11.0539 2.06865L10.0087 2L9.48516 2.01739L8.44631 2.15377L7.93559 2.27275L7.43401 2.42469L6.46656 2.82558L5.55952 3.35004L5.133 3.65483L4.72845 3.98707L3.98707 4.72845L3.65483 5.133L3.07271 6.00435L2.82558 6.46656L2.42469 7.43401L2.27275 7.93559L2.06865 8.96345L2 10.0087L2.01739 10.5322L2.15377 11.5711L2.27275 12.0818L2.42469 12.5834L2.82558 13.5508L3.35004 14.4579L3.65483 14.8844L3.98707 15.2889L4.72845 16.0303L5.55952 16.6674L6.00435 16.9447L6.46656 17.1918L7.43401 17.5927L8.44631 17.8636L8.96345 17.9487L9.48516 18H10.5322L11.5711 17.8636L12.0818 17.7446L13.073 17.4078L13.5508 17.1918L14.013 16.9447L14.8844 16.3626L15.2889 16.0303L16.0303 15.2889L16.6674 14.4579L16.9447 14.013L17.1918 13.5508L17.5927 12.5834L17.8636 11.5711L17.9487 11.0539L18.0174 10.0087L18 9.48516ZM8.41336 13.2149L5.85058 10.7016L5.72427 10.4059L5.70688 10.2458L5.76637 9.92998L5.84143 9.78628L6.06659 9.55746L6.36222 9.43115L6.68348 9.42841L6.98187 9.54831L7.10726 9.64899L8.85636 11.3633L13.0712 7.12923L13.3678 7.00475L13.689 7.00292L13.9865 7.12465L14.1119 7.22716L14.2922 7.49351L14.3398 7.64727L14.3416 7.96854L14.2949 8.12322L14.1174 8.3914L9.44946 13.1051L9.18494 13.2845L9.03118 13.3321L8.71083 13.3348L8.41336 13.2149Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg>Your data is safe &amp; secured</p>
     </footer>
   </div>
 
   <!-- ═════════ ADD YOUR RESUME — "Spotlight", blue theme (user's pick from round 2, 2026-11-01) ═════════
+       2026-11-06 (user): the resume is a REQUIRED step, right after Key skills — no "Skip for now"; job preferences come
+       after it and are optional (the Profile created sheet offers them)
        back · "Do you know?" fact bubble · a spotlight falls from it onto their profile card (resume attached) while two
        cards without one stay dim · Resume = Visibility · Upload resume (buttons atom Primary) · Skip for now (Secondary) -->
   <div class="mo-view mo-nudge sp" data-view="nudge" hidden>
@@ -3109,7 +3129,6 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     </div>
     <div class="mo-foot">
       <button class="btn btn--primary btn--lg btn--block" type="button" data-act="nudge-upload"><svg aria-hidden="true" focusable="false" data-icon="ic_upload-outline" viewBox="0 0 20 20" fill="none"><path d="M17 11.438V16.438C17 16.6038 16.9342 16.7627 16.8169 16.8799C16.6997 16.9971 16.5408 17.063 16.375 17.063H2.625C2.45924 17.063 2.30027 16.9971 2.18306 16.8799C2.06585 16.7627 2 16.6038 2 16.438V11.438C2 11.2722 2.06585 11.1133 2.18306 10.996C2.30027 10.8788 2.45924 10.813 2.625 10.813C2.79076 10.813 2.94973 10.8788 3.06694 10.996C3.18415 11.1133 3.25 11.2722 3.25 11.438V15.813H15.75V11.438C15.75 11.2722 15.8158 11.1133 15.9331 10.996C16.0503 10.8788 16.2092 10.813 16.375 10.813C16.5408 10.813 16.6997 10.8788 16.8169 10.996C16.9342 11.1133 17 11.2722 17 11.438ZM6.375 7.37549H8.875V12.3755C8.875 12.5413 8.94085 12.7002 9.05806 12.8174C9.17527 12.9346 9.33424 13.0005 9.5 13.0005C9.66576 13.0005 9.82473 12.9346 9.94194 12.8174C10.0592 12.7002 10.125 12.5413 10.125 12.3755V7.37549H12.625C12.7487 7.37559 12.8696 7.33899 12.9725 7.27032C13.0754 7.20165 13.1555 7.104 13.2029 6.98974C13.2502 6.87547 13.2626 6.74973 13.2385 6.62842C13.2143 6.50712 13.1547 6.39571 13.0672 6.3083L9.94219 3.1833C9.88414 3.12519 9.81521 3.07909 9.73934 3.04764C9.66346 3.01619 9.58213 3 9.5 3C9.41787 3 9.33654 3.01619 9.26066 3.04764C9.18479 3.07909 9.11586 3.12519 9.05781 3.1833L5.93281 6.3083C5.84531 6.39571 5.7857 6.50712 5.76154 6.62842C5.73739 6.74973 5.74977 6.87547 5.79711 6.98974C5.84446 7.104 5.92464 7.20165 6.02751 7.27032C6.13038 7.33899 6.25132 7.37559 6.375 7.37549Z" fill="currentColor"/></svg>Upload resume</button>
-      <button class="btn btn--secondary btn--lg btn--block" type="button" data-act="nudge-skip">Skip for now</button>
     </div>
   </div>
   </div>
@@ -3157,6 +3176,27 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     </div>
   </div>
 </div>
+
+<!-- ▼ profile-sheet — Profile created (after the resume, user 2026-11-06 — their pick: the half gauge, buttons stacked):
+     the bottom-sheet component · strong scrim · not dismissable (no ×, no drag, no backdrop): the two buttons are the way on —
+     Add job preferences (→ the optional Job preferences step) · I'll do it later (→ welcome). The dial fills to how complete
+     the profile is (the steps done ÷ those + job preferences: 83% with a job, 80% for a fresher). -->
+<div class="bs ps" id="profileSheet" data-bs-cta="inline" data-bs-scrim="strong" data-bs-dismiss="false" data-bs-drag="false" hidden>
+  <div class="bs-body bs-body--gutter">
+    <div class="ps-in">
+      <span class="ps-gauge" aria-hidden="true"><svg viewBox="0 0 200 110"><path class="t" d="M14 100 A86 86 0 0 1 186 100" pathLength="100"/><path class="v" d="M14 100 A86 86 0 0 1 186 100" pathLength="100"/></svg><span class="ps-gauge-in"><b data-ps-pct>83%</b><em>Profile strength</em></span></span>
+      <h2 class="bs-title">Profile <span class="accent">created.</span></h2>
+      <p class="ps-sub">Add job preferences to reach 100% and get roles that fit.</p>
+    </div>
+    <div class="bs-bottom">
+      <div class="bs-actions">
+        <button class="btn btn--primary btn--lg btn--block" type="button" data-act="profile-prefs">Add job preferences</button>
+        <button class="btn btn--secondary btn--lg btn--block" type="button" data-act="profile-later">I’ll do it later</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ▲ profile-sheet -->
 
 <!-- Help me fill — display · Large · close · inline stacked buttons -->
 <div class="bs" id="helpSheet" data-bs-cta="inline" data-bs-scrim="strong" hidden>
@@ -6054,7 +6094,8 @@ window.__MO_CFG = {
 </script>
 <script>
 /* ═══ SHINE APP · SIGN UP › MANUAL ONBOARDING — page script · sample v1 (2026-11-01) ═══════════════════════
-   Steps: basic → (OTP · account created) → edu → emp (experienced only) → skills → prefs → nudge → welcome (no “Setting up your profile” screen — user, 2026-11-01).
+   Steps: basic → (OTP · account created) → edu → emp (experienced only) → skills → resume (required · 2026-11-06) → Profile created sheet
+          → prefs (optional: Add job preferences / I’ll do it later) → welcome (no “Setting up your profile” screen — user, 2026-11-01).
    Components used (inlined above): ShineSheet (bottom-sheet), ShineField (field-base + normal · combo · multi · OTP),
    ShineDropdown (inline-dropdown, via the combo box), ShineTopBar (top-app-bar). Helpers below marked "as Profile" are
    the Profile page's own page-local helpers, copied so both screens behave the same. */
@@ -6245,6 +6286,7 @@ window.__MO_CFG = {
     titles(step);
     progress();
     k(foot, 'terms').hidden = step !== 'basic' || st.created;
+    k(foot, 'later').hidden = step !== 'prefs';                      // job preferences are optional (user 2026-11-06)
     $('.stp-back').hidden = step === 'basic' && st.created;          // the account exists: nothing to go back to
     $$('[data-cv]').forEach(function (n) { var s = n.closest('.mo-step').getAttribute('data-step'); n.hidden = !(st.cv && st.cv[s]); });
     if (step === 'edu') eduStep.enter();
@@ -6623,8 +6665,28 @@ window.__MO_CFG = {
   });
   function pickResume(then) { uploadThen = then; try { file.value = ''; } catch (e) {} file.click(); }
   function uploaded(f, b) {
-    var skip = $('[data-act="nudge-skip"]'), done = b ? busy(b, 'Uploading…') : function () {}; skip.disabled = true; html.classList.add('mo-uploading');
-    setTimeout(function () { done(); skip.disabled = false; html.classList.remove('mo-uploading'); say('Resume added'); setTimeout(toWelcome, 500); }, 1100);
+    var done = b ? busy(b, 'Uploading…') : function () {}; html.classList.add('mo-uploading');
+    setTimeout(function () { done(); html.classList.remove('mo-uploading'); st.cv = st.cv || {}; html.classList.add('mo-has-cv'); openProfile(); }, 1100);
+  }
+  /* ═══ Profile created (user 2026-11-06) — after the resume: job preferences are offered, not required ═══ */
+  function profileFacts() {                              // what a sample of the sheet may show: first name · steps done · how complete
+    var name = (st.name || F(k(B, 'name')).value() || '').trim(), first = name.split(' ')[0] || 'there';
+    var done = steps().filter(function (s) { return s !== 'prefs'; }).map(function (s) { return LABEL[s]; }).concat('Resume');
+    var pct = Math.round(done.length / (done.length + 1) * 100);
+    var cur = empStep.items().filter(function (x) { return x.current; })[0] || empStep.items()[0], city = F(k(B, 'loc')).value();
+    $$('[data-ps-first]').forEach(function (e) { e.textContent = first; });
+    $$('[data-ps-initials]').forEach(function (e) { e.textContent = name ? name.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase() : 'You'; });
+    $$('[data-ps-done]').forEach(function (e) { e.innerHTML = done.map(function (t) { return '<li>' + IC['ic_check-circle-solid'] + '<span>' + esc(t) + '</span></li>'; }).join(''); });
+    $$('[data-ps-pct]').forEach(function (e) { e.textContent = pct + '%'; });
+    $$('[data-ps-role]').forEach(function (e) { e.textContent = cur && cur.title ? cur.title : (st.fresher ? 'Freshers’ roles' : 'Roles for you'); });
+    $$('[data-ps-city]').forEach(function (e) { e.textContent = city ? cityName(city) : 'Your city'; });
+    html.style.setProperty('--ps-pct', String(pct / 100));
+  }
+  function openProfile() { profileFacts(); var p = $('#profileSheet'); p.classList.remove('is-shown'); openSheet(p); }
+  $('#profileSheet').addEventListener('shine:sheet-opened', function (e) { if (e.target.id === 'profileSheet') e.target.classList.add('is-shown'); });
+  function toPrefs() {                                    // the resume screen is done with: Back from preferences goes to Key skills
+    var fromNudge = history.state && history.state.mo === 'nudge';
+    go('prefs', !fromNudge); if (fromNudge) history.replaceState({ mo: 'prefs' }, '', '#prefs');
   }
 
   /* Help me fill → Upload resume, part-way through (user 2026-11-02): the resume fills the CURRENT step and the ones
@@ -6669,8 +6731,9 @@ window.__MO_CFG = {
     if (s === 'basic') { basicNext(); return; }
     if (s === 'edu') { if (!eduStep.save()) return; if (!eduStep.items().length) return; }
     if (s === 'emp') { if (!empStep.save()) return; if (!empStep.items().length) return; }
-    if (s === 'skills') { if (skills.list().length < 3) { skills.error('Add at least 3 skills'); skills.combo.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; } }
-    if (s === 'prefs') { if (!prefsCheck()) { firstInvalid(P); return; } if (st.cv) toWelcome(); else toNudge(); return; }
+    if (s === 'skills') { if (skills.list().length < 3) { skills.error('Add at least 3 skills'); skills.combo.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+      if (st.cv) openProfile(); else toNudge(); return; }   // 2026-11-06 (user): the resume is next and required — or, already added (Help me fill), straight to Profile created
+    if (s === 'prefs') { if (!prefsCheck()) { firstInvalid(P); return; } toWelcome(); return; }   // optional now: Continue checks what they started, I'll do it later skips
     go(list[list.indexOf(s) + 1]);
   }
   doc.addEventListener('click', function (e) {
@@ -6694,7 +6757,9 @@ window.__MO_CFG = {
       }); break;
       case 'delete-yes': after($('#delSheet'), function () { stepOf(menu.kind).remove(menu.i); say('Deleted'); }); break;
       case 'nudge-upload': pickResume(function (f) { uploaded(f, a.hasAttribute('data-nobusy') ? null : a); }); break;
-      case 'nudge-skip': toWelcome(); break;
+      case 'profile-prefs': after($('#profileSheet'), toPrefs); break;
+      case 'profile-later': after($('#profileSheet'), toWelcome); break;
+      case 'prefs-later': toWelcome(); break;
       case 'demo': demoOpen(a); break;
       case 'demo-otp': F(otpF).set(DB.otp); verifyOtp(); break;
     }
