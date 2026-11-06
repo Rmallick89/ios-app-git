@@ -2009,17 +2009,19 @@ body { background: var(--surface-base, var(--surface-base)); }
             {id:'25-50',label:'25 To 50 Lakh',count:2110},
             {id:'50+',label:'50 Lakh+',count:580}
           ] },
-        { key:'jobtype', name:'Job Type', popular:['permanent','contractual','freelance','internship'],
+        // user 2026-11-06 — the same options and order as sign-up and Profile
+        { key:'jobtype', name:'Job Type', popular:['fulltime','parttime','internship','contractual','freelance'],
           options:[
-            {id:'permanent',label:'Permanent',count:24820},
+            {id:'fulltime',label:'Full Time',count:23140},
+            {id:'parttime',label:'Part Time',count:1680},
+            {id:'internship',label:'Internship',count:349},
             {id:'contractual',label:'Contractual',count:3210},
-            {id:'freelance',label:'Freelance',count:590},
-            {id:'internship',label:'Internship',count:349}
+            {id:'freelance',label:'Freelance',count:590}
           ] },
-        { key:'jobmode', name:'Job Mode', popular:['onsite','remote','hybrid'],
+        { key:'jobmode', name:'Work Mode', popular:['remote','office','hybrid'],
           options:[
-            {id:'onsite',label:'On Site',count:18500},
             {id:'remote',label:'Remote',count:4890},
+            {id:'office',label:'In Office',count:18500},
             {id:'hybrid',label:'Hybrid',count:5579}
           ] }
       ];
@@ -2034,10 +2036,10 @@ body { background: var(--surface-base, var(--surface-base)); }
 
       // Sample data has no job type / mode — give each job a fixed mock value
       // so those filters do something visible in the prototype.
-      var MOCK_MODES = ['onsite','hybrid','onsite','remote','hybrid','onsite','onsite'];
+      var MOCK_MODES = ['office','hybrid','office','remote','hybrid','office','office'];
       BASE_JOBS.forEach(function(j, i){
         if (!j.jobmode) j.jobmode = MOCK_MODES[i % MOCK_MODES.length];
-        if (!j.jobtype) j.jobtype = (i % 9 === 4) ? 'contractual' : (i % 17 === 11) ? 'freelance' : 'permanent';
+        if (!j.jobtype) j.jobtype = (i % 9 === 4) ? 'contractual' : (i % 17 === 11) ? 'freelance' : (i % 13 === 6) ? 'parttime' : (i % 23 === 15) ? 'internship' : 'fulltime';
       });
       var TOP_CO = ['microsoft','flipkart','zomato','swiggy','phonepe'];
       var LOC_MATCH = { 'all-india':['all india'], 'bangalore':['bengaluru','bangalore'], 'delhi-ncr':['delhi','gurgaon','noida'] };

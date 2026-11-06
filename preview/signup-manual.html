@@ -29,7 +29,7 @@
   words in green ("Seventy-Eight Lakh Ninety Thousand Eight Hundred Ninety-Eight Rupees"), ₹1 lakh – ₹1 crore, errors
   "₹3 is too low. Annual salary must be at least ₹1 lakh." · "Enter your annual salary."; expected salary = a list in lakhs (bottom sheet: 1 Lac ·
   1.5 Lacs … 50 Lacs · 51 … 99 Lacs · 1 Cr+); the current salary shows as 9,85,899 (no ₹, no "a year"); job type
-  Full time · Part time · Contractual · Freelance · Internship; work mode Remote · In Office · Hybrid; disability None ·
+  Full Time · Part Time · Internship · Contractual · Freelance (2026-11-06); work mode Remote · In Office · Hybrid; disability None ·
   Loco Motor Disability · Visual Impairment · Hearing Impairment · Other, with their subtext.
 -->
 
@@ -2945,7 +2945,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
               <label class="field-label" for="moNotice">Notice period</label>
               <div class="field-control"><input class="field-input" id="moNotice" placeholder="Select notice period" required></div>
             </div>
-            <fieldset class="field field--sm field-multi" data-field="date" data-parts="dmy" data-pick="sheet" data-min="today" data-max="today+1y" data-required data-error-empty="Please select your last working day" data-k="lwd" hidden><legend class="field-label">Last working day</legend></fieldset>
+            <fieldset class="field field--sm field-multi" data-field="date" data-parts="dmy" data-pick="sheet" data-min="today" data-max="today+6m" data-pick-conflict="error" data-required data-error-empty="Select your last working day" data-error-min="Last working day can’t be in the past" data-error-max="Last working day must be within 6 months" data-k="lwd" hidden><legend class="field-label">Last working day</legend></fieldset>
           </div>
           <div class="field field--sm" data-field="combo" data-combo="inline" data-combo-free data-k="loc" data-error-empty="Enter your current location">
             <label class="field-label" for="moLoc">Current location</label>
@@ -5427,7 +5427,10 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 })(window.ShineField);
 </script>
 <script data-component="multi-input">
-/* SHINE · INPUT FIELDS · MULTI INPUT  (atoms/input-fields/multi-input/)      v3.3.0
+/* SHINE · INPUT FIELDS · MULTI INPUT  (atoms/input-fields/multi-input/)      v3.4.0
+   v3.4.0 · the last working day (user 2026-11-06): data-min / data-max take months (today+6m); data-pick-conflict="error"
+   keeps a day the newly picked month / year hasn't got and says so ("April has only 30 days" · "February 2027 has only 28
+   days") with the day box marked, instead of clearing it; the error for a date out of range marks the box at fault.
    Needs field-base.css + field-base.js and multi-input.css. One answer in 2 or 3 boxes — the page writes only the
    group and its label; the boxes are drawn here:
 
@@ -5439,7 +5442,8 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 
    date        data-parts  dmy (default — day only where it matters: date of birth) · my (month and year: start /
                            end of a job or a course)
-               data-min / data-max   an ISO date (1950-01-01), "today", or "today-15y" (15 years before today)
+               data-min / data-max   an ISO date (1950-01-01), "today", "today-15y" (15 years before today) or "today+6m"
+                                     (6 months from today — v3.4.0; a day the month hasn't got becomes its last day)
                data-autocomplete="bday"   lets the phone fill a date of birth
    experience  data-max-years (default 50) — months are 0 to 11
    data-name   adds a hidden input with that name: the ISO date (1995-05-12 · 2021-08) or the total months (54)
@@ -5466,10 +5470,20 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
                           got (31 Apr · 30 Feb · 29 Feb outside a leap year), days outside the range in its first / last month
                         · picking a year or a month that rules out a part already picked below it (31 → Feb, 29 Feb → 2027)
                           clears that part and goes back to it — never a dead end, never an impossible date
-                      Last working day: data-min="today" data-max="today+1y" (years ascending). Date of birth:
+                      Last working day (v3.4.0): data-min="today" data-max="today+6m" data-pick-conflict="error"
+                      data-error-min="Last working day can’t be in the past" data-error-max="Last working day must be within
+                      6 months" data-error-empty="Select your last working day" (years ascending). Date of birth:
                       data-min="1950-01-01" data-max="today-15y" data-pick-order="desc" (newest year first).
                       Backspace / Delete on a box empties it.
      data-pick-order  desc — the year grid newest first (date of birth); default asc (last working day)
+     data-pick-conflict  error (v3.4.0 · the last working day) — a month or year picked AFTER the day that the day doesn't fit
+                      (31 → April · 29 Feb → 2027) keeps the day: the error shows at once under the field ("April has only
+                      30 days" · "February 2027 has only 28 days") and the day box is marked, till a day that fits is
+                      picked. Out-of-range values stay faded, judged on every part picked except a day (a year is judged with
+                      its month too), so a past or too-far date can only come from a day picked first — then the error says
+                      so (data-error-min / data-error-max) and marks the day. Default: clear the day and go back to it.
+                      The sheet closed before the date is complete says at once what is missing (nothing picked: data-error-empty).
+                      Any date picked from a sheet words a missing part "Select the day" (typed: "Enter the day").
      data-pick-title  the word after "Select" in the sheet's title — default: day · month · year
 
    Typing: numbers only, numeric keyboard; a box moves on by itself when it is full (a day of 4–9 or a month of
@@ -5498,9 +5512,13 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
   function pad(v) { return v.length === 1 ? '0' + v : v; }
   function daysIn(m, y) { return new Date(y, m, 0).getDate(); }
   function list(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
-  function when(s) {                                      // ISO · today · today-15y → { y, m, d }
-    if (!s) return null; var t = /^today(?:([+-]\d+)y)?$/.exec(s.trim()), dt;
-    if (t) { dt = new Date(); if (t[1]) dt.setFullYear(dt.getFullYear() + +t[1]); return { y: dt.getFullYear(), m: dt.getMonth() + 1, d: dt.getDate(), today: !t[1] }; }
+  function when(s) {                                      // ISO · today · today-15y · today+6m → { y, m, d }
+    if (!s) return null; var t = /^today(?:([+-]\d+)([ym]))?$/.exec(s.trim()), dt;
+    if (t) {
+      dt = new Date(); var y = dt.getFullYear(), m = dt.getMonth() + 1, d = dt.getDate();
+      if (t[1]) { var mm = (y * 12 + m - 1) + +t[1] * (t[2] === 'y' ? 12 : 1); y = Math.floor(mm / 12); m = mm % 12 + 1; d = Math.min(d, daysIn(m, y)); }   // 31 Aug + 6m → 28 / 29 Feb
+      return { y: y, m: m, d: d, today: !t[1] };
+    }
     t = /^(\d{4})(?:-(\d{1,2}))?(?:-(\d{1,2}))?$/.exec(s.trim()); return t ? { y: +t[1], m: +(t[2] || 1), d: +(t[3] || 1) } : null;
   }
 
@@ -5560,22 +5578,27 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
         if (m > 11) return { text: 'Enter 0 to 11 months', at: [1] };
         return null;
       }
-      var cd = keys.indexOf('d'), cm = keys.indexOf('m');           // v3.2.0: a day the month never has — said at once, before what is missing
-      if (cd > -1 && v[cd] && v[cm] && +v[cm] >= 1 && +v[cm] <= 12 && +v[cd] > DMAX[+v[cm] - 1]) return { text: MONTHS[+v[cm] - 1] + ' has ' + DMAX[+v[cm] - 1] + ' days', at: [cd], conflict: true };
+      var cd = keys.indexOf('d'), cm = keys.indexOf('m'), cy = keys.indexOf('y');   // v3.2.0: a day the month never has — said at once, before what is missing
+      if (cd > -1 && v[cd] && v[cm] && +v[cm] >= 1 && +v[cm] <= 12) {               // v3.4.0 copy: "April has only 30 days" · "February 2027 has only 28 days"
+        var cM = +v[cm], cY = cy > -1 && v[cy] && v[cy].length === 4 ? +v[cy] : 0, lim = cY ? daysIn(cM, cY) : DMAX[cM - 1];
+        if (+v[cd] > lim) return { text: MONTHS[cM - 1] + (cY && cM === 2 ? ' ' + cY : '') + ' has only ' + lim + ' days', at: [cd], conflict: true };
+      }
       var miss = [], at = [];
       keys.forEach(function (k, i) { if (!v[i]) { miss.push(PART[k].label.toLowerCase()); at.push(i); } });
-      if (miss.length) return { text: 'Enter the ' + list(miss), at: at };
+      if (miss.length) return { text: (pick ? 'Select the ' : 'Enter the ') + list(miss), at: at };   // v3.4.0: picked from a sheet → "Select the day"
       var iy = keys.indexOf('y'), im = keys.indexOf('m'), id = keys.indexOf('d');
       var Y = +v[iy], M = +v[im], D = id > -1 ? +v[id] : 1;
       if (v[iy].length < 4) return { text: 'Enter the year in full, like 1995', at: [iy] };
       if (M < 1 || M > 12) return { text: 'Enter a month from 1 to 12', at: [im] };
       if (id > -1 && (D < 1 || D > 31)) return { text: 'Enter a day from 1 to 31', at: [id] };
-      if (id > -1 && D > daysIn(M, Y)) return { text: M === 2 && D === 29 ? Y + ' isn’t a leap year — February has 28 days' : MONTHS[M - 1] + ' ' + Y + ' has ' + daysIn(M, Y) + ' days', at: [id] };
+      if (id > -1 && D > daysIn(M, Y)) return { text: MONTHS[M - 1] + (M === 2 ? ' ' + Y : '') + ' has only ' + daysIn(M, Y) + ' days', at: [id] };
       var lo = when(el.getAttribute('data-min')), hi = when(el.getAttribute('data-max')), me = Y * 10000 + M * 100 + (id > -1 ? D : 1);
       var fmt = function (w) { return (id > -1 ? w.d + ' ' : '') + MONTHS[w.m - 1].slice(0, 3) + ' ' + w.y; };
       var key = function (w) { return w.y * 10000 + w.m * 100 + (id > -1 ? w.d : 1); }, custom = el.getAttribute('data-error-range');
-      if (hi && me > key(hi)) return { text: el.getAttribute('data-error-max') || custom || (hi.today ? 'The date can’t be in the future' : 'Enter a date up to ' + fmt(hi)), at: [] };
-      if (lo && me < key(lo)) return { text: el.getAttribute('data-error-min') || custom || (lo.today ? 'The date can’t be before today' : 'Enter a date from ' + fmt(lo) + ' onwards'), at: [] };
+      // v3.4.0 · which box: the day when its month is the range's first / last month (the day is what's out), else month + year
+      var culprit = function (w) { return id > -1 && Y === w.y && M === w.m ? [id] : [im, iy]; };
+      if (hi && me > key(hi)) return { text: el.getAttribute('data-error-max') || custom || (hi.today ? 'The date can’t be in the future' : 'Enter a date up to ' + fmt(hi)), at: culprit(hi) };
+      if (lo && me < key(lo)) return { text: el.getAttribute('data-error-min') || custom || (lo.today ? 'The date can’t be before today' : 'Enter a date from ' + fmt(lo) + ' onwards'), at: culprit(lo) };
       return null;
     }
     function value() {
@@ -5652,9 +5675,10 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     }
     function picked() { var v = vals(), o = { d: null, m: null, y: null }; keys.forEach(function (k, i) { o[k] = v[i] ? +v[i] : null; }); return o; }
     /* a value is off when nothing in the range can come of it — judged on the parts ABOVE it only (year › month › day) */
+    var keep = el.getAttribute('data-pick-conflict') === 'error';   // v3.4.0
     function off(b, k, v, q) {
       var t = { y: q.y, m: q.m, d: q.d }; t[k] = v;
-      if (k === 'y') { t.m = null; t.d = null; } else if (k === 'm') t.d = null;
+      if (k === 'y') { if (!keep) t.m = null; t.d = null; } else if (k === 'm') t.d = null;   // keep mode: a year is judged with its month too
       return !possible(b, t);
     }
     function buildSheet() {
@@ -5680,7 +5704,13 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
         all[i].tabIndex = -1; all[j].tabIndex = 0; all[j].focus();
       });
       sheet.addEventListener('shine:sheet-close', function () { if (at > -1) ins[at].closest('.field-control').classList.remove('is-open'); at = -1; el.classList.remove('field--open'); });
-      sheet.addEventListener('shine:sheet-closed', function () { closing = false; });
+      sheet.addEventListener('shine:sheet-closed', function () {
+        var done = closing; closing = false;
+        // v3.4.0 · keep mode (the last working day): closed before the date is complete → say what's missing at once —
+        // nothing picked: the empty text ("Select your last working day") · some parts: what is still to pick
+        if (!keep || done || ins.some(function (x) { return x.disabled; })) return;
+        var v = vals(); if (!v.some(Boolean)) { if (_.required(el)) show({ text: _.emptyText(el), at: [] }); } else { var pr = problem(); if (pr) show(pr); }
+      });
     }
     function draw(i) {                                    // the grid for box i's part
       var k = ins[i].getAttribute('data-part') || keys[i], b = bounds(), q = picked(), h = '', first = null, items = [], x;
@@ -5728,9 +5758,12 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
       put(i, v); live.textContent = c.getAttribute('aria-label') + ' picked';
       var q = picked(), back = null, im = keys.indexOf('m'), id = keys.indexOf('d');
       // a higher part picked: drop what it rules out below it, and go back to it (the reference's rule)
-      if (k === 'y' && q.m != null && !possible(b, { y: q.y, m: q.m, d: null })) { put(im, ''); q.m = null; back = im; }
-      if (k !== 'd' && id > -1 && q.d != null && !possible(b, q)) { put(id, ''); q.d = null; back = id; }
+      if (!keep) {
+        if (k === 'y' && q.m != null && !possible(b, { y: q.y, m: q.m, d: null })) { put(im, ''); q.m = null; back = im; }
+        if (k !== 'd' && id > -1 && q.d != null && !possible(b, q)) { put(id, ''); q.d = null; back = id; }
+      }
       recheck(); changed();
+      if (keep) { var cp = problem(); if (cp && cp.conflict) show(cp); }   // v3.4.0: the day the month / year hasn't got — said at once
       var to = back;
       if (to === null) for (var j = 1; j < keys.length; j++) { var p = (i + j) % keys.length; if (q[keys[p]] == null) { to = p; break; } }   // the next empty part, round
       if (to !== null) { setTimeout(function () { if (at === i && sheet && ShineSheet.isOpen(sheet)) moveTo(to); }, 140); return; }
@@ -5977,17 +6010,18 @@ window.__MO_CFG = {
 <script data-page="notice-lwd">
 /* ═══ SHINE APP · SIGN UP — NOTICE PERIOD + LAST WORKING DAY (user 2026-11-02) ═══════════════════════════════
    Shared by signup-manual.html (Basic details) and signup-resume.html (Almost there · Edit basic details).
-   Notice period (combo box · sheet): Immediate joiner · Serving notice period · 15 days · 1 month · 2 months · 3 months.
+   Notice period (combo box · sheet): Immediate Joiner · Serving Notice Period · 15 Days · 1 Month · 2 Months · 3 Months.
    "Serving notice period" shows the Last working day under it — the multi-input component's picked date
    (data-pick="sheet", v3.3.0 — the same field as App-login's Profile and apply flow): DD ⌄ · MM ⌄ · YYYY ⌄, a tap opens the
-   day / month / year sheet, today … a year from today. The picker, its range and its messages are the component's; this
+   day / month / year sheet, today … 6 months from today (user 2026-11-06 — out-of-range values faded; a day the month
+   or year picked after it hasn't got stays, with "April has only 30 days" · "February 2027 has only 28 days"; hidden = cleared). The picker, its range and its messages are the component's; this
    file only shows / hides the field and reads / writes the pair.
    → window.MoNotice = { OPTIONS, SERVING, label(code, lwd), attach(root) → { sync(), read(), write(code, lwd) } } */
 (function () {
   'use strict';
   var F = window.ShineField; if (!F) return;
-  var OPTIONS = [['Immediate', 'Immediate joiner'], ['Serving notice', 'Serving notice period'], ['15 days', '15 days'],
-                 ['1 month', '1 month'], ['2 months', '2 months'], ['3 months', '3 months']];
+  var OPTIONS = [['Immediate', 'Immediate Joiner'], ['Serving notice', 'Serving Notice Period'], ['15 days', '15 Days'],
+                 ['1 month', '1 Month'], ['2 months', '2 Months'], ['3 months', '3 Months']];   // Title Case (user 2026-11-06)
   var SERVING = 'Serving notice';
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -6005,6 +6039,7 @@ window.__MO_CFG = {
       fs.hidden = !on;
       [].forEach.call(fs.querySelectorAll('.field-input'), function (i) { i.disabled = !on; });
       if (!on) F.set(fs, null);
+      if (F.get(n).value() !== SERVING && F.get(fs).parts().some(Boolean)) F.get(fs).clear();   // another option: the date is cleared (user 2026-11-06)
     }
     n.addEventListener('shine:combo', function () { setTimeout(sync, 0); });
     sync();
@@ -6496,7 +6531,7 @@ window.__MO_CFG = {
   /* the resume flow's Job preferences (user 2026-11-02): 1 Roles · 2 Cities — chips to tap, a search for anything else ·
      3 Expected salary · 4 Job type · 5 Work mode (both optional). Roles, cities and salary are needed to go on. */
   var P = $('#fPrefs'), jpType = choice('ptype', P), jpMode = choice('pmode', P);
-  chips(jpType, [['Full time', 'Full time'], ['Part time', 'Part time'], ['Contractual', 'Contractual'], ['Freelance', 'Freelance'], ['Internship', 'Internship']]);
+  chips(jpType, [['Full Time', 'Full Time'], ['Part Time', 'Part Time'], ['Internship', 'Internship'], ['Contractual', 'Contractual'], ['Freelance', 'Freelance']]);
   chips(jpMode, [['Remote', 'Remote'], ['In Office', 'In Office'], ['Hybrid', 'Hybrid']]);
   F(k(P, 'esal')).options(LACS);                                   // expected salary: the lakhs list
   function roleHints() {
@@ -6673,14 +6708,14 @@ window.__MO_CFG = {
       emp: [{ title: 'Product Manager', company: 'XYZ Technologies Pvt. Ltd.', dept: 'Product Management', deptLabel: 'Product Management', ind: 'FinTech', indLabel: 'FinTech', current: true, start: '2022-03', end: '' },
             { title: 'Associate Product Manager', company: 'Blinkit', dept: 'Product Management', deptLabel: 'Product Management', ind: 'Internet / E-commerce', indLabel: 'Internet / E-commerce', current: false, start: '2018-07', end: '2022-02' }],
       skills: ['Product Management', 'User Research', 'Stakeholder Management', 'SQL', 'A/B Testing'],
-      prefs: { roles: ['Sr. Product Manager', 'Group Product Manager'], locs: ['Gurugram', 'Bengaluru'], salary: 2400000, types: ['Full time'], modes: ['In Office', 'Hybrid'] }
+      prefs: { roles: ['Sr. Product Manager', 'Group Product Manager'], locs: ['Gurugram', 'Bengaluru'], salary: 2400000, types: ['Full Time'], modes: ['In Office', 'Hybrid'] }
     },
     fresher: {
       basic: { name: 'Ananya Sharma', email: 'ananya.sharma@gmail.com', phone: '9811122334', exp: 'fresher', loc: 'Pune, Maharashtra', gender: 'Female', dob: '2003-04-12', dis: 'None' },
       edu: [{ level: 'BBA', levelLabel: 'BBA', ctype: 'Full time', inst: 'Symbiosis International', start: '2021-07', end: '2024-05', grade: '% Marks of 100', marks: '78' },
             { level: 'Class XII - Commerce', levelLabel: 'Class XII — Commerce', ctype: 'Full time', inst: 'CBSE', start: '2020-04', end: '2021-03', grade: '% Marks of 100', marks: '88' }],
       skills: ['Excel', 'Communication', 'Market Research', 'Business Development'],
-      prefs: { roles: ['Business Analyst', 'Marketing Executive'], locs: ['Pune', 'Mumbai'], salary: 400000, types: ['Full time', 'Internship'], modes: ['In Office'] }
+      prefs: { roles: ['Business Analyst', 'Marketing Executive'], locs: ['Pune', 'Mumbai'], salary: 400000, types: ['Full Time', 'Internship'], modes: ['In Office'] }
     }
   };
   function fillBasic(p) {
