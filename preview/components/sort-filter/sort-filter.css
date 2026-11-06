@@ -72,24 +72,13 @@
 .sf-bar-btn--filter { padding-right: 32px; }
 .sf-bar-div { width: 1px; height: 20px; margin: 0 2px; flex-shrink: 0; background: var(--sf-stroke-muted); }
 /* applied-filters count — A.04 Badge (inverse, xs) */
-.sf-badge {
-  position: absolute; top: 4px; right: 8px;
-  min-width: 18px; height: 18px; padding: 0 4px; box-sizing: border-box;
-  display: none; place-items: center;
-  background: var(--sf-content); color: var(--sf-content-on-dark);
-  border: var(--sf-stroke-thick) solid var(--sf-surface); border-radius: var(--sf-radius-full);
-  font: 800 10px/1 var(--sf-font);
-}
-.sf-badge.is-shown { display: grid; }
+/* the Filters count = the PILLS ATOM Small (16) · neutral on the 40 bar button (user 2026-11-06, App-login in sync) — this
+   rule only places it and shows it while filters are on */
+.sf-badge.pill { position: absolute; top: 4px; right: 8px; display: none; --pill-halo: var(--sf-surface); }
+.sf-badge.pill.is-shown { display: inline-grid; }
 /* non-default sort — quiet dot so users can tell the order was changed */
-.sf-dot {
-  position: absolute; top: 9px; right: 14px;
-  width: 8px; height: 8px; box-sizing: content-box;
-  border-radius: 50%; background: var(--sf-content);
-  border: var(--sf-stroke-thick) solid var(--sf-surface);
-  display: none;
-}
-.sf-bar-btn--sort.is-active .sf-dot { display: block; }
+.sf-dot.pill { position: absolute; top: 9px; right: 14px; display: none; --pill-halo: var(--sf-surface); }   /* the PILLS ATOM Small dot (8) · neutral */
+.sf-bar-btn--sort.is-active .sf-dot.pill { display: block; }
 
 /* ── Sort sheet ────────────────────────────────────────────────────── */
 .sf-sort .bs-body { padding-bottom: calc(var(--sf-gutter) + env(safe-area-inset-bottom, 0px)); }
@@ -135,20 +124,7 @@
 .sf-link:active { color: var(--sf-content); }
 .sf-group.has-selection .sf-link { display: inline-block; }
 .sf-pills { display: flex; flex-wrap: wrap; gap: 8px; }
-/* A.06 Chip · selectable */
-.sf-pill {
-  height: 32px; padding: 0 12px;
-  display: inline-flex; align-items: center; gap: 4px;
-  background: var(--sf-surface); color: var(--sf-content);
-  border: var(--sf-stroke-default) solid var(--sf-stroke); border-radius: var(--sf-radius-full);
-  font: 700 12px/1 var(--sf-font);
-  cursor: pointer; -webkit-tap-highlight-color: transparent;
-  transition: background 140ms, color 140ms, border-color 140ms, transform 140ms;
-}
-.sf-pill:active { transform: scale(.97); }
-.sf-pill[aria-pressed="true"] { background: var(--sf-content); color: var(--sf-content-on-dark); border-color: var(--sf-content); }
-.sf-pill-count { font: 600 10px/1 var(--sf-font); opacity: .6; }
-.sf-pill[aria-pressed="true"] .sf-pill-count { opacity: .75; }
+/* filter options = the CHIPS ATOM · Medium · intense, with a count (user 2026-11-06, App-login in sync: Medium in a sheet) */
 .sf-seeall {
   margin-top: 14px; padding: 0; height: 28px;
   display: inline-flex; align-items: center; gap: 2px;

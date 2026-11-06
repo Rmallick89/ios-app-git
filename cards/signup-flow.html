@@ -36,6 +36,113 @@
 <meta name="theme-color" content="#0C1731">
 <title>Sign up · Shine</title>
 <link rel="preload" href="fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="fonts/fonts.css"><script src="native.js"></script>
+<!-- ▼ COMPONENT · badges v1.0.0 · verbatim copy of App-components/atoms/badges/badges.css — do not edit here -->
+<style data-component="badges">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · BADGES  (app component · App-components · atoms/)          v1.0.0
+   A small, read-only status label — "Actively hiring", "Applied", "Expired", "+10" — on a card, a row or beside a
+   title. Design-system A.04 Badge (component-system.md), sized on the tags atom's scale (user, 2026-11-03: study the
+   tags' sizes, then build badges and pills): the tags run 40 · 36 · 32 · 28, the badges carry on below them in the
+   same 4-step — 24 · 20 · 16 — so a badge always reads smaller than a tag. Semantic tokens only, light and dark.
+
+     ( ● Actively hiring )    ( ✓ Applied )    ( Early applicant )    ( +22 ↑ )
+       [dot] label              [icon] label      label                  label [icon]
+       lg 24 · md 20 (default) · sm 16 tall · fully round · Label / md 12 bold (sm: Label / sm 10)
+
+   Classes
+     .badge                         base — always (md by default; neutral when no intent is given)
+     .badge--lg | --md | --sm       size
+     Intent (meaning)    .badge--brand · --positive · --negative · --notice · --neutral
+     Decorative (category only, never a status)   .badge--pink · --violet · --aqua · --cyan · --lime · --ey (electric yellow)
+     .badge-dot                     a dot before the label — it pulses: only for live states ("Actively hiring")
+     .badge-dot--static             the same dot, still (a quiet marker)
+     svg                            an icons-atom icon, before or after the label (currentColor, sized per size)
+   States: none. A badge is not a control — no hover, focus or press (A.04). To make a label tappable, use a chip / button.
+   The fill is the badge — no edge, no shadow.
+
+   ▶ BEFORE CHANGING IT: read README.md here and component-system.md A.04. Semantic tokens only.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.badge {
+  /* COLOUR — DESIGN-SYSTEM.md §2.2 (light) · intent */
+  --bdg-brand-bg: #EBF0FF;       --bdg-brand-fg: #0B3FCC;         /* surface.brand.brand-subtle · content.neutral.brand */
+  --bdg-pos-bg: #EAFAF0;         --bdg-pos-fg: #027A48;           /* surface.status.positive-subtle · content.status.positive */
+  --bdg-neg-bg: #FEF2F2;         --bdg-neg-fg: #B42318;           /* surface.status.negative-subtle · content.status.negative */
+  --bdg-notice-bg: #FFF4ED;      --bdg-notice-fg: #A35A04;        /* surface.status.notice-subtle · content.status.notice */
+  --bdg-neutral-bg: #EEF1F5;     --bdg-neutral-fg: #0D1117;       /* surface.neutral.muted · content.neutral.base */
+  /* · decorative (categories) */
+  --bdg-pink-bg: #FCE7F3;        --bdg-pink-fg: #BE185D;          /* surface.decorative.pink-subtle · content.decorative.pink */
+  --bdg-violet-bg: #F3EEFE;      --bdg-violet-fg: #6F46E0;        /* surface.decorative.violet-subtle · content.decorative.violet */
+  --bdg-aqua-bg: #CCFBEE;        --bdg-aqua-fg: #0F766A;          /* surface.decorative.aqua-subtle · content.decorative.aqua */
+  --bdg-cyan-bg: #CFFAFE;        --bdg-cyan-fg: #0E7490;          /* surface.decorative.cyan-subtle · content.decorative.cyan */
+  --bdg-lime-bg: #EBFFB0;        --bdg-lime-fg: #56770B;          /* surface.decorative.lime-subtle · content.decorative.lime */
+  --bdg-ey-bg: #FFFCC0;          --bdg-ey-fg: #5F5200;            /* surface.decorative.electric-yellow-subtle · content.decorative.electric-yellow */
+  /* SIZE · SPACE · TYPE — §2.1 / §2.3 / §2.4 (md) */
+  --bdg-h: 20px;                 /* unit/20 — a 12 label + 4 + 4 (A.04 md) */
+  --bdg-px: 8px;                 /* spacing.inset.md */
+  --bdg-gap: 4px;                /* spacing.inline.sm — dot / icon ↔ label */
+  --bdg-fs: 12px;                /* Label / md */
+  --bdg-ic: 12px;                /* size.icon.xs */
+  --bdg-dot: 6px;                /* unit/6 */
+  --bdg-halo: 3px;               /* elevation.halo.* (proposed, A.04) — the dot's ring, 18 % of the badge colour */
+  --bdg-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;   /* typeface.family.brand */
+  --_bg: var(--bdg-neutral-bg); --_fg: var(--bdg-neutral-fg);
+
+  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: var(--bdg-gap);
+  max-width: 100%; min-width: 0; height: var(--bdg-h); padding: 0 var(--bdg-px); border-radius: 1024px;   /* size.radius.full */
+  background: var(--_bg); color: var(--_fg);
+  font: 700 var(--bdg-fs)/var(--bdg-fs) var(--bdg-font); letter-spacing: 0;                              /* Label · bold */
+  white-space: nowrap; vertical-align: middle; cursor: default; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased;
+}
+.badge *, .badge *::before, .badge *::after { box-sizing: border-box; }
+.badge > svg { display: block; flex: none; width: var(--bdg-ic); height: var(--bdg-ic); color: currentColor; }
+
+/* sizes — on the tags' 4-step: tags 40 · 36 · 32 · 28 → badges 24 · 20 · 16 */
+.badge--lg { --bdg-h: 24px; --bdg-px: 10px; --bdg-fs: 12px; --bdg-ic: 14px; --bdg-dot: 6px; }   /* unit/24 · unit/10 · Label / md · size.icon.sm */
+.badge--md { --bdg-h: 20px; --bdg-px: 8px;  --bdg-fs: 12px; --bdg-ic: 12px; --bdg-dot: 6px; }   /* unit/20 · spacing.inset.md · Label / md · size.icon.xs */
+.badge--sm { --bdg-h: 16px; --bdg-px: 6px;  --bdg-fs: 10px; --bdg-ic: 10px; --bdg-dot: 4px; --bdg-halo: 2px; }   /* unit/16 · spacing.inset.sm · Label / sm · unit/10 (no icon token this small) · unit/4 */
+
+/* intent */
+.badge--brand    { --_bg: var(--bdg-brand-bg);   --_fg: var(--bdg-brand-fg); }
+.badge--positive { --_bg: var(--bdg-pos-bg);     --_fg: var(--bdg-pos-fg); }
+.badge--negative { --_bg: var(--bdg-neg-bg);     --_fg: var(--bdg-neg-fg); }
+.badge--notice   { --_bg: var(--bdg-notice-bg);  --_fg: var(--bdg-notice-fg); }
+.badge--neutral  { --_bg: var(--bdg-neutral-bg); --_fg: var(--bdg-neutral-fg); }
+/* decorative — categories only */
+.badge--pink   { --_bg: var(--bdg-pink-bg);   --_fg: var(--bdg-pink-fg); }
+.badge--violet { --_bg: var(--bdg-violet-bg); --_fg: var(--bdg-violet-fg); }
+.badge--aqua   { --_bg: var(--bdg-aqua-bg);   --_fg: var(--bdg-aqua-fg); }
+.badge--cyan   { --_bg: var(--bdg-cyan-bg);   --_fg: var(--bdg-cyan-fg); }
+.badge--lime   { --_bg: var(--bdg-lime-bg);   --_fg: var(--bdg-lime-fg); }
+.badge--ey     { --_bg: var(--bdg-ey-bg);     --_fg: var(--bdg-ey-fg); }
+
+/* the dot — the badge's own colour; it pulses (live states only), --static keeps it still */
+.badge-dot {
+  flex: none; width: var(--bdg-dot); height: var(--bdg-dot); border-radius: 1024px; background: currentColor;
+  box-shadow: 0 0 0 var(--bdg-halo) color-mix(in srgb, currentColor 18%, transparent);              /* elevation.halo.* (proposed) */
+  animation: bdg-pulse 2s ease-in-out infinite;
+}
+.badge-dot--static { animation: none; box-shadow: none; }
+@keyframes bdg-pulse { 50% { box-shadow: 0 0 0 0 transparent; } }
+
+/* the same tokens, dark column of §2.2 */
+[data-theme="dark"] .badge {
+  --bdg-brand-bg: #06184F;       --bdg-brand-fg: #7EA3FF;         /* brand-900 · brand-300 */
+  --bdg-pos-bg: #011A10;         --bdg-pos-fg: #34D77F;           /* green-950 · green-400 */
+  --bdg-neg-bg: #1C0404;         --bdg-neg-fg: #FCA5A0;           /* red-950 · red-300 */
+  --bdg-notice-bg: #211100;      --bdg-notice-fg: #FAB663;        /* amber-950 · amber-400 */
+  --bdg-neutral-bg: #161B22;     --bdg-neutral-fg: #F7F9FB;       /* cool-900 · cool-50 */
+  --bdg-pink-bg: #200410;        --bdg-pink-fg: #F498CB;          /* pink-950 · pink-300 */
+  --bdg-violet-bg: #130624;      --bdg-violet-fg: #B59CFC;        /* violet-950 · violet-300 */
+  --bdg-aqua-bg: #042F2C;        --bdg-aqua-fg: #5EEAC8;          /* aqua-950 · aqua-300 */
+  --bdg-cyan-bg: #083344;        --bdg-cyan-fg: #67E8F9;          /* cyan-950 · cyan-300 */
+  --bdg-lime-bg: #111900;        --bdg-lime-fg: #C4FF38;          /* lime-950 · lime-300 */
+  --bdg-ey-bg: #1D1900;          --bdg-ey-fg: #FFE419;            /* electric-yellow-950 · -400 */
+}
+@media (prefers-reduced-motion: reduce) { .badge-dot { animation: none; } }
+</style>
+<!-- ▲ COMPONENT · badges -->
+
 
 <style>
 
@@ -615,11 +722,7 @@
 .alert-text a{color:var(--content-neutral-base);font-weight:var(--typeface-weight-bold);text-decoration:underline;text-underline-offset:var(--unit-2)}
 .alert--negative{background:var(--surface-status-negative-subtle);border:var(--size-stroke-thin) solid var(--stroke-status-negative-soft);color:var(--content-status-negative)}
 .alert--neutral{background:var(--surface-neutral-muted);border:var(--size-stroke-thin) solid var(--stroke-neutral-base);color:var(--content-neutral-base)}
-.badge{display:inline-flex;align-items:center;gap:var(--spacing-inline-sm);padding:var(--unit-2) var(--spacing-inset-md);border-radius:var(--size-radius-full);
-  font-size:var(--type-label-sm-size);line-height:var(--unit-14);font-weight:var(--typeface-weight-bold);white-space:nowrap}
-.badge svg{width:var(--size-icon-xs);height:var(--size-icon-xs)}
-.badge--positive{background:var(--surface-status-positive-subtle);color:var(--content-status-positive)}
-.badge--notice{background:var(--surface-status-notice-subtle);color:var(--content-status-notice)}
+/* badges: the BADGES ATOM (App-components/atoms/badges, Small — user 2026-11-06, App-login in sync) */
 .toast{position:absolute;left:50%;bottom:calc(var(--spacing-section-lg) + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:300;
   display:inline-flex;align-items:center;gap:var(--spacing-inline-md);max-width:calc(100% - 2 * var(--spacing-layout-xs));
   padding:var(--spacing-inset-lg) var(--spacing-inset-xl);border-radius:var(--size-radius-full);background:var(--surface-inverse-base);color:var(--content-on-fill-dark-base);
@@ -1005,7 +1108,6 @@ html .su-or::before,html .su-or::after{min-width:var(--unit-40)}
 .su-parse-h{font-size:var(--type-display-sm-size);line-height:var(--type-display-sm-lh);letter-spacing:var(--type-display-sm-ls);font-weight:var(--typeface-weight-extrabold)}
 .su-parse-p{margin-top:var(--spacing-stack-xs);font-size:var(--type-body-md-size);line-height:var(--type-body-md-lh);font-weight:var(--typeface-weight-medium);color:var(--content-inverse-muted)}
 .su-parse-badge{margin-top:var(--spacing-stack-md)}
-.su-parse .badge--brand{background:var(--surface-brand-brand-subtle);color:var(--content-neutral-brand)}
 .su-steps{list-style:none;width:100%;margin-top:var(--spacing-section-lg);display:flex;flex-direction:column;gap:var(--spacing-stack-md);text-align:left}
 .su-step{position:relative;display:flex;align-items:center;gap:var(--spacing-inline-lg);height:var(--unit-48);padding:0 var(--spacing-inset-xl);border-radius:var(--size-radius-xl);
   background:rgba(255,255,255,.05);border:var(--size-stroke-thin) solid rgba(255,255,255,.10);
@@ -1114,8 +1216,6 @@ html .su-or::before,html .su-or::after{min-width:var(--unit-40)}
 .su-btn-neg{background:var(--surface-status-negative-intense);color:var(--content-on-fill-dark-base)}
 .su-btn-neg:active{background:var(--surface-status-negative-intense-hover)}
 .su-btn-neg svg{width:var(--size-icon-md);height:var(--size-icon-md)}
-.badge--negative{background:var(--surface-status-negative-subtle);color:var(--content-status-negative)}
-.badge--brand{background:var(--surface-brand-brand-subtle);color:var(--content-neutral-brand)}
 .su-del-b{margin-top:var(--spacing-stack-md)}
 #delMsg b{color:var(--content-neutral-base)}
 /* exit sheet: Why Shine on a light card */
@@ -1450,7 +1550,7 @@ html .su-land .su-or{margin:var(--unit-32) auto var(--unit-32)}
     </div>
 
     <div class="sw-or su-or">Don’t have a resume?</div>
-    <div class="su-manual"><button class="btn btn--secondary btn--lg btn--block" type="button" data-act="manual">Fill details manually<span class="badge badge--notice">8 mins</span></button></div>
+    <div class="su-manual"><button class="btn btn--secondary btn--lg btn--block" type="button" data-act="manual">Fill details manually<span class="badge badge--sm badge--notice">8 mins</span></button></div>
     <p class="pf-secure su-safe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>Your data is safe &amp; secured</p>
   </section>
 

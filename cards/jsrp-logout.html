@@ -19,6 +19,338 @@
 <meta name="theme-color" content="#0D1117" />
 <title>Product Manager jobs in India — Shine</title>
 <link rel="preload" href="fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="fonts/fonts.css"><script src="native.js"></script>
+<!-- ▼ COMPONENT · chips v1.1.0 · verbatim copy of App-components/atoms/chips/chips.css — do not edit here -->
+<style data-component="chips">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · CHIPS  (app component · App-components · atoms/)          v1.1.0
+   The label you TAP: pick one answer, switch filters on and off, run an action, open a list. Design-system A.06 Chip
+   (component-system.md), built from the chips already in App-login and App-logout (user, 2026-11-03: study where
+   chips are used, then build the component) and sized with the tags, badges and pills (one 4-step ladder):
+       chips 44 · 40 · 36 · 32   →   tags 40 · 36 · 32 · 28   →   badges 24 · 20 · 16   →   pills 24 · 20 · 16
+   A chip is a control, so it sits at the top of the ladder: every chip is a real <button>. Semantic tokens, light and dark.
+
+     ( Immediate Joiner )  ( ● Serving Notice Period )     choice — one of a set      [role=radio · aria-checked]
+     ( Full time ) ( Remote )                              filter — on / off           [aria-pressed]
+     ( Bengaluru 8,421 )  ( ███ 1 to 3 Years 12,480 )      filter · intense + count    [.chip--intense]
+     ( ◷ Use last: 4 Years )  ( in LinkedIn )              action — does something     [plain button]
+     ( 7 days ⌄ )                                          dropdown — opens a list     [aria-haspopup · aria-expanded]
+       lg 44 · md 40 (default) · sm 36 · xs 32 tall · fully round · Label / lg 14 semibold (xs: Label / md 12)
+
+   Classes
+     .chips                         a row of chips: wraps, 8 apart (.chips--scroll: one line that scrolls sideways)
+     .chip                          base — always a <button type="button"> (md by default)
+     .chip--lg | --md | --sm | --xs size
+     .chip--intense                 the selected look is solid (JSRP's sort & filter: scans across a dense panel)
+     .chip--icon                    (v1.1.0) an icon and no label — square, as tall as its size (a preview eye beside "Use last")
+     .chips--invalid / .chip--invalid   the group's answer is missing: unselected chips take the negative edge
+     svg (icons atom, or a brand logo)   a leading icon — sized per size
+     .chip-count                    a number after the label ("8,421") — Label / sm, faded
+     .chip-caret                    the dropdown's ic_caret-down-outline — turns up while [aria-expanded="true"]
+   Selected = [aria-checked="true"] (choice) · [aria-pressed="true"] (filter) · .chip--selected (static, guidelines)
+   States: hover (mouse only) · pressed · keyboard focus · selected · disabled (the disabled attribute) · invalid.
+   [data-state="hover|pressed|focus"] shows a state statically — guidelines and screenshots only.
+   Removable values (a skill with ×) are TAGS (atoms/tags), not chips — one component per use case.
+   Behaviour (one choice · on / off · keys · events): chips.js — ShineChips.
+
+   ▶ BEFORE CHANGING IT: read README.md here and component-system.md A.06. Semantic tokens only.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }                               /* spacing.inline.md */
+.chips--scroll { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+                 margin: -4px 0; padding: 4px 0; }                                                 /* room for the focus ring */
+.chips--scroll::-webkit-scrollbar { display: none; }
+.chips--scroll > .chip { flex: none; }
+
+.chip {
+  /* COLOUR — DESIGN-SYSTEM.md §2.2 (light) */
+  --chip-bg: #FFFFFF;                       /* surface.neutral.raised */
+  --chip-edge: #E4E7EC;                     /* stroke.neutral.base */
+  --chip-fg: #344054;                       /* content.neutral.muted */
+  --chip-ink: #0D1117;                      /* content.neutral.base — hover edge and label */
+  --chip-press: #EEF1F5;                    /* surface.neutral.muted — pressed */
+  --chip-on-bg: #EBF0FF;                    /* surface.neutral-state.selected — selected */
+  --chip-on-fg: #0B3FCC;                    /* content.neutral.brand */
+  --chip-on-edge: #1A56FF;                  /* stroke.brand */
+  --chip-int-bg: #0D1117;                   /* surface.inverse.base — selected · intense */
+  --chip-int-fg: #FFFFFF;                   /* content.on-fill-dark.base */
+  --chip-focus: #1A56FF;                    /* stroke.neutral.focus */
+  --chip-ring: rgba(26, 86, 255, .10);      /* elevation.focus.default — 4 px brand 10 % */
+  --chip-dis-bg: #EEF1F5;                   /* surface.neutral.muted */
+  --chip-dis-edge: rgba(13, 17, 23, .08);   /* stroke.neutral.disabled (black-25) */
+  --chip-dis-fg: rgba(13, 17, 23, .36);     /* content.neutral.disabled (black-75) */
+  --chip-neg: #B42318;                      /* stroke.status.negative — a missing answer */
+  /* SIZE · SPACE · TYPE — §2.1 / §2.3 / §2.4 (md) */
+  --chip-h: 40px;                           /* size.control.sm */
+  --chip-px: 16px;                          /* spacing.inset.xl */
+  --chip-gap: 8px;                          /* spacing.inline.md — icon ↔ label ↔ count / caret */
+  --chip-fs: 14px;                          /* Label / lg */
+  --chip-ic: 16px;                          /* size.icon.md */
+  --chip-edge-w: 1px;                       /* size.stroke.thin */
+  --chip-on-w: 1.5px;                       /* size.stroke.default — the selected / focused edge */
+  --chip-ring-w: 4px;                       /* elevation.focus.* spread */
+  --chip-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;   /* typeface.family.brand */
+  --chip-dur: 150ms;                        /* motion — proposed */
+  --_bg: var(--chip-bg); --_edge: var(--chip-edge); --_ew: var(--chip-edge-w); --_fg: var(--chip-fg); --_ring: 0 0 0 0 transparent;
+
+  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: var(--chip-gap);
+  max-width: 100%; min-width: 0; height: var(--chip-h); margin: 0; padding: 0 var(--chip-px);
+  border: 0; border-radius: 1024px;                                                                /* size.radius.full */
+  background: var(--_bg); color: var(--_fg); box-shadow: inset 0 0 0 var(--_ew) var(--_edge), var(--_ring);   /* the edge is an inset shadow: exact 1 / 1.5 px on Android */
+  font: 600 var(--chip-fs)/var(--chip-fs) var(--chip-font); letter-spacing: 0;                        /* Label · semibold */
+  white-space: nowrap; text-align: left; vertical-align: middle; cursor: pointer; user-select: none; -webkit-user-select: none;
+  -webkit-appearance: none; appearance: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-font-smoothing: antialiased;
+  transition: background-color var(--chip-dur), box-shadow var(--chip-dur), color var(--chip-dur), transform var(--chip-dur);
+}
+.chip *, .chip *::before, .chip *::after { box-sizing: border-box; }
+.chip > svg { display: block; flex: none; width: var(--chip-ic); height: var(--chip-ic); }
+.chip-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; line-height: calc(var(--chip-fs) + 6px); }   /* one line, … when it doesn't fit */
+.chip-count { flex: none; font: 600 10px/10px var(--chip-font); opacity: .6; font-variant-numeric: tabular-nums; }   /* Label / sm · semibold */
+.chip-caret { transition: transform var(--chip-dur); }
+.chip[aria-expanded="true"] .chip-caret { transform: rotate(180deg); }
+
+/* sizes — one step above the tags (a chip is a control): 44 · 40 · 36 · 32 */
+.chip--lg { --chip-h: 44px; --chip-px: 20px; --chip-gap: 8px; --chip-fs: 14px; --chip-ic: 16px; }   /* size.control.md · inset.xl (desktop) · Label / lg · icon.md */
+.chip--md { --chip-h: 40px; --chip-px: 16px; --chip-gap: 8px; --chip-fs: 14px; --chip-ic: 16px; }   /* size.control.sm · inset.xl · Label / lg · icon.md */
+.chip--sm { --chip-h: 36px; --chip-px: 14px; --chip-gap: 6px; --chip-fs: 14px; --chip-ic: 16px; }   /* unit/36 · inset.lg (desktop) · inline.sm (desktop) · Label / lg · icon.md */
+.chip--xs { --chip-h: 32px; --chip-px: 12px; --chip-gap: 4px; --chip-fs: 12px; --chip-ic: 14px; }   /* unit/32 · inset.lg · inline.sm · Label / md · icon.sm */
+/* icon only (v1.1.0) — square: the size's height both ways, no side padding; give it an aria-label */
+.chip--icon { flex: none; width: var(--chip-h); padding: 0; }
+
+/* hover — mouse / trackpad only: the edge and label darken */
+@media (hover: hover) {
+  .chip:not(:disabled):not([aria-checked="true"]):not([aria-pressed="true"]):not(.chip--selected):hover { --_edge: var(--chip-ink); --_fg: var(--chip-ink); }
+}
+.chip[data-state="hover"] { --_edge: var(--chip-ink); --_fg: var(--chip-ink); }
+/* pressed — the finger is on it */
+.chip:not(:disabled):active, .chip[data-state="pressed"] { --_bg: var(--chip-press); transform: scale(.97); }
+/* selected — choice (aria-checked) · filter (aria-pressed): brand tint, brand label, 1.5 brand edge */
+.chip[aria-checked="true"], .chip[aria-pressed="true"], .chip.chip--selected { --_bg: var(--chip-on-bg); --_fg: var(--chip-on-fg); --_edge: var(--chip-on-edge); --_ew: var(--chip-on-w); }
+.chip[aria-checked="true"]:active, .chip[aria-pressed="true"]:active { --_bg: var(--chip-on-bg); }
+/* selected · intense — solid (dense filter panels) */
+.chip--intense[aria-checked="true"], .chip--intense[aria-pressed="true"], .chip--intense.chip--selected { --_bg: var(--chip-int-bg); --_fg: var(--chip-int-fg); --_edge: var(--chip-int-bg); --_ew: var(--chip-edge-w); }
+.chip[aria-checked="true"] .chip-count, .chip[aria-pressed="true"] .chip-count, .chip.chip--selected .chip-count { opacity: .75; }
+/* keyboard focus — 1.5 focus edge + the 4 px ring (on top of whatever state it is in) */
+.chip:focus { outline: none; }
+.chip:focus-visible, .chip[data-state="focus"] { --_edge: var(--chip-focus); --_ew: var(--chip-on-w); --_ring: 0 0 0 var(--chip-ring-w) var(--chip-ring); }
+/* a missing answer (the group is required) — the unselected chips take the negative edge */
+/* (v1.1.0) also when the chips sit in a field-base fieldset marked invalid (.field--invalid — the field's own message shows under them) */
+.chips--invalid .chip:not([aria-checked="true"]):not([aria-pressed="true"]):not(:focus-visible), .chip--invalid:not(:focus-visible),
+.field--invalid .chips .chip:not([aria-checked="true"]):not([aria-pressed="true"]):not(:focus-visible) { --_edge: var(--chip-neg); }
+/* disabled */
+.chip:disabled, .chip[aria-disabled="true"] { --_bg: var(--chip-dis-bg); --_edge: var(--chip-dis-edge); --_ew: var(--chip-edge-w); --_fg: var(--chip-dis-fg); --_ring: 0 0 0 0 transparent; cursor: default; transform: none; }
+
+/* the same tokens, dark column of §2.2 */
+[data-theme="dark"] .chip {
+  --chip-bg: #232A38;                       /* surface.neutral.raised · cool-800 */
+  --chip-edge: #4A5260;                     /* stroke.neutral.base · cool-600 */
+  --chip-fg: #C8CED7;                       /* content.neutral.muted · cool-300 */
+  --chip-ink: #F7F9FB;                      /* content.neutral.base · cool-50 */
+  --chip-press: #161B22;                    /* surface.neutral.muted · cool-900 */
+  --chip-on-bg: #082478;                    /* surface.neutral-state.selected · brand-800 */
+  --chip-on-fg: #7EA3FF;                    /* content.neutral.brand · brand-300 */
+  --chip-on-edge: #7EA3FF;                  /* stroke.brand · brand-300 */
+  --chip-int-bg: #F7F9FB;                   /* surface.inverse.base · cool-50 */
+  --chip-int-fg: #0D1117;                   /* content.inverse.base · black */
+  --chip-focus: #7EA3FF;                    /* stroke.neutral.focus · brand-300 */
+  --chip-ring: rgba(126, 163, 255, .24);    /* elevation.focus.default (dark α) */
+  --chip-dis-bg: #161B22;                   /* surface.neutral.muted · cool-900 */
+  --chip-dis-edge: rgba(255, 255, 255, .08);/* stroke.neutral.disabled · white-25 */
+  --chip-dis-fg: rgba(255, 255, 255, .36);  /* content.neutral.disabled · white-75 */
+  --chip-neg: #F87171;                      /* stroke.status.negative · red-400 */
+}
+@media (prefers-reduced-motion: reduce) { .chip, .chip-caret { transition: none; } .chip:active { transform: none; } }
+</style>
+<!-- ▲ COMPONENT · chips -->
+<!-- ▼ COMPONENT · badges v1.0.0 · verbatim copy of App-components/atoms/badges/badges.css — do not edit here -->
+<style data-component="badges">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · BADGES  (app component · App-components · atoms/)          v1.0.0
+   A small, read-only status label — "Actively hiring", "Applied", "Expired", "+10" — on a card, a row or beside a
+   title. Design-system A.04 Badge (component-system.md), sized on the tags atom's scale (user, 2026-11-03: study the
+   tags' sizes, then build badges and pills): the tags run 40 · 36 · 32 · 28, the badges carry on below them in the
+   same 4-step — 24 · 20 · 16 — so a badge always reads smaller than a tag. Semantic tokens only, light and dark.
+
+     ( ● Actively hiring )    ( ✓ Applied )    ( Early applicant )    ( +22 ↑ )
+       [dot] label              [icon] label      label                  label [icon]
+       lg 24 · md 20 (default) · sm 16 tall · fully round · Label / md 12 bold (sm: Label / sm 10)
+
+   Classes
+     .badge                         base — always (md by default; neutral when no intent is given)
+     .badge--lg | --md | --sm       size
+     Intent (meaning)    .badge--brand · --positive · --negative · --notice · --neutral
+     Decorative (category only, never a status)   .badge--pink · --violet · --aqua · --cyan · --lime · --ey (electric yellow)
+     .badge-dot                     a dot before the label — it pulses: only for live states ("Actively hiring")
+     .badge-dot--static             the same dot, still (a quiet marker)
+     svg                            an icons-atom icon, before or after the label (currentColor, sized per size)
+   States: none. A badge is not a control — no hover, focus or press (A.04). To make a label tappable, use a chip / button.
+   The fill is the badge — no edge, no shadow.
+
+   ▶ BEFORE CHANGING IT: read README.md here and component-system.md A.04. Semantic tokens only.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.badge {
+  /* COLOUR — DESIGN-SYSTEM.md §2.2 (light) · intent */
+  --bdg-brand-bg: #EBF0FF;       --bdg-brand-fg: #0B3FCC;         /* surface.brand.brand-subtle · content.neutral.brand */
+  --bdg-pos-bg: #EAFAF0;         --bdg-pos-fg: #027A48;           /* surface.status.positive-subtle · content.status.positive */
+  --bdg-neg-bg: #FEF2F2;         --bdg-neg-fg: #B42318;           /* surface.status.negative-subtle · content.status.negative */
+  --bdg-notice-bg: #FFF4ED;      --bdg-notice-fg: #A35A04;        /* surface.status.notice-subtle · content.status.notice */
+  --bdg-neutral-bg: #EEF1F5;     --bdg-neutral-fg: #0D1117;       /* surface.neutral.muted · content.neutral.base */
+  /* · decorative (categories) */
+  --bdg-pink-bg: #FCE7F3;        --bdg-pink-fg: #BE185D;          /* surface.decorative.pink-subtle · content.decorative.pink */
+  --bdg-violet-bg: #F3EEFE;      --bdg-violet-fg: #6F46E0;        /* surface.decorative.violet-subtle · content.decorative.violet */
+  --bdg-aqua-bg: #CCFBEE;        --bdg-aqua-fg: #0F766A;          /* surface.decorative.aqua-subtle · content.decorative.aqua */
+  --bdg-cyan-bg: #CFFAFE;        --bdg-cyan-fg: #0E7490;          /* surface.decorative.cyan-subtle · content.decorative.cyan */
+  --bdg-lime-bg: #EBFFB0;        --bdg-lime-fg: #56770B;          /* surface.decorative.lime-subtle · content.decorative.lime */
+  --bdg-ey-bg: #FFFCC0;          --bdg-ey-fg: #5F5200;            /* surface.decorative.electric-yellow-subtle · content.decorative.electric-yellow */
+  /* SIZE · SPACE · TYPE — §2.1 / §2.3 / §2.4 (md) */
+  --bdg-h: 20px;                 /* unit/20 — a 12 label + 4 + 4 (A.04 md) */
+  --bdg-px: 8px;                 /* spacing.inset.md */
+  --bdg-gap: 4px;                /* spacing.inline.sm — dot / icon ↔ label */
+  --bdg-fs: 12px;                /* Label / md */
+  --bdg-ic: 12px;                /* size.icon.xs */
+  --bdg-dot: 6px;                /* unit/6 */
+  --bdg-halo: 3px;               /* elevation.halo.* (proposed, A.04) — the dot's ring, 18 % of the badge colour */
+  --bdg-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;   /* typeface.family.brand */
+  --_bg: var(--bdg-neutral-bg); --_fg: var(--bdg-neutral-fg);
+
+  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: var(--bdg-gap);
+  max-width: 100%; min-width: 0; height: var(--bdg-h); padding: 0 var(--bdg-px); border-radius: 1024px;   /* size.radius.full */
+  background: var(--_bg); color: var(--_fg);
+  font: 700 var(--bdg-fs)/var(--bdg-fs) var(--bdg-font); letter-spacing: 0;                              /* Label · bold */
+  white-space: nowrap; vertical-align: middle; cursor: default; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased;
+}
+.badge *, .badge *::before, .badge *::after { box-sizing: border-box; }
+.badge > svg { display: block; flex: none; width: var(--bdg-ic); height: var(--bdg-ic); color: currentColor; }
+
+/* sizes — on the tags' 4-step: tags 40 · 36 · 32 · 28 → badges 24 · 20 · 16 */
+.badge--lg { --bdg-h: 24px; --bdg-px: 10px; --bdg-fs: 12px; --bdg-ic: 14px; --bdg-dot: 6px; }   /* unit/24 · unit/10 · Label / md · size.icon.sm */
+.badge--md { --bdg-h: 20px; --bdg-px: 8px;  --bdg-fs: 12px; --bdg-ic: 12px; --bdg-dot: 6px; }   /* unit/20 · spacing.inset.md · Label / md · size.icon.xs */
+.badge--sm { --bdg-h: 16px; --bdg-px: 6px;  --bdg-fs: 10px; --bdg-ic: 10px; --bdg-dot: 4px; --bdg-halo: 2px; }   /* unit/16 · spacing.inset.sm · Label / sm · unit/10 (no icon token this small) · unit/4 */
+
+/* intent */
+.badge--brand    { --_bg: var(--bdg-brand-bg);   --_fg: var(--bdg-brand-fg); }
+.badge--positive { --_bg: var(--bdg-pos-bg);     --_fg: var(--bdg-pos-fg); }
+.badge--negative { --_bg: var(--bdg-neg-bg);     --_fg: var(--bdg-neg-fg); }
+.badge--notice   { --_bg: var(--bdg-notice-bg);  --_fg: var(--bdg-notice-fg); }
+.badge--neutral  { --_bg: var(--bdg-neutral-bg); --_fg: var(--bdg-neutral-fg); }
+/* decorative — categories only */
+.badge--pink   { --_bg: var(--bdg-pink-bg);   --_fg: var(--bdg-pink-fg); }
+.badge--violet { --_bg: var(--bdg-violet-bg); --_fg: var(--bdg-violet-fg); }
+.badge--aqua   { --_bg: var(--bdg-aqua-bg);   --_fg: var(--bdg-aqua-fg); }
+.badge--cyan   { --_bg: var(--bdg-cyan-bg);   --_fg: var(--bdg-cyan-fg); }
+.badge--lime   { --_bg: var(--bdg-lime-bg);   --_fg: var(--bdg-lime-fg); }
+.badge--ey     { --_bg: var(--bdg-ey-bg);     --_fg: var(--bdg-ey-fg); }
+
+/* the dot — the badge's own colour; it pulses (live states only), --static keeps it still */
+.badge-dot {
+  flex: none; width: var(--bdg-dot); height: var(--bdg-dot); border-radius: 1024px; background: currentColor;
+  box-shadow: 0 0 0 var(--bdg-halo) color-mix(in srgb, currentColor 18%, transparent);              /* elevation.halo.* (proposed) */
+  animation: bdg-pulse 2s ease-in-out infinite;
+}
+.badge-dot--static { animation: none; box-shadow: none; }
+@keyframes bdg-pulse { 50% { box-shadow: 0 0 0 0 transparent; } }
+
+/* the same tokens, dark column of §2.2 */
+[data-theme="dark"] .badge {
+  --bdg-brand-bg: #06184F;       --bdg-brand-fg: #7EA3FF;         /* brand-900 · brand-300 */
+  --bdg-pos-bg: #011A10;         --bdg-pos-fg: #34D77F;           /* green-950 · green-400 */
+  --bdg-neg-bg: #1C0404;         --bdg-neg-fg: #FCA5A0;           /* red-950 · red-300 */
+  --bdg-notice-bg: #211100;      --bdg-notice-fg: #FAB663;        /* amber-950 · amber-400 */
+  --bdg-neutral-bg: #161B22;     --bdg-neutral-fg: #F7F9FB;       /* cool-900 · cool-50 */
+  --bdg-pink-bg: #200410;        --bdg-pink-fg: #F498CB;          /* pink-950 · pink-300 */
+  --bdg-violet-bg: #130624;      --bdg-violet-fg: #B59CFC;        /* violet-950 · violet-300 */
+  --bdg-aqua-bg: #042F2C;        --bdg-aqua-fg: #5EEAC8;          /* aqua-950 · aqua-300 */
+  --bdg-cyan-bg: #083344;        --bdg-cyan-fg: #67E8F9;          /* cyan-950 · cyan-300 */
+  --bdg-lime-bg: #111900;        --bdg-lime-fg: #C4FF38;          /* lime-950 · lime-300 */
+  --bdg-ey-bg: #1D1900;          --bdg-ey-fg: #FFE419;            /* electric-yellow-950 · -400 */
+}
+@media (prefers-reduced-motion: reduce) { .badge-dot { animation: none; } }
+</style>
+<!-- ▲ COMPONENT · badges -->
+<!-- ▼ COMPONENT · pills v1.0.0 · verbatim copy of App-components/atoms/pills/pills.css — do not edit here -->
+<style data-component="pills">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · PILLS  (app component · App-components · atoms/)          v1.0.0
+   A count or a dot that sits ON another element — "3" on the notifications bell, "12" on Filters, a dot on the
+   Docket tab. Design-system A.03 Pill (component-system.md), sized on the tags atom's scale (user, 2026-11-03):
+   tags 40 · 36 · 32 · 28 → badges 24 · 20 · 16 → pills 24 · 20 · 16 and a dot 12 · 10 · 8. Never a control
+   itself: the element it sits on is the button. Semantic tokens only, light and dark.
+
+        ┌───────┐(3)        ┌───────┐(12)       ┌───────┐•
+        │  🔔   │           │  ⚙    │           │  ✉    │         count · 99+ at most · dot (unread, no number)
+        └───────┘           └───────┘           └───────┘
+       count lg 24 · md 20 (default) · sm 16 tall, at least as wide as tall · dot lg 12 · md 10 · sm 8
+       a 1.5 ring in the host's surface keeps it legible on any background (--pill-halo)
+
+   Classes
+     .pill                          base — always: a count (md by default), brand by default
+     .pill--lg | --md | --sm        size
+     .pill--dot                     a dot, no number (unread)
+     Intent    (brand, default) · .pill--negative (urgent: missed, failed) · .pill--positive · .pill--neutral
+     .pill-wrap                     the host's wrapper: places the pill on the host's top-right corner
+     .pill-wrap--round              the host is round (an avatar, a disc): the pill sits on the circle, not the box corner
+     --pill-halo                    the ring's colour — set it to the surface the host sits on (default surface.neutral.raised)
+   States: none — the pill is aria-hidden; the host's aria-label carries the count ("Notifications, 3 unread").
+
+   ▶ BEFORE CHANGING IT: read README.md here and component-system.md A.03. Semantic tokens only.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.pill {
+  /* COLOUR — DESIGN-SYSTEM.md §2.2 (light) */
+  --pill-brand: #1A56FF;         /* surface.brand.brand-intense */
+  --pill-neg: #B42318;           /* surface.status.negative-intense (red/600) */
+  --pill-pos: #027A48;           /* surface.status.positive-intense (green/700) */
+  --pill-neutral: #0D1117;       /* content.neutral.base (A.03 neutral) */
+  --pill-fg: #FFFFFF;            /* content.on-fill-dark.base — the number */
+  --pill-neutral-fg: #FFFFFF;    /* content.on-fill-dark.base on the black neutral */
+  --pill-halo: #FFFFFF;          /* surface.neutral.raised — the ring; set it to the host's surface */
+  /* SIZE · TYPE — §2.1 / §2.4 (md) */
+  --pill-h: 20px;                /* unit/20 */
+  --pill-px: 6px;                /* unit/6 — room either side of 2 digits */
+  --pill-fs: 10px;               /* Label / sm */
+  --pill-dot: 10px;              /* unit/10 */
+  --pill-ring: 1.5px;            /* size.stroke.default */
+  --pill-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;   /* typeface.family.brand */
+  --_bg: var(--pill-brand); --_fg: var(--pill-fg);
+
+  box-sizing: border-box; display: inline-grid; place-items: center;
+  min-width: var(--pill-h); height: var(--pill-h); padding: 0 var(--pill-px); border-radius: 1024px;   /* size.radius.full */
+  background: var(--_bg); color: var(--_fg); box-shadow: 0 0 0 var(--pill-ring) var(--pill-halo);       /* the ring is outside: the pill keeps its size */
+  font: 700 var(--pill-fs)/var(--pill-fs) var(--pill-font); letter-spacing: 0; font-variant-numeric: tabular-nums;   /* Label · bold */
+  white-space: nowrap; pointer-events: none; user-select: none; -webkit-user-select: none; -webkit-font-smoothing: antialiased;
+}
+/* sizes — counts 24 · 20 · 16 (the badges' heights), dots 12 · 10 · 8 */
+.pill--lg { --pill-h: 24px; --pill-px: 7px; --pill-fs: 12px; --pill-dot: 12px; }   /* unit/24 · Label / md · unit/12 */
+.pill--md { --pill-h: 20px; --pill-px: 6px; --pill-fs: 10px; --pill-dot: 10px; }   /* unit/20 · Label / sm · unit/10 */
+.pill--sm { --pill-h: 16px; --pill-px: 4px; --pill-fs: 10px; --pill-dot: 8px; --pill-ring: 1px; }   /* unit/16 · Label / sm · unit/8 · size.stroke.thin */
+/* the dot — no number */
+.pill--dot { min-width: 0; width: var(--pill-dot); height: var(--pill-dot); padding: 0; font-size: 0; }
+/* intent */
+.pill--negative { --_bg: var(--pill-neg); }
+.pill--positive { --_bg: var(--pill-pos); }
+.pill--neutral  { --_bg: var(--pill-neutral); --_fg: var(--pill-neutral-fg); }
+
+/* placement — on the host's top-right corner: a count's centre sits on the corner (A.03: −6 at md), a dot sits just
+   inside it (4 from the top and the right) */
+.pill-wrap { position: relative; display: inline-flex; vertical-align: middle; }
+.pill-wrap > .pill { position: absolute; z-index: 1; top: calc(var(--pill-h) / -2 + 4px); right: calc(var(--pill-h) / -2 + 4px); }   /* md: −6 */
+.pill-wrap > .pill--dot { top: 4px; right: 4px; }                                                          /* unit/4 */
+/* a round host (avatar, disc): on the circle at 45°, not on the box's corner */
+.pill-wrap--round > .pill { top: calc(14.6% - var(--pill-h) / 2); right: calc(14.6% - var(--pill-h) / 2); }
+.pill-wrap--round > .pill--dot { top: calc(14.6% - var(--pill-dot) / 2); right: calc(14.6% - var(--pill-dot) / 2); }
+
+/* the same tokens, dark column of §2.2 */
+[data-theme="dark"] .pill {
+  --pill-brand: #1A56FF;         /* brand-500 (same both themes) */
+  --pill-neg: #B42318;           /* red-600 */
+  --pill-pos: #027A48;           /* green-700 */
+  --pill-neutral: #F7F9FB;       /* content.neutral.base · cool-50 */
+  --pill-neutral-fg: #0D1117;    /* content.on-fill-light.base — black on the light neutral */
+  --pill-halo: #232A38;          /* surface.neutral.raised · cool-800 */
+}
+</style>
+<!-- ▲ COMPONENT · pills -->
+
 
 <style>
 :root {
@@ -613,23 +945,8 @@ body.on-it { background:#0A0E14; }
   }
 .nudge-close svg { width: var(--size-icon-md); height: var(--size-icon-md); }
 .nudge-body { padding: 40px 32px 32px; }
-.nudge-eyebrow {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 12px;
-    background: rgba(26, 86, 255, 0.08);
-    color: var(--content-brand);
-    border-radius: var(--radius-full);
-    font: var(--type-label-sm-bold);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-  }
-.nudge-eyebrow .pulse {
-    width: 6px; height: 6px;
-    border-radius: var(--radius-full);
-    background: var(--content-brand);
-    animation: nudgePulse 1.6s ease-out infinite;
-  }
+.nudge-eyebrow { display: flex; margin-bottom: 20px; }   /* the BADGES ATOM Small · brand · still dot (user 2026-11-06, as App-login's sheet eyebrows) */
+.nudge-eyebrow > .badge { letter-spacing: 0.06em; text-transform: uppercase; }
 @keyframes nudgePulse {
     0%   { box-shadow: 0 0 0 0 rgba(26, 86, 255, 0.6); }
     70%  { box-shadow: 0 0 0 8px rgba(26, 86, 255, 0); }
@@ -689,32 +1006,7 @@ body.on-it { background:#0A0E14; }
     color: var(--content-muted);
     margin: 12px 0 0;
   }
-.share-channels {
-    display: flex; flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 22px;
-  }
-.share-channel {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 10px 14px;
-    background: var(--surface-raised);
-    border: var(--stroke-thin) solid var(--stroke-muted);
-    border-radius: var(--radius-full);
-    color: var(--content-base);
-    font: 700 13px/1 var(--font-brand);
-    letter-spacing: -0.005em;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: border-color 140ms ease, background 140ms ease, transform 120ms ease;
-    font-family: var(--font-brand);
-  }
-.share-channel:hover {
-    border-color: var(--content-base);
-    background: var(--surface-muted);
-    transform: translateY(-1px);
-  }
-.share-channel:active { transform: scale(0.98); }
-.share-channel svg { width: 15px; height: 15px; }
+.share-channels { margin-top: 22px; }   /* the CHIPS ATOM · Medium · action with the network's logo (user 2026-11-06, as App-login's share sheet) */
 .share-channel--linkedin svg { color: #0A66C2; }
 .share-channel--twitter  svg { color: #0F1419; }
 .share-channel--facebook svg { color: #1877F2; }
@@ -988,13 +1280,7 @@ body { background: var(--surface-base, var(--surface-base)); }
       margin-bottom: var(--spacing-stack-lg);
       flex-wrap: wrap;
     }
-.jsrp-m-jc-chip {
-      font-family: var(--font-brand); font-size: 10px; font-weight: 700;
-      padding: 4px 10px; border-radius: var(--radius-full);
-      line-height: 1.4; white-space: nowrap; letter-spacing: 0;
-    }
-.jsrp-m-jc-chip.actively { background: var(--surface-brand-subtle); color: var(--content-brand); }
-.jsrp-m-jc-chip.early { background: var(--surface-pink-subtle, var(--surface-pink-subtle)); color: var(--content-pink, var(--content-pink)); }
+/* status = the BADGES ATOM Small (user 2026-11-06, App-login in sync): Actively hiring brand + pulsing dot · early pink */
 .jsrp-m-jc-meta {
       display: flex; flex-direction: column;
       
@@ -1612,26 +1898,26 @@ body { background: var(--surface-base, var(--surface-base)); }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>
     <div class="nudge-body">
-      <span class="nudge-eyebrow"><span class="pulse"></span> Share this job</span>
+      <span class="nudge-eyebrow"><span class="badge badge--sm badge--brand"><span class="badge-dot badge-dot--static" aria-hidden="true"></span>Share this job</span></span>
       <h2 class="nudge-h" id="nudgeShareSheetH">Send this role to a friend.</h2>
-      <div class="share-channels">
-        <button class="share-channel share-channel--linkedin" data-share="linkedin" type="button" aria-label="Share on LinkedIn">
+      <div class="chips share-channels">
+        <button class="chip share-channel share-channel--linkedin" data-share="linkedin" type="button" aria-label="Share on LinkedIn">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5V9h3v10zm-1.5-11.3a1.75 1.75 0 110-3.5 1.75 1.75 0 010 3.5zM19 19h-3v-5.5c0-1.4-.5-2.3-1.7-2.3-1 0-1.5.6-1.7 1.2-.1.2-.1.5-.1.8V19h-3V9h3v1.3A3 3 0 0115 8.8c2 0 3.4 1.3 3.4 4.1V19z"/></svg>
           LinkedIn
         </button>
-        <button class="share-channel share-channel--twitter" data-share="twitter" type="button" aria-label="Share on X">
+        <button class="chip share-channel share-channel--twitter" data-share="twitter" type="button" aria-label="Share on X">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 3H22l-7.3 8.4L23 21h-6.7l-5.2-6.8L5 21H2l7.8-9L1.8 3h6.9l4.7 6.2L18.9 3zm-2.4 16h1.9L7.6 5H5.6l10.9 14z"/></svg>
           X
         </button>
-        <button class="share-channel share-channel--facebook" data-share="facebook" type="button" aria-label="Share on Facebook">
+        <button class="chip share-channel share-channel--facebook" data-share="facebook" type="button" aria-label="Share on Facebook">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 10-11.6 9.9v-7h-2.5V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.3v7A10 10 0 0022 12z"/></svg>
           Facebook
         </button>
-        <button class="share-channel share-channel--email" data-share="email" type="button" aria-label="Share on Email">
+        <button class="chip share-channel share-channel--email" data-share="email" type="button" aria-label="Share on Email">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
           Email
         </button>
-        <button class="share-channel share-channel--whatsapp" data-share="whatsapp" type="button" aria-label="Share on WhatsApp">
+        <button class="chip share-channel share-channel--whatsapp" data-share="whatsapp" type="button" aria-label="Share on WhatsApp">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 3.5A11.94 11.94 0 0012 0C5.4 0 .1 5.3.1 11.9c0 2.1.6 4.1 1.6 5.9L0 24l6.4-1.7c1.7 1 3.6 1.5 5.6 1.5 6.6 0 11.9-5.3 11.9-11.9 0-3.2-1.2-6.2-3.4-8.4zM12 21.7c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.8 1 1-3.7-.2-.4c-1-1.6-1.6-3.4-1.6-5.2 0-5.5 4.5-9.9 10-9.9 2.7 0 5.2 1 7 2.9 1.9 1.9 2.9 4.4 2.9 7 .1 5.5-4.4 9.9-9.8 9.9zm5.4-7.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.4-1.5-.9-.8-1.5-1.8-1.6-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5s-.7-1.7-.9-2.4c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.4 1.1 2.8 1.2 3c.1.2 2.1 3.2 5 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4 0-.1-.3-.2-.6-.3z"/></svg>
           WhatsApp
         </button>
@@ -2122,14 +2408,14 @@ body { background: var(--surface-base, var(--surface-base)); }
         // Status chips → Badge atoms (with pulsing dot for "Actively hiring").
         var chips = (j.chips || []).map(function(c){
           if (c.cls === 'actively') {
-            return '<span class="jsrp-m-jc-chip ' + c.cls + ' badge badge--brand">' +
-                     '<span class="badge-dot" aria-hidden="true"></span> ' + c.text +
+            return '<span class="jsrp-m-jc-chip ' + c.cls + ' badge badge--sm badge--brand">' +
+                     '<span class="badge-dot" aria-hidden="true"></span>' + c.text +
                    '</span>';
           }
           if (c.cls === 'early') {
-            return '<span class="jsrp-m-jc-chip ' + c.cls + ' badge badge--pink">' + c.text + '</span>';
+            return '<span class="jsrp-m-jc-chip ' + c.cls + ' badge badge--sm badge--pink">' + c.text + '</span>';
           }
-          return '<span class="jsrp-m-jc-chip ' + c.cls + ' badge">' + c.text + '</span>';
+          return '<span class="jsrp-m-jc-chip ' + c.cls + ' badge badge--sm badge--neutral">' + c.text + '</span>';
         }).join('');
 
         var payNum = (function(){ var m = (j.sal||'').match(/[\d.]+/); return m ? parseFloat(m[0]) : 0; })();

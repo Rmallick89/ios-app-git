@@ -89,9 +89,9 @@
     bar.setAttribute('role', 'toolbar');
     bar.setAttribute('aria-label', L.bar);
     bar.innerHTML =
-      '<button class="sf-bar-btn sf-bar-btn--sort" type="button" id="' + P + '-sort-btn" aria-haspopup="dialog">' + I.sort + '<span>' + esc(L.sort) + '</span><span class="sf-dot" aria-hidden="true"></span></button>' +
+      '<button class="sf-bar-btn sf-bar-btn--sort" type="button" id="' + P + '-sort-btn" aria-haspopup="dialog">' + I.sort + '<span>' + esc(L.sort) + '</span><span class="pill pill--sm pill--dot pill--neutral sf-dot" aria-hidden="true"></span></button>' +
       '<span class="sf-bar-div" aria-hidden="true"></span>' +
-      '<button class="sf-bar-btn sf-bar-btn--filter" type="button" id="' + P + '-filter-btn" aria-haspopup="dialog">' + I.filter + '<span>' + esc(L.filter) + '</span><span class="sf-badge" aria-hidden="true">0</span></button>';
+      '<button class="sf-bar-btn sf-bar-btn--filter" type="button" id="' + P + '-filter-btn" aria-haspopup="dialog">' + I.filter + '<span>' + esc(L.filter) + '</span><span class="pill pill--sm pill--neutral sf-badge" aria-hidden="true">0</span></button>';
 
     var sortSheet = doc.createElement('div');
     sortSheet.className = 'bs sf-sheet sf-sort'; sortSheet.id = P + '-sort'; sortSheet.hidden = true;
@@ -203,8 +203,8 @@
         var pills = ids.map(function (id) {
           var o = opt(g, id); if (!o) return '';
           var on = has(draft, g.key, id);
-          return '<button class="sf-pill" type="button" aria-pressed="' + on + '" data-group="' + esc(g.key) + '" data-opt="' + esc(id) + '">' +
-            '<span>' + esc(o.label) + '</span>' + (o.count != null ? '<span class="sf-pill-count">' + fmt(o.count) + '</span>' : '') + '</button>';
+          return '<button class="chip chip--intense sf-pill" type="button" aria-pressed="' + on + '" data-group="' + esc(g.key) + '" data-opt="' + esc(id) + '">' +
+            '<span class="chip-label">' + esc(o.label) + '</span>' + (o.count != null ? '<span class="chip-count sf-pill-count">' + fmt(o.count) + '</span>' : '') + '</button>';
         }).join('');
         var hidden = g.options.filter(function (o) { return pop.indexOf(o.id) < 0 && !has(draft, g.key, o.id); }).length;
         var hid = P + '-g-' + g.key;
@@ -212,7 +212,7 @@
           '<div class="sf-group-h"><h3 class="sf-group-title" id="' + hid + '">' + esc(g.name) +
             '<span class="sf-group-count">' + sel.length + '<span class="sf-sr"> selected</span></span></h3>' +
             '<button class="sf-link" type="button" data-sf-clear="' + esc(g.key) + '" aria-label="' + esc(L.clear + ' ' + g.name) + '">' + esc(L.clear) + '</button></div>' +
-          '<div class="sf-pills">' + pills + '</div>' +
+          '<div class="chips sf-pills">' + pills + '</div>' +
           (hidden > 0 ? '<button class="sf-seeall" type="button" data-sf-seeall="' + esc(g.key) + '" aria-haspopup="dialog">' + esc(tpl(L.seeAll, { n: g.options.length })) + '</button>' : '') +
         '</div>';
       }).join('');
