@@ -3394,7 +3394,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
   <div class="bs-body bs-body--gutter">
     <div class="pf-form">
       <div class="pf-channel" id="otpBox">
-        <div class="field field-otp field--sm" data-field="otp" id="otpField">
+        <div class="field field-otp field--lg" data-field="otp" id="otpField">
           <label class="field-label" for="otpIn">Enter the OTP sent to <b id="otpTo"></b></label>
           <div class="field-otp-wrap"><input class="field-otp-input" id="otpIn" maxlength="4" data-bs-autofocus><div class="field-otp-boxes"></div></div>
         </div>
@@ -6646,16 +6646,13 @@ window.__MO_CFG = {
         return;
       }
       clearInterval(otpT); st.created = true;
-      otpBox.classList.add('is-verified');                // Profile's verified state: the positive alert in place of the boxes
-      k(OTP, 'done').innerHTML = window.ShineAlert.html({ intent: 'positive', title: 'Mobile number verified', text: otpMask(st.phone) });
+      /* verified (user 2026-11-08): no "verified" alert in the OTP sheet — the sheet is replaced straight away by Account created */
       var ph = $('.field-input', k(B, 'phone')); ph.readOnly = true; FLD.set(k(B, 'phone'), 'helper', 'Verified');
-      setTimeout(function () {
-        after(OTP, function () {                          // the result sheet closes itself: 2 s on screen, counted once it's fully up
-          var s = $('#doneSheet');
-          s.addEventListener('shine:sheet-opened', function h(e) { if (e.target !== s) return; s.removeEventListener('shine:sheet-opened', h); setTimeout(function () { after(s, function () { go(steps()[1]); }); }, 2000); });
-          openSheet(s);
-        });
-      }, 800);
+      after(OTP, function () {                          // the result sheet closes itself: 2 s on screen, counted once it's fully up
+        var s = $('#doneSheet');
+        s.addEventListener('shine:sheet-opened', function h(e) { if (e.target !== s) return; s.removeEventListener('shine:sheet-opened', h); setTimeout(function () { after(s, function () { go(steps()[1]); }); }, 2000); });
+        openSheet(s);
+      });
     }, 500);
   }
 
