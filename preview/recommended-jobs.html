@@ -3,7 +3,11 @@
   SHINE APP · SIGN UP · Recommended jobs (4)                    recommended-jobs.html
   Generated from jsrp-logout.html (same page + job card component) in "recommended" mode: 4 jobs, no Sort · Filter,
   logged-in save / apply, hero "Top picks for <name>". Query: ?name=<first name>&q=<role>&loc=<city>.
-  Nav: Back = start again (splash → logged-out home) · See all jobs → the JSRP page with the same search.
+  v1 nav (top bar, now hidden): Back = start again (splash → logged-out home) · See all jobs → the JSRP page with the same search.
+  v2 (2026-11-09, user): onboarding step — no top bar; "Top picks for <name>." over a fanned deck of the 4 picks
+  (swipe / dots); Apply sends it (one tap) and the card leaves the deck; "I’ll apply later" (sticky) → welcome;
+  every pick applied → a ticket ("That’s all 4." · Explore more jobs on your dashboard) + Go to dashboard → welcome.
+  Cards: the app’s job card component (App-components/cards/job-card v2.7.0, inlined). No "Are these jobs relevant?" sheet here. Built from samples/recommended-jobs-1-fanned-deck.html + …-done-f-ticket.html.
 -->
 <html lang="en">
 <head>
@@ -22,9 +26,265 @@
     if (iOS && m && !/maximum-scale/.test(m.content)) m.content += ', maximum-scale=1';
   })();
 </script>
-<meta name="theme-color" content="#0D1117" />
+<meta name="theme-color" content="#FAF9F6" />
 <title>Recommended jobs · Shine</title>
 <link rel="preload" href="fonts/plus-jakarta-sans-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="fonts/fonts.css"><script src="native.js"></script>
+<!-- ▼ COMPONENT · buttons v1.3.0 · verbatim copy of App-components/atoms/buttons/buttons.css — do not edit here -->
+<style data-component="buttons">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · BUTTONS  (app component · App-login · atoms/)          v1.3.0
+   Every button in the logged-in app: four types × two tones, four sizes, with an optional icon or icon only.
+   Built on design-system A.02 Button (component-system.md) and the buttons used on Home, My Jobs, Docket and
+   Profile (cards, sheets and the top app bar). "Brand" here is the app's black (A.02 Primary · Neutral) — brand
+   blue is the one exception tone, .btn--accent (A.02 Primary · Brand), and it belongs to Search Jobs alone.
+
+     type          brand (black, default)                    destructive (.btn--destructive)
+     ─────────────────────────────────────────────────────────────────────────────────────────────
+     Primary       [■ Apply now ]  black fill · white text    [■ Remove ]  red fill · white text
+     Secondary     [□ View      ]  warm white · grey edge     [□ Remove ]  warm white · red edge · red text
+     Muted         [▤ Filters   ]  grey fill · black text     [▤ Remove ]  pale red fill · red text
+     Link            Job details   text only · black            Remove      text only · red
+     exception     Primary + .btn--accent  [● Search Jobs ]  brand-blue fill + blue glow — search only (A.02 Primary · Brand)
+
+   Classes
+     .btn                                   base — always
+     .btn--primary | --secondary | --muted | --link            type (pick one)
+     .btn--destructive                      tone (default: brand = black)
+     .btn--accent                           Primary only: brand blue + glow — the top bar's Search Jobs, nothing else
+     .btn--sm 40 | --md 44 (default) | --lg 48 | --xl 56       size (A.02)
+     .btn--icon                             icon only: square, glyph only, aria-label required
+     .btn--icon-lg                          icon only, navigation glyph 20 at sm (menu, back) — action glyphs stay 16
+     .btn--block                            full width            .btn--fill  shares a row (flex 1, padding 12)
+     .btn--flush                            Link only: pulls the text / glyph onto the content edge (margin = −padding)
+     .btn--pill                             fully round — bar / navigation buttons only (README › Pill buttons)
+     .btn--on-dark                          Primary or Muted on a dark surface (white fill, black text)
+     [aria-pressed="true"]                  toggle on (bookmark saved): brand-subtle fill + brand glyph
+     [aria-haspopup] + [aria-expanded]      opens a sheet / menu (status, sort): trailing chevron, expanded while open
+     :disabled / [aria-disabled="true"]     disabled · [aria-busy="true"] + .btn-spinner  loading
+     [data-state="hover|pressed|focus"]     shows a state statically — guidelines and screenshots only
+   Anatomy: [leading svg] label [trailing svg | .badge] — gap spacing.inline.md 8 (badge 12); icons inherit the text
+   colour; icon-only glyphs are content.neutral.muted (A.02 Icon-only), except on Muted (it has a fill, so the
+   glyph keeps content.neutral.base). Hover exists only with a mouse or trackpad (@media (hover: hover)) — on a
+   phone a button shows rest, pressed, focus (keyboard / switch access), disabled and loading, so its REST look must
+   read as a button on its own. The edge is an inset shadow, never a border,
+   so 1.5 px renders as 1.5 px on Android too (Chromium floors border widths to whole pixels).
+
+   ▶ BEFORE CHANGING IT: read README.md here and component-system.md A.02. Semantic tokens only.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.btn {
+  /* COLOUR — DESIGN-SYSTEM.md §2.2 (light) */
+  --btn-inverse: #0D1117;                   /* surface.inverse.base — primary fill */
+  --btn-inverse-hover: #344054;             /* surface.inverse-state.hover */
+  --btn-inverse-pressed: #4A5260;           /* surface.inverse-state.pressed */
+  --btn-on-fill: #FFFFFF;                   /* primary text: content.on-fill-dark.base (light) → content.inverse.base (dark) */
+  --btn-on-intense: #FFFFFF;                /* content.on-fill-dark.base — text on red; the same in both themes */
+  --btn-ink: #0D1117;                       /* content.neutral.base */
+  --btn-ink-muted: #344054;                 /* content.neutral.muted — icon-only glyph (A.02 Icon-only) */
+  --btn-base: #FAF9F6;                      /* surface.neutral.base — secondary fill (warm white) */
+  --btn-muted: #EEF1F5;                     /* surface.neutral.muted — muted fill */
+  --btn-state-hover: #EEF1F5;               /* surface.neutral-state.hover */
+  --btn-state-pressed: #E4E7EC;             /* surface.neutral-state.pressed */
+  --btn-stroke: #E4E7EC;                    /* stroke.neutral.base — secondary edge */
+  --btn-neg: #B42318;                       /* surface.status.negative-intense (red/600 in both themes) */
+  --btn-neg-text: #B42318;                  /* content.status.negative */
+  --btn-neg-stroke: #B42318;                /* stroke.status.negative */
+  --btn-neg-hover: #8B1A14;                 /* surface.status.negative-intense-hover — hover and pressed (as the sheet) */
+  --btn-neg-subtle: #FEF2F2;                /* surface.status.negative-subtle */
+  --btn-neg-subtle-hover: #FEE4E4;          /* surface.status.negative-subtle-hover (PROPOSED · red/100) */
+  --btn-brand-subtle: #EBF0FF;              /* surface.brand.brand-subtle — toggle on */
+  --btn-brand: #0B3FCC;                     /* content.neutral.brand — toggle on glyph */
+  --btn-disabled-bg: rgba(13, 17, 23, .08); /* stroke.neutral.disabled (black-25) */
+  --btn-disabled-fg: rgba(13, 17, 23, .36); /* content.neutral.disabled (black-75) */
+  --btn-focus: #1A56FF;                     /* stroke.neutral.focus */
+  /* ELEVATION — §2.5 */
+  --btn-lifted: 0 4px 12px rgba(13, 17, 23, .08), 0 2px 4px rgba(13, 17, 23, .04);   /* elevation.neutral.lifted — filled · hover */
+  --btn-raised-sh: 0 1px 3px rgba(13, 17, 23, .08), 0 1px 2px rgba(13, 17, 23, .04); /* elevation.neutral.raised — filled · pressed */
+  --btn-ring: 0 0 0 4px rgba(26, 86, 255, .10);                                       /* elevation.focus.default */
+  /* ON A DARK SURFACE — the Profile hero is dark in both themes, so these never flip */
+  --btn-on-dark-bg: #FFFFFF;                /* cool-neutral/white */
+  --btn-on-dark-fg: #0D1117;                /* cool-neutral/black */
+  --btn-on-dark-hover: #EEF1F5;             /* cool-neutral/100 */
+  --btn-on-dark-pressed: #E4E7EC;           /* cool-neutral/200 */
+  --btn-on-dark-focus: #7EA3FF;             /* brand/300 — the focus outline that reads on dark */
+  /* EXCEPTION TONE · .btn--accent (A.02 Primary · Brand — search only); the same blue in both themes */
+  --btn-accent: #1A56FF;                    /* surface.brand.brand-intense · brand/500 */
+  --btn-accent-hover: #0B3FCC;              /* surface.brand.brand-intense-hover · brand/600 */
+  --btn-accent-pressed: #0A33A6;            /* surface.brand.brand-intense-pressed · brand/700 */
+  --btn-accent-raised: 0 6px 14px -4px rgba(26, 86, 255, .45);    /* elevation.brand.raised — at rest */
+  --btn-accent-lifted: 0 16px 40px -12px rgba(26, 86, 255, .40);  /* elevation.brand.lifted — hover */
+  --btn-accent-subtle: 0 8px 24px -10px rgba(26, 86, 255, .18);   /* elevation.brand.subtle — pressed */
+  --btn-none: 0 0 #0000;                    /* "no shadow" that can sit in a box-shadow list */
+  /* SHAPE · SPACE · TYPE — §2.1 / §2.3 / §2.4 */
+  --btn-radius: 12px;                       /* size.radius.lg — every action button */
+  --btn-stroke-w: 1.5px;                    /* size.stroke.default — outlined edge */
+  --btn-gap: 8px;                           /* spacing.inline.md — icon ↔ label */
+  --btn-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;   /* typeface.family.brand */
+  --btn-dur: 150ms;                         /* motion — proposed */
+
+  /* size md (default) — A.02 */
+  --_h: 44px;                               /* size.control.md */
+  --_px: 16px;                              /* spacing.inset.xl */
+  --_fs: 12px; --_lh: 12px;                 /* Label / md bold */
+  --_ic: 16px;                              /* size.icon.md */
+  --_ic-only: 20px;                         /* size.icon.lg — icon-only glyph */
+  /* type primary (default) */
+  --_bg: var(--btn-inverse); --_fg: var(--btn-on-fill); --_bd: transparent;
+  --_bg-h: var(--btn-inverse-hover); --_bg-p: var(--btn-inverse-pressed);
+  --_sh: var(--btn-none);                   /* rest elevation — none, except the accent's glow */
+  --_sh-h: var(--btn-lifted); --_sh-p: var(--btn-raised-sh); --_lift: translateY(-1px);
+  --_edge: inset 0 0 0 var(--btn-stroke-w) var(--_bd);   /* the edge: an inset shadow (size.stroke.default) */
+
+  position: relative; box-sizing: border-box;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--btn-gap);
+  height: var(--_h); min-width: var(--_h); margin: 0; padding: 0 var(--_px);
+  border: 0; border-radius: var(--btn-radius);
+  background: var(--_bg); color: var(--_fg); box-shadow: var(--_edge), var(--_sh);
+  font: 700 var(--_fs)/var(--_lh) var(--btn-font); letter-spacing: 0; text-align: center; text-decoration: none; white-space: nowrap;
+  cursor: pointer; -webkit-appearance: none; appearance: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none;
+  transition: background-color var(--btn-dur), color var(--btn-dur), box-shadow var(--btn-dur), transform var(--btn-dur);
+}
+/* icons bring their own drawing (the app's icon markup: stroke icons fill="none" stroke="currentColor"; solid icons
+   fill="currentColor"); the atom only sizes them, colours them through currentColor and sets the stroke weight */
+.btn > svg { display: block; flex: none; width: var(--_ic); height: var(--_ic); }
+.btn > svg:not([stroke-width]) { stroke-width: 2px; }   /* size.stroke.thick — an icon that sets its own weight keeps it */
+
+/* ── Sizes (A.02.4) ─────────────────────────────────────────────── */
+.btn--sm { --_h: 40px; --_px: 16px; --_fs: 12px; --_lh: 12px; --_ic: 14px; --_ic-only: 16px; }   /* size.control.sm · inset.xl · Label/md · icon.sm (icon only: icon.md) */
+.btn--md { --_h: 44px; --_px: 16px; --_fs: 12px; --_lh: 12px; --_ic: 16px; --_ic-only: 20px; }   /* size.control.md · inset.xl · Label/md · icon.md */
+.btn--lg { --_h: 48px; --_px: 22px; --_fs: 14px; --_lh: 14px; --_ic: 16px; --_ic-only: 20px; }   /* size.control.lg · inset.xxl · Label/lg · icon.md */
+.btn--xl { --_h: 56px; --_px: 22px; --_fs: 14px; --_lh: 14px; --_ic: 16px; --_ic-only: 20px; }   /* size.control.xl · inset.xxl · Label/lg · icon.md */
+
+/* ── Types × tones ──────────────────────────────────────────────── */
+/* 1 · Primary — the one main action of a region */
+.btn--primary { --_bg: var(--btn-inverse); --_fg: var(--btn-on-fill); --_bd: transparent;
+  --_bg-h: var(--btn-inverse-hover); --_bg-p: var(--btn-inverse-pressed); --_sh-h: var(--btn-lifted); --_sh-p: var(--btn-raised-sh); --_lift: translateY(-1px); }
+.btn--primary.btn--destructive { --_bg: var(--btn-neg); --_fg: var(--btn-on-intense);
+  --_bg-h: var(--btn-neg-hover); --_bg-p: var(--btn-neg-hover); }   /* pressed = hover colour + raised (bottom sheet today) */
+/* 1b · Primary · accent — THE EXCEPTION: brand blue with a blue glow at rest (A.02 Primary · Brand). Search only —
+   the top bar's Search Jobs; every other primary is black. It glows instead of moving: no lift on hover */
+.btn--primary.btn--accent { --_bg: var(--btn-accent); --_fg: var(--btn-on-intense);
+  --_bg-h: var(--btn-accent-hover); --_bg-p: var(--btn-accent-pressed);
+  --_sh: var(--btn-accent-raised); --_sh-h: var(--btn-accent-lifted); --_sh-p: var(--btn-accent-subtle); --_lift: none; }
+/* 2 · Secondary — outlined: the alternative next to a primary. Hover lifts and presses like Primary (A.02.5 — one
+   motion for Primary and Secondary; Muted and Link stay flat) */
+.btn--secondary { --_bg: var(--btn-base); --_fg: var(--btn-ink); --_bd: var(--btn-stroke);
+  --_bg-h: var(--btn-state-hover); --_bg-p: var(--btn-state-pressed); }
+.btn--secondary.btn--destructive { --_fg: var(--btn-neg-text); --_bd: var(--btn-neg-stroke);
+  --_bg-h: var(--btn-neg-subtle); --_bg-p: var(--btn-neg-subtle-hover); }
+/* 3 · Muted — tinted fill, no edge: quiet actions and the bar's pills (menu, back, status). Flat (v1.3.0): only the
+   fill changes on hover / press — it never lifts, so bar buttons don't jump under the finger */
+.btn--muted { --_bg: var(--btn-muted); --_fg: var(--btn-ink); --_bd: transparent;
+  --_bg-h: var(--btn-state-pressed); --_bg-p: var(--btn-state-pressed); --_sh-h: var(--btn-none); --_sh-p: var(--btn-none); --_lift: none; }
+.btn--muted.btn--destructive { --_bg: var(--btn-neg-subtle); --_fg: var(--btn-neg-text);
+  --_bg-h: var(--btn-neg-subtle-hover); --_bg-p: var(--btn-neg-subtle-hover); }
+/* 4 · Link — text only, the lowest weight; padding 12 so the tap area stays a button. Hover and pressed share one
+   tint (A.02 Ghost; the Profile icon buttons and the sheet's ghost button today) */
+.btn--link { --_bg: transparent; --_fg: var(--btn-ink); --_bd: transparent; --_px: 12px;   /* spacing.inset.lg (A.02 tertiary) */
+  --_bg-h: var(--btn-state-hover); --_bg-p: var(--btn-state-hover); --_sh-h: var(--btn-none); --_sh-p: var(--btn-none); --_lift: none; }
+.btn--link.btn--destructive { --_fg: var(--btn-neg-text);
+  --_bg-h: var(--btn-neg-subtle); --_bg-p: var(--btn-neg-subtle); }
+
+/* ── States (A.02.5) — hover on pointer devices only; data-state shows a state in the guidelines ── */
+@media (hover: hover) {
+  .btn:hover:not(:active):not(:disabled):not([aria-disabled="true"]):not([aria-busy="true"]) {
+    background: var(--_bg-h); box-shadow: var(--_edge), var(--_sh-h); transform: var(--_lift);
+  }
+}
+.btn[data-state="hover"] { background: var(--_bg-h); box-shadow: var(--_edge), var(--_sh-h); transform: var(--_lift); }
+.btn:active:not(:disabled):not([aria-disabled="true"]):not([aria-busy="true"]),
+.btn[data-state="pressed"] { background: var(--_bg-p); box-shadow: var(--_edge), var(--_sh-p); transform: none; }
+.btn:focus { outline: none; }
+.btn:focus-visible, .btn[data-state="focus"] {   /* stroke.neutral.focus outline + elevation.focus.default ring; the edge stays */
+  outline: 2px solid var(--btn-focus); outline-offset: 2px; box-shadow: var(--_edge), var(--btn-ring);
+}
+.btn:disabled, .btn[aria-disabled="true"] {
+  --_bd: transparent; background: var(--btn-disabled-bg); color: var(--btn-disabled-fg);
+  box-shadow: var(--_edge); transform: none; cursor: default; pointer-events: none;
+}
+.btn--secondary:disabled, .btn--secondary[aria-disabled="true"] { --_bd: var(--btn-disabled-bg); background: transparent; }
+.btn--link:disabled, .btn--link[aria-disabled="true"] { background: transparent; }
+
+/* loading — keep the label, add a spinner in front; the button stays its size */
+.btn[aria-busy="true"] { cursor: progress; pointer-events: none; }
+.btn-spinner {
+  flex: none; width: var(--_ic); height: var(--_ic); box-sizing: border-box; border-radius: 1024px;   /* size.radius.full */
+  border: 2px solid currentColor; border-right-color: transparent; animation: btn-spin 700ms linear infinite;
+}
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+
+/* ── Icon only — square, glyph only (aria-label required) ───────── */
+.btn--icon { width: var(--_h); padding: 0; }
+.btn--icon > svg { width: var(--_ic-only); height: var(--_ic-only); }
+/* A.02 Icon-only: the glyph is content.neutral.muted on Secondary and Link (share, save, edit, ⋮, +). Muted keeps
+   content.neutral.base — its fill already says "button", and menu / back are primary navigation */
+.btn--icon:not(.btn--primary):not(.btn--destructive):not(.btn--muted) { --_fg: var(--btn-ink-muted); }
+/* navigation glyph (menu, back): size.icon.lg 20 at every size — action glyphs (save, share, +) keep the size's own */
+.btn--icon.btn--icon-lg { --_ic-only: 20px; }
+.btn--icon[aria-busy="true"] svg { display: none; }                   /* loading: the spinner replaces the glyph */
+.btn--icon .btn-spinner { width: var(--_ic-only); height: var(--_ic-only); }
+
+/* toggle on (e.g. bookmark saved) — the app's "selected" pair, any type except primary */
+.btn[aria-pressed="true"]:not(.btn--primary) {
+  --_bg: var(--btn-brand-subtle); --_fg: var(--btn-brand); --_bd: var(--btn-brand-subtle);
+  --_bg-h: var(--btn-brand-subtle); --_bg-p: var(--btn-brand-subtle);
+}
+.btn[aria-pressed="true"]:not(.btn--primary) > svg { fill: currentColor; }
+
+/* ── Layout and shape ───────────────────────────────────────────── */
+.btn--block { display: flex; width: 100%; }
+.btn--fill { flex: 1 1 0; min-width: 0; --_px: 12px; }   /* shares a row with other buttons: label centred, padding spacing.inset.lg */
+@media (max-width: 359px) { .btn--fill.btn--lg, .btn--fill.btn--xl { --_px: 8px; --_fs: 12px; --_lh: 12px; } }   /* two labels fit on 320 phones */
+.btn--pill { border-radius: 1024px; }      /* size.radius.full — bar / navigation buttons only (README › Pill buttons) */
+/* Link only: the text (or glyph) lines up with the content edge — the button's padding hangs outside it */
+.btn--link.btn--flush { margin-inline: calc(var(--_px) * -1); }
+.btn--link.btn--icon.btn--flush { margin: calc((var(--_ic-only) - var(--_h)) / 2); }
+/* a trailing badge (A.04, e.g. +22 on Upload resume) sits 12 from the label (spacing.inline.lg) */
+.btn > .badge { margin-left: 4px; }
+
+/* on a permanently dark surface (the Profile hero, the dark top bar over it): white fill, black text — in both
+   themes. Primary (Upload resume) and Muted (the bar's status pill) take it; on Muted it is the resting fill that
+   reads on dark, so the role (quiet choice) stays the same while the surface changes */
+.btn--primary.btn--on-dark, .btn--muted.btn--on-dark { --_bg: var(--btn-on-dark-bg); --_fg: var(--btn-on-dark-fg); --_bg-h: var(--btn-on-dark-hover); --_bg-p: var(--btn-on-dark-pressed); --btn-focus: var(--btn-on-dark-focus); }
+
+/* ── Dark theme — the dark column of §2.2 (App-login pages are light-only today) ── */
+[data-theme="dark"] .btn {
+  --btn-inverse: #FAF9F6;                   /* surface.inverse.base · warm-100 */
+  --btn-inverse-hover: #EEF1F5;             /* surface.inverse-state.hover · cool-100 */
+  --btn-inverse-pressed: #E4E7EC;           /* surface.inverse-state.pressed · cool-200 */
+  --btn-on-fill: #0D1117;                   /* A.02: primary text in dark = content.inverse.base · black */
+  --btn-ink: #F7F9FB;                       /* content.neutral.base · cool-50 */
+  --btn-ink-muted: #C8CED7;                 /* content.neutral.muted · cool-300 */
+  --btn-base: #0D1117;                      /* surface.neutral.base · black */
+  --btn-muted: #161B22;                     /* surface.neutral.muted · cool-900 */
+  --btn-state-hover: #344054;               /* surface.neutral-state.hover · cool-700 */
+  --btn-state-pressed: #4A5260;             /* surface.neutral-state.pressed · cool-600 */
+  --btn-stroke: #4A5260;                    /* stroke.neutral.base · cool-600 */
+  --btn-neg-text: #FCA5A0;                  /* content.status.negative · red-300 */
+  --btn-neg-stroke: #F87171;                /* stroke.status.negative · red-400 */
+  --btn-neg-subtle: #1C0404;                /* surface.status.negative-subtle · red-950 */
+  --btn-neg-subtle-hover: #380808;          /* proposed · red-900 */
+  --btn-brand-subtle: #06184F;              /* surface.brand.brand-subtle · brand-900 */
+  --btn-brand: #7EA3FF;                     /* content.neutral.brand · brand-300 */
+  --btn-disabled-bg: rgba(255, 255, 255, .08); /* stroke.neutral.disabled · white-25 */
+  --btn-disabled-fg: rgba(255, 255, 255, .36); /* content.neutral.disabled · white-75 */
+  --btn-focus: #7EA3FF;                     /* stroke.neutral.focus · brand-300 */
+  --btn-lifted: 0 4px 12px rgba(13, 17, 23, .45), 0 2px 4px rgba(13, 17, 23, .30);   /* elevation.neutral.lifted (dark α) */
+  --btn-raised-sh: 0 1px 3px rgba(13, 17, 23, .40), 0 1px 2px rgba(13, 17, 23, .25); /* elevation.neutral.raised (dark α) */
+  --btn-ring: 0 0 0 4px rgba(26, 86, 255, .20);                                       /* elevation.focus.default (dark α) */
+  --btn-accent-raised: 0 6px 14px -4px rgba(26, 86, 255, .55);    /* elevation.brand.raised (dark α) */
+  --btn-accent-lifted: 0 16px 40px -12px rgba(26, 86, 255, .50);  /* elevation.brand.lifted (dark α) */
+  --btn-accent-subtle: 0 8px 24px -10px rgba(26, 86, 255, .30);   /* elevation.brand.subtle (dark α) */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+  .btn:hover, .btn[data-state="hover"] { transform: none !important; }
+  .btn-spinner { animation-duration: 1.6s; }
+}
+</style>
+<!-- ▲ COMPONENT · buttons -->
 <!-- ▼ COMPONENT · chips v1.1.0 · verbatim copy of App-components/atoms/chips/chips.css — do not edit here -->
 <style data-component="chips">
 /* ═══════════════════════════════════════════════════════════════════════
@@ -1759,6 +2019,535 @@ body { background: var(--surface-base, var(--surface-base)); }
 .jsrp-m-jc-apply.is-applied{opacity:1;background:var(--surface-status-positive-subtle,#EAFAF0) !important;color:var(--content-positive,#027A48) !important;cursor:default}
 .jsrp-m-rec-note{margin:0 0 14px;text-align:center;font:500 12px/18px var(--font-brand,"Plus Jakarta Sans",sans-serif);color:var(--content-faded,#667085)}
 </style>
+<!-- ▼ COMPONENT · card-container v1.5.1 · verbatim copy of App-components/cards/card-container/card-container.css — do not edit here -->
+<style data-component="card-container">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · CARD CONTAINER  (app component · App-login · cards/)   v1.5.1
+   The ONE parent container every card in the app sits in — job cards, the nav card, every Profile card
+   (Upload resume, details, key skills, employment & education, links) and any card built later.
+   A card component never draws its own background, edge, shadow, corners or padding: it puts `.card` on
+   its root and builds its content inside. Taken from the job card (My Jobs, Docket), the app's reference card.
+
+     ┌──────────────────────────────────────┐ ← edge     1 px stroke.neutral.muted
+     │ ░░░░░░░░░░░░░ 22 ░░░░░░░░░░░░░░░░░░ │ ← inset    spacing.inset.xxl, all four sides
+     │ 22   card content (the component)  22 │ ← surface  surface.neutral.raised
+     │ ░░░░░░░░░░░░░ 22 ░░░░░░░░░░░░░░░░░░ │
+     ╰──────────────────────────────────────╯ ← corners  size.radius.xl 16 · shadow: soft resting shadow
+
+   Two variants (v1.5.0, user)
+     1 Normal card       .card — the default: the card is as tall as its content
+     2 Expandable card   .card.card--expandable — long content folds at --card-fold-max (360) behind a fade, with
+                         a Show more / Show less button. CONDITIONAL: card-container.js shows the fold and the button
+                         only when the content is taller than the fold + 48; otherwise it reads as a normal card.
+                         A page puts it on a card of free, unknown-length text (job description, about a company);
+                         card components never build their own read-more (see README.md › Variants).
+
+   Classes
+     .card               the container (any element: article, section, div, a, button)
+     .card--interactive  the whole card is one tap target: hover = edge one step darker (subtle grey) + lifted
+                         + 1 px up, keyboard focus = the same grey edge + focus ring. A card is a surface, not a
+                         control: its edge never turns brand blue (v1.1.0, user). Leave it off for cards that only hold content or
+                         whose controls are inside (Profile cards) and for inert cards (expired jobs).
+     .card--empty        a card's EMPTY STATE only (nothing added yet, e.g. Profile › Links): grey surface
+                         (surface.neutral.muted), flat (no shadow), edge stroke.neutral.base; same inset and corners.
+                         Once the card has content it drops the modifier (v1.2.0, user).
+   Tokens other components may read (never redefine): --card-inset (full-bleed strips: negative margins
+   of var(--card-inset)), --card-radius, --card-stroke (separators inside a card).
+
+   Text hierarchy (v1.4.0, user): every piece of text in a card is ONE of four levels — a card component reads
+   these tokens and never sets its own text size, weight or colour (see README.md › Text hierarchy):
+     1 Eyebrow     --card-eyebrow-font / -color / -track   names a group of rows      Eyebrow / md 12 bold, caps
+     2 Header      --card-header-font / -color             the one thing it's about   Heading / sm 16 bold
+     3 Subtext 1   --card-sub1-font / -color               who · where · the value    Body / md 14 medium
+     4 Subtext 2   --card-sub2-font / -color               when · how long · size     Body / sm 12 medium
+   Labels inside buttons, tags and badges follow their own atom, not these levels.
+
+   ▶ BEFORE CHANGING IT: read README.md here — it is the rule for every card. Semantic tokens only.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.card {
+  /* COLOUR — DESIGN-SYSTEM.md §2.2 (light; App-login pages are light-only) */
+  --card-surface: #FFFFFF;                  /* surface.neutral.raised */
+  --card-stroke: #EEF1F5;                   /* stroke.neutral.muted — the edge (user: subtler than M.02's stroke.neutral.base) */
+  --card-stroke-hover: #E4E7EC;             /* stroke.neutral.base — subtle grey, one step darker than the rest edge
+                                               (user v1.1.0: cards are surfaces, not inputs or buttons; M.02 says content.neutral.brand) */
+  --card-stroke-focus: #E4E7EC;             /* stroke.neutral.base — same grey edge; the focus ring below marks keyboard focus */
+  /* ELEVATION — §2.5 · colour cool-neutral/black */
+  --card-shadow: 0 6px 22px -8px rgba(13, 17, 23, .10), 0 2px 4px -1px rgba(13, 17, 23, .04);
+                                            /* elevation.neutral.soft (PROPOSED) — the job cards' soft resting shadow
+                                               (user: softer than elevation.neutral.raised) */
+  --card-shadow-hover: 0 4px 12px rgba(13, 17, 23, .08), 0 2px 4px rgba(13, 17, 23, .04);   /* elevation.neutral.lifted */
+  --card-ring: 0 0 0 4px rgba(26, 86, 255, .10);                                             /* elevation.focus.default */
+  /* SPACE · SIZE — §2.3 / §2.4 */
+  --card-inset: 22px;                       /* spacing.inset.xxl — M.02 card padding (mobile) */
+  --card-radius: 16px;                      /* size.radius.xl — M.02 card corners (user v1.3.0; was size.radius.2xl 24) */
+  --card-stroke-w: 1px;                     /* size.stroke.thin */
+  --card-dur: 150ms;                        /* motion — proposed */
+  /* TEXT — the four levels (v1.4.0, user) · DESIGN-SYSTEM.md §1.3 typography, §2.2 content colours */
+  --card-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;   /* typeface.family.brand */
+  --card-eyebrow-font: 700 12px/12px var(--card-font);   /* 1 Eyebrow · Eyebrow / md · bold · uppercase */
+  --card-eyebrow-track: 1.5px;                           /*   Eyebrow / md letter-spacing (mobile) */
+  --card-eyebrow-color: #667085;                         /*   content.neutral.faded */
+  --card-header-font: 700 16px/20px var(--card-font);    /* 2 Header · Heading / sm · bold */
+  --card-header-color: #0D1117;                          /*   content.neutral.base */
+  --card-sub1-font: 500 14px/20px var(--card-font);      /* 3 Subtext 1 · Body / md · medium */
+  --card-sub1-color: #344054;                            /*   content.neutral.muted */
+  --card-sub2-font: 500 12px/18px var(--card-font);      /* 4 Subtext 2 · Body / sm · medium */
+  --card-sub2-color: #667085;                            /*   content.neutral.faded */
+
+  position: relative; box-sizing: border-box; min-width: 0;
+  padding: var(--card-inset);
+  background: var(--card-surface);
+  border: var(--card-stroke-w) solid var(--card-stroke);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}
+
+/* the whole card is one tap target (M.02 states) */
+.card--interactive {
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: border-color var(--card-dur), box-shadow var(--card-dur), transform var(--card-dur);
+}
+@media (hover: hover) {
+  .card--interactive:hover { border-color: var(--card-stroke-hover); box-shadow: var(--card-shadow-hover); transform: translateY(-1px); }
+}
+.card--interactive:focus-visible { outline: none; border-color: var(--card-stroke-focus); box-shadow: var(--card-ring), var(--card-shadow); }
+
+[data-theme="dark"] .card {                 /* the same tokens, dark column of §2.2 / §2.5 (no App-login page is dark yet) */
+  --card-surface: #232A38;                  /* surface.neutral.raised · cool-800 */
+  --card-stroke: #344054;                   /* stroke.neutral.muted · cool-700 */
+  --card-stroke-hover: #4A5260;             /* stroke.neutral.base · cool-600 */
+  --card-stroke-focus: #4A5260;             /* stroke.neutral.base · cool-600 */
+  --card-shadow: 0 6px 22px -8px rgba(13, 17, 23, .40), 0 2px 4px -1px rgba(13, 17, 23, .25);   /* soft · dark α as raised */
+  --card-shadow-hover: 0 4px 12px rgba(13, 17, 23, .45), 0 2px 4px rgba(13, 17, 23, .30);       /* lifted · dark */
+  --card-ring: 0 0 0 4px rgba(126, 163, 255, .25);
+  --card-eyebrow-color: #98A2B3;                         /* content.neutral.faded · cool-400 */
+  --card-header-color: #F7F9FB;                          /* content.neutral.base · cool-50 */
+  --card-sub1-color: #C8CED7;                            /* content.neutral.muted · cool-300 */
+  --card-sub2-color: #98A2B3;                            /* content.neutral.faded · cool-400 */
+}
+/* empty state (v1.2.0, user): grey and flat — reads as "nothing here yet", not as a card to scan. Same inset 22 and
+   corners 16 as every card; only the surface, the edge and the shadow change. */
+.card--empty {
+  --card-surface: #EEF1F5;                  /* surface.neutral.muted — the grey it had before the rule */
+  --card-stroke: #E4E7EC;                   /* stroke.neutral.base — visible on the grey surface (muted would vanish) */
+  --card-shadow: none;                      /* elevation.neutral.flat */
+}
+[data-theme="dark"] .card--empty {
+  --card-surface: #161B22;                  /* surface.neutral.muted · cool-900 */
+  --card-stroke: #4A5260;                   /* stroke.neutral.base · cool-600 */
+  --card-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card--interactive { transition: none; }
+  .card--interactive:hover { transform: none; }
+}
+
+/* ══ 2 · EXPANDABLE CARD (v1.5.0, user) ═══════════════════════════════════════════════════════════
+   <section class="card card--expandable" data-fold-more="Read full description" data-fold-less="Show less">
+     …what always shows (the title)…
+     <div class="card-fold">…the long content…</div>
+     <button class="btn btn--secondary btn--md card-fold-toggle" type="button">…</button>   ← card-container.js adds it if missing
+   </section>
+   card-container.js sets data-fold on the card: none (fits → no button, a normal card) · collapsed · opening ·
+   expanded · closing. Nothing here applies until it has measured, so without the script the card shows everything. */
+.card--expandable {
+  --card-fold-max: 360px;                   /* the collapsed height of the fold — a page may set its own */
+  --card-fold-fade: 55%;                    /* the fold is solid to here, then fades to the card's surface */
+  --card-fold-dur: 280ms;                   /* motion — proposed (expand / collapse) */
+  --card-fold-ease: cubic-bezier(.2, 0, 0, 1);
+}
+.card-fold { position: relative; }
+.card--expandable[data-fold="collapsed"] .card-fold,
+.card--expandable[data-fold="opening"] .card-fold,
+.card--expandable[data-fold="closing"] .card-fold { overflow: hidden; }
+.card--expandable[data-fold="collapsed"] .card-fold { max-height: var(--card-fold-max); }
+.card--expandable[data-fold="collapsed"] .card-fold,
+.card--expandable[data-fold="closing"] .card-fold {
+  -webkit-mask-image: linear-gradient(to bottom, #000 var(--card-fold-fade), transparent);
+          mask-image: linear-gradient(to bottom, #000 var(--card-fold-fade), transparent);   /* fades into any surface */
+}
+.card--expandable[data-fold="opening"] .card-fold,
+.card--expandable[data-fold="closing"] .card-fold { transition: max-height var(--card-fold-dur) var(--card-fold-ease); }
+/* the button — buttons atom Secondary · md · label + ic_caret-down-outline (icons atom), 16 under the fold; only while it folds */
+.card-fold-toggle { margin-top: 16px; }                                                 /* spacing.inset.xl */
+.card-fold-toggle > svg { transition: transform 200ms ease; }
+.card-fold-toggle[aria-expanded="true"] > svg { transform: rotate(180deg); }
+.card--expandable:not([data-fold]) .card-fold-toggle,
+.card--expandable[data-fold="none"] .card-fold-toggle,
+.card--expandable:not([data-fold]) [data-fold-meter],
+.card--expandable[data-fold="none"] [data-fold-meter] { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .card--expandable { --card-fold-dur: 0ms; }
+  .card-fold-toggle > svg { transition: none; }
+}
+</style>
+<!-- ▲ COMPONENT · card-container -->
+<!-- ▼ COMPONENT · job-card v2.7.0 · verbatim copy of App-components/cards/job-card/job-card.css — do not edit here -->
+<style data-component="job-card">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · JOB CARD  (app component · App-login · cards/)        v2.7.0
+   One card for every job in the logged-in app, built from the design system:
+   M.02 Job Card · Portrait (the mobile job list), composed of the M.02 logo,
+   A.04 Badge (the BADGES ATOM, Small), A.03 Pill (the PILLS ATOM: unread dot) and the app's BUTTONS ATOM (atoms/buttons — A.02). Cards only: the expired row (nav-card), the Expired-page
+   note (alert) and day headers (page) are not part of this component.
+
+     ┌──────────────────────────────────────┐
+     │ ♡ Kavita liked your profile…          │  context strip    (Docket)
+     │ Kavita Sharma                    [KS] │  head  · name + time left, square logo 40 right
+     │ TalentBridge Staffing · 6:40 PM        │         (M.02 logo · radius.md; + A.03 unread dot)
+     │ ──────────────────────────────────── │  separator · stroke.neutral.muted
+     │ Role title                             │  Heading / md bold
+     │ (● Actively hiring) (Early applicant)  │  badges atom · Small
+     │ Recruiter note…                        │  Body / md medium          (optional)
+     │ ◯ 6 to 10 Yrs · ◯ 25–45 Lacs · ◯ …     │  meta rows · 28 frame · icon 14
+     │ Job details ›                          │  Link · sm · flush         (invite)
+     │ ──────────────────────────────────── │
+     │ Required: A · B · C                    │  skills                    (optional)
+     │ ──────────────────────────────────── │
+     │ [share] [save] [   Apply now   ]       │  Secondary · xl · icon ×2 · Primary · xl · fill
+     │  or  (Applied)          2 days ago     │  outcome · badges atom · Small + Body / sm
+     └──────────────────────────────────────┘
+
+   Container (v2.1.0): the shared card container — cards/card-container/card-container.css, loaded first. It draws the
+   surface (surface.neutral.raised), the 1 px stroke.neutral.muted edge, the soft resting shadow, the inset.xxl 22 padding,
+   the radius.xl 16 corners and, with .card--interactive, the hover (subtle grey edge + lifted + 1 px up) and focus ring.
+   Markup: <article class="card card--interactive jcard jcard--active"> (expired and, since v2.5.0, invite: no card--interactive). This file
+   styles only what is inside the card · sections stack.lg 14.
+   Atoms (v2.7.0): the badges are the BADGES ATOM, Small (atoms/badges/badges.css) and the unread dot the PILLS ATOM, Medium dot
+   (atoms/pills/pills.css) — both loaded before this file; the card only places them (.jcard-badge · .jcard-dot are hooks).
+   Buttons (v2.2.0): every button is the buttons atom — atoms/buttons/buttons.css, loaded before this file. The card only
+   places them (the actions row, 12 apart; the Job details trim). The jcard-ib / jcard-save / jcard-cta / jcard-link class
+   names stay on the buttons as hooks for scripts and tests; they carry no look.
+   Variants (cards/README): 2.1 Job card (state active/done/expired) · 2.2 Recruiter's invite (ctx invite, state invite)
+   · 2.3 Matched job (ctx match) · 2.4 Saved job (ctx saved, saved: true) · 2.5 JD job card (ShineJobCard.jd — v2.3.0).
+   ▶ BEFORE CHANGING IT: read README.md here and component-system.md M.02. Semantic tokens only.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.jcard, .jcard-list {
+  /* COLOUR — DESIGN-SYSTEM.md §2.2 (light; the app is light-only) */
+  --jc-surface-raised: #FFFFFF;             /* surface.neutral.raised — the unread dot's halo (the card surface itself: card container) */
+  --jc-surface-muted: #EEF1F5;              /* surface.neutral.muted */
+  --jc-inverse: #0D1117;                    /* surface.inverse.base */
+  --jc-brand-subtle: #EBF0FF;               /* surface.brand.brand-subtle */
+  --jc-brand-intense: #1A56FF;              /* surface.brand.brand-intense — unread dot */
+  --jc-positive-subtle: #EAFAF0;            /* surface.status.positive-subtle */
+  --jc-notice-subtle: #FFF4ED;              /* surface.status.notice-subtle */
+  --jc-negative-subtle: #FEF2F2;            /* surface.status.negative-subtle */
+  --jc-pink-subtle: #FCE7F3;                /* surface.decorative.pink-subtle */
+  --jc-violet-subtle: #F3EEFE;              /* surface.decorative.violet-subtle */
+  --jc-ink: #0D1117;                        /* content.neutral.base */
+  --jc-muted: #344054;                      /* content.neutral.muted */
+  --jc-faded: #667085;                      /* content.neutral.faded */
+  --jc-brand: #0B3FCC;                      /* content.neutral.brand */
+  --jc-on-dark: #FFFFFF;                    /* content.on-fill-dark.base */
+  --jc-on-light: #0D1117;                   /* content.on-fill-light.base */
+  --jc-positive: #027A48;                   /* content.status.positive */
+  --jc-notice: #A35A04;                     /* content.status.notice */
+  --jc-negative: #B42318;                   /* content.status.negative */
+  --jc-pink: #BE185D;                       /* content.decorative.pink */
+  --jc-violet: #6F46E0;                     /* content.decorative.violet */
+  --jc-line: #E4E7EC;                       /* stroke.neutral.base — meta icon frames */
+  --jc-line-subtle: #EEF1F5;                /* stroke.neutral.muted — separators (user: subtler); = the container edge */
+  --jc-focus: #1A56FF;                      /* stroke.neutral.focus — the JD job card's company link */
+  --jc-av-pink: #BE185D;                    /* surface.decorative.pink-intense */
+  --jc-av-violet: #6F46E0;                  /* surface.decorative.violet-intense */
+  --jc-av-aqua: #0F766A;                    /* surface.decorative.aqua-intense */
+  --jc-av-cyan: #0E7490;                    /* surface.decorative.cyan-intense */
+  --jc-av-lime: #C4FF38;                    /* surface.decorative.lime-intense */
+  --jc-av-ey: #FFE419;                      /* surface.decorative.electric-yellow-intense */
+  /* ELEVATION — §2.5 */
+  /* SPACE · SIZE — §2.3 / §2.4 */
+  --jc-stack: 14px;          /* spacing.stack.lg — between sections (user: more room; = M.02 landscape rhythm) */
+  --jc-row-gap: 12px;        /* spacing.stack.md — between meta rows */
+  --jc-inline: 8px;          /* spacing.inline.md */
+  --jc-btn-gap: 12px;        /* spacing.inline.lg — between the card's buttons (= the atom's side-by-side rule) */
+  --jc-radius-logo: 8px;     /* size.radius.md — M.02 square company logo */
+  --jc-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;   /* typeface.family.brand */
+}
+
+/* ── List (page level) ───────────────────────────────────────────── */
+.jcard-list { display: flex; flex-direction: column; gap: 20px; padding: 20px 24px 8px; }        /* stack.xl · layout.sm */
+
+/* ── Card · M.02 Portrait ────────────────────────────────────────── */
+.jcard {
+  /* surface, edge, shadow, padding, corners, hover + focus: the card container (.card · .card--interactive) */
+  display: flex; flex-direction: column; margin: 0; overflow: hidden;   /* overflow: the context strip follows the corners */
+  font-family: var(--jc-font); color: var(--jc-ink); -webkit-font-smoothing: antialiased;
+}
+.jcard *, .jcard *::before, .jcard *::after { box-sizing: border-box; }
+.jcard button { font-family: inherit; }
+.jcard svg { display: block; flex: none; }
+
+/* context strip — why the card is in Docket (no DS atom; tokens follow A.04 / A.07 intent pairs) */
+.jcard-ctx {
+  display: flex; align-items: flex-start; gap: var(--jc-inline);
+  margin: calc(var(--card-inset) * -1) calc(var(--card-inset) * -1) var(--jc-stack); padding: 12px var(--card-inset);   /* full bleed: the container's inset · inset.lg */
+  font: 600 12px/18px var(--jc-font);                                     /* Body / sm semibold */
+}
+.jcard-ctx svg { width: 12px; height: 12px; margin-top: 3px; }           /* size.icon.xs — pairs with Body / sm */
+.jcard-ctx--invite { background: var(--jc-notice-subtle); color: var(--jc-notice); }   /* notice intent */
+.jcard-ctx--match  { background: var(--jc-brand-subtle);  color: var(--jc-brand); }    /* brand / info intent */
+.jcard-ctx--saved  { background: var(--jc-violet-subtle); color: var(--jc-violet); }   /* decorative violet */
+
+/* head — name + time on the left, square logo on the right (the app's job-card head before v1.0;
+   M.02 landscape head: square logo 40 · radius.md · decorative intense) — v1.2, user */
+.jcard-head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--jc-row-gap);   /* stack.md 12 between text and logo */
+  padding-bottom: var(--jc-stack); margin-bottom: var(--jc-stack); border-bottom: 1px solid var(--jc-line-subtle);   /* separator · stroke.neutral.muted (A.11 default “inside cards”) */
+}
+.jcard-who { flex: 1 1 0; min-width: 0; display: grid; gap: 2px; }      /* stack.3xs */
+.jcard-name { font: 700 14px/20px var(--jc-font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* Label / lg bold */
+.jcard-sub  { font: 500 12px/18px var(--jc-font); color: var(--jc-faded); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* Body / sm medium */
+.jcard-av { position: relative; flex: none; }
+.jc-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }                           /* .pill-wrap */
+.jcard-logo {
+  width: 40px; height: 40px; display: grid; place-items: center; border-radius: var(--jc-radius-logo);   /* M.02 logo 40 · radius.md */
+  font: 700 12px/12px var(--jc-font); text-transform: uppercase;                          /* Label / md bold */
+  background: var(--jc-av-violet); color: var(--jc-on-dark);
+}
+.jcard-logo--person { background: var(--jc-inverse); color: var(--jc-on-dark); }          /* recruiter (a person): User domain · contrast */
+.jcard-logo--violet { background: var(--jc-av-violet); color: var(--jc-on-dark); }
+.jcard-logo--pink   { background: var(--jc-av-pink);   color: var(--jc-on-dark); }
+.jcard-logo--aqua   { background: var(--jc-av-aqua);   color: var(--jc-on-dark); }
+.jcard-logo--cyan   { background: var(--jc-av-cyan);   color: var(--jc-on-dark); }
+.jcard-logo--lime   { background: var(--jc-av-lime);   color: var(--jc-on-light); }
+.jcard-logo--ey     { background: var(--jc-av-ey);     color: var(--jc-on-light); }
+.jcard-dot { position: absolute; top: -3px; right: -3px; }   /* unread (v2.7.0): the PILLS ATOM — pill pill--md pill--dot (10, brand, 1.5 ring in the card's surface) — on the logo's top-right corner */
+
+/* role · badges · note */
+/* the role — ONE size on every variant (v2.3.1, user): Heading / md bold 18 / 22 · −0.2 (M.02); only the spacing around it differs */
+.jcard-role, .jcard-jd-role { font: 700 18px/22px var(--jc-font); letter-spacing: -.2px; text-wrap: pretty; }
+.jcard-role { margin: 0 0 var(--jc-stack); }
+.jcard-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: var(--jc-stack); }                    /* inline.sm */
+/* badges (v2.7.0): the BADGES ATOM, Small (atoms/badges — badge badge--sm badge--<intent>, loaded before this file):
+   Actively Hiring = brand + the live (pulsing) dot · Be An Early Applicant = pink · Urgent = negative. The card only places them. */
+.jcard-badge { flex: none; }
+.jcard-desc { margin: 0 0 var(--jc-stack); font: 500 14px/20px var(--jc-font); color: var(--jc-muted); }   /* Body / md medium */
+
+/* facts — M.02 meta stack: 28 frame, icon 14, Body / md medium, icon ↔ text inline.md */
+.jcard-facts { display: grid; gap: var(--jc-stack); padding-bottom: var(--jc-stack); border-bottom: 1px solid var(--jc-line-subtle); }
+.jcard-meta { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--jc-row-gap); }               /* stack.md */
+.jcard-meta li { display: flex; align-items: center; gap: var(--jc-inline); min-width: 0; font: 500 14px/20px var(--jc-font); color: var(--jc-muted); }
+.jcard-meta li > span:last-child { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jcard-ico { width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: 1024px; border: 1px solid var(--jc-line); color: var(--jc-faded); }
+.jcard-ico svg { width: 14px; height: 14px; }                           /* size.icon.sm */
+/* Job details — the atom's Link · sm · flush (its text sits on the content edge); the card trims 4 above and below so
+   the 40 tap area doesn't push the facts apart */
+.jcard-facts > .jcard-link { justify-self: start; margin-block: -4px; }
+
+/* skills — M.02 skills row: Label / md semibold label · Label / lg bold list · faded dots */
+.jcard-skills { display: flex; align-items: center; gap: var(--jc-inline); min-width: 0; padding: var(--jc-stack) 0; border-bottom: 1px solid var(--jc-line-subtle); }
+.jcard-skills-label { flex: none; font: 600 12px/12px var(--jc-font); color: var(--jc-faded); }
+.jcard-skills-list { flex: 1 1 0; min-width: 0; font: 700 14px/14px var(--jc-font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jcard-skills-list i { font-style: normal; color: var(--jc-faded); margin: 0 4px; }
+
+/* ── Actions ──────────────────────────────────────────────────────── */
+.jcard-actions { display: flex; align-items: center; gap: var(--jc-btn-gap); padding-top: var(--jc-stack); margin-top: auto; }
+
+/* the buttons themselves: the buttons atom — share and save Secondary · xl · icon (save toggles with aria-pressed),
+   Apply now / Interested Primary · xl · fill, Not interested Secondary · xl · fill. Nothing to style here. */
+
+/* outcome — done / expired: no buttons, only what happened (A.04 Badge md) and when (Body / sm medium) */
+.jcard-actions--outcome { justify-content: space-between; gap: 12px; }
+.jcard-when { min-width: 0; font: 500 12px/18px var(--jc-font); color: var(--jc-faded); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* expired — inert; decorative colour drops out, text steps down to content.neutral.faded */
+.jcard--expired { filter: grayscale(1); }   /* inert: rendered without card--interactive (no hover, no pointer) */
+.jcard--expired .jcard-role, .jcard--expired .jcard-name, .jcard--expired .jcard-skills-list,
+.jcard--expired .jcard-meta li, .jcard--expired .jcard-desc { color: var(--jc-faded); }
+.jcard--expired * { pointer-events: none; }
+
+/* ── 2.5 JD job card (v2.3.0) — the job at the top of the JD page ─────────────────────────────────────────────
+   badges · role · posted · company · facts grid · actions (· similar-jobs strip). Not a tap target: rendered without
+   card--interactive, and the click handler only reports its buttons. Badges and the outcome are the badges atom (Small);
+   .jcard-when is the card's own; buttons are the buttons atom. */
+.jcard--jd .jcard-badges { margin-bottom: 20px; }   /* stack.xl — more room between the pills and the role (v2.3.2, user) */
+.jcard-jd-role { margin: 0; }   /* the screen's heading (h1) — same size as every card's role (rule above) */
+.jcard-jd-by {
+  display: flex; align-items: center; flex-wrap: wrap; gap: var(--jc-inline); margin: 8px 0 0;                /* inline.md · stack.xs */
+  font: 500 12px/18px var(--jc-font); color: var(--jc-faded);                                                   /* Body / sm medium */
+}
+.jcard-jd-when { display: inline-flex; align-items: center; gap: 4px; }                                        /* inline.sm */
+.jcard-jd-when svg { width: 14px; height: 14px; }                                                              /* size.icon.sm — icons atom: clock */
+.jcard-jd-dot { width: 3px; height: 3px; border-radius: 1024px; background: currentColor; }
+.jcard-jd-co {                                                                                                 /* the company — opens its page */
+  margin: 0; padding: 0; border: 0; border-radius: 4px; background: none; cursor: pointer;
+  font: 600 12px/18px var(--jc-font); color: var(--jc-muted); -webkit-tap-highlight-color: transparent;         /* Body / sm semibold */
+}
+.jcard-jd-co:focus { outline: none; }
+.jcard-jd-co:focus-visible { outline: 2px solid var(--jc-focus); outline-offset: 2px; }
+.jcard-jd-facts {                                                                                               /* Location · Experience · Salary · Type */
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px 16px; margin: 20px 0 0; padding: 20px 0;             /* stack.xl · inset.xl */
+  border-top: 1px solid var(--jc-line-subtle); border-bottom: 1px solid var(--jc-line-subtle);
+}
+.jcard-jd-facts > div { min-width: 0; }
+.jcard-jd-facts dt { margin: 0; font: 700 10px/10px var(--jc-font); letter-spacing: 1px; text-transform: uppercase; color: var(--jc-faded); }   /* Eyebrow / sm */
+.jcard-jd-facts dd { margin: 8px 0 0; font: 700 14px/20px var(--jc-font); overflow-wrap: anywhere; }            /* Label / lg bold (line 20: a wrapped value keeps its rhythm) */
+.jcard--jd .jcard-actions { padding-top: 20px; margin-top: 0; }                                                  /* stack.xl under the facts */
+.jcard-jd-done { display: flex; align-items: center; gap: var(--jc-inline); margin: 20px 0 0; }
+.jcard-jd-done + .jcard-actions { padding-top: var(--jc-stack); }
+/* under 360 the atom tightens a fill label; with two icon buttons beside it the arrow would touch the edges */
+@media (max-width: 359px) { .jcard--jd .jcard-actions .btn--fill > svg { display: none; } }
+/* similar-jobs strip — the card's last part, edge to edge (the container's inset); highlighted on the brand-subtle fill of
+   the Docket "Matched…" strip (v2.3.2, user) — the fill marks its edge, so no separator */
+.jcard-jd-strip {
+  display: flex; align-items: center; gap: var(--jc-row-gap);
+  margin: 20px calc(var(--card-inset) * -1) calc(var(--card-inset) * -1); padding: 12px var(--card-inset);       /* inset.lg */
+  background: var(--jc-brand-subtle);                                                                            /* surface.brand.brand-subtle */
+}
+.jcard-jd-strip-text { flex: 1 1 0; min-width: 0; font: 600 14px/20px var(--jc-font); color: var(--jc-ink); }   /* Body / md semibold · content.neutral.base */
+/* the stack (v2.4.0, v2.4.1 smaller): up to three company logos + the total — 28 squares, corners 8, 5 overlap; the left tile sits on top
+   so every mark shows whole; a 2 ring in the strip's own colour cuts each edge; marks sit in an 18 box (same visual size) */
+.jcard-jd-stack { flex: none; display: flex; }
+.jcard-jd-tile {
+  position: relative; box-sizing: border-box; display: grid; place-items: center; width: 28px; height: 28px; margin-left: -5px; border-radius: 8px;
+  box-shadow: 0 0 0 2px var(--jc-brand-subtle); font: 700 11px/1 var(--jc-font); font-style: normal; color: var(--jc-on-dark);   /* Label / md bold */
+}
+.jcard-jd-tile:first-child { margin-left: 0; }
+.jcard-jd-tile:nth-child(1) { z-index: 4; } .jcard-jd-tile:nth-child(2) { z-index: 3; } .jcard-jd-tile:nth-child(3) { z-index: 2; } .jcard-jd-tile:nth-child(4) { z-index: 1; }
+.jcard-jd-tile--logo { padding: 6px; background-color: var(--jc-surface-raised); background-repeat: no-repeat; background-position: center; background-size: contain; background-origin: content-box; }   /* the company's own mark on white */
+.jcard-jd-tile--count { padding-left: 5px; background: var(--jc-brand-intense); font-variant-numeric: tabular-nums; }   /* the total; clears the tile on top of it */
+.jcard-jd-tile.jcard-logo--lime, .jcard-jd-tile.jcard-logo--ey { color: var(--jc-on-light); }
+/* narrow phones keep the line on one row: fewer logos, never a smaller text (the count always stays) */
+/* sized by the strip's own width (a container query), so it holds wherever the card sits: content under 296 (a 390 phone) two logos,
+   under 266 (a 360 phone) one and tighter gaps */
+.jcard-jd-strip { container: jc-strip / inline-size; }
+@container jc-strip (max-width: 295px) { .jcard-jd-tile:not(.jcard-jd-tile--count):nth-child(3) { display: none; } }
+@container jc-strip (max-width: 265px) { .jcard-jd-tile:not(.jcard-jd-tile--count):nth-child(2) { display: none; } .jcard-jd-stack { margin-right: -4px; } .jcard-jd-go { margin-left: -4px; } }
+/* the round arrow — 28 circle, arrow 14 (icons atom: arrow-right), 44 tap area. Smaller than the buttons atom's smallest
+   button (sm 40): kept in the card for now (user's pick, sample E) — a candidate for an xs round icon button in the atom */
+.jcard-jd-go {
+  position: relative; flex: none; display: grid; place-items: center; width: 28px; height: 28px; margin: 0 -2px 0 0; padding: 0; border: 0; border-radius: 1024px;
+  background: var(--jc-surface-raised); box-shadow: inset 0 0 0 1px var(--jc-line); color: var(--jc-ink);           /* surface.neutral.raised · stroke.neutral.base */
+  cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color 150ms ease;
+}
+.jcard-jd-go::after { content: ""; position: absolute; inset: -8px; border-radius: inherit; }                          /* 44 tap area */
+.jcard-jd-go svg { width: 14px; height: 14px; }                                                                    /* size.icon.sm */
+@media (hover: hover) { .jcard-jd-go:hover { background: var(--jc-surface-muted); } }
+.jcard-jd-go:active { background: var(--jc-surface-muted); }                                                       /* surface.neutral-state.hover */
+.jcard-jd-go:focus { outline: none; }
+.jcard-jd-go:focus-visible { outline: 2px solid var(--jc-focus); outline-offset: 2px; }
+</style>
+<!-- ▲ COMPONENT · job-card -->
+<style data-page="recommended-onboarding">
+/* ═══ RECOMMENDED JOBS · ONBOARDING (v2 · 2026-11-09, the user’s pick: samples/recommended-jobs-1-fanned-deck.html + status F "Ticket") ═══
+   Light page (no dark hero, no top bar) · fanned deck of the 4 picks (as App-login JD page › Similar jobs) · "I’ll apply later" sticky
+   (buttons atom, Secondary · lg · block, as the sign-up pages) · Apply → the card leaves the deck · all applied → the ticket, Go to dashboard. */
+
+.rj-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.rj-dots { display: flex; justify-content: center; gap: 6px; }
+.rj-dot { position: relative; width: 6px; height: 6px; padding: 0; border: 0; border-radius: var(--radius-full); background: var(--content-faded); opacity: .35; cursor: pointer; transition: width 200ms ease, opacity 200ms ease, background 200ms ease; }
+.rj-dot.is-on { width: 18px; border-radius: 4px; background: var(--content-base); opacity: 1; }
+.rj-dot::after { content: ""; position: absolute; left: -6px; right: -6px; top: -17px; bottom: -17px; }
+.rj-dot:focus-visible { outline: 2px solid var(--stroke-focus, #1A56FF); outline-offset: 3px; }
+/* the page's own note under the list ("Based on your profile and job preferences") moves into each layout */
+.jsrp-m-rec-note { display: none; }
+@media (prefers-reduced-motion: reduce) { [class^="rj-"], [class^="rj-"] * { transition-duration: 1ms !important; animation: none !important; } }
+
+#jsrpMHero { display: none !important; }
+html, body { background: var(--surface-base); }
+.rj-head { padding: 92px 24px 0; }
+@media (max-height: 760px) { .rj-head { padding-top: 84px; } .rj-title { font-size: 28px; line-height: 32px; } }
+.rj-eyebrow { margin: 0 0 8px; font: 700 10px/12px var(--font-brand); letter-spacing: 1.5px; text-transform: uppercase; color: var(--content-brand); }
+.rj-title { margin: 0; font: 800 32px/36px var(--font-brand); letter-spacing: -.8px; color: var(--content-base); text-wrap: balance; }
+.rj-title .accent { color: var(--content-brand); }
+.rj-sub { margin: 8px 0 0; font: 500 14px/20px var(--font-brand); color: var(--content-muted); }
+.rj-head--c { text-align: center; } .rj-head--c .rj-title { margin: 0 auto; max-width: 320px; }
+.rj-count { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 6px 12px 6px 10px; border-radius: var(--radius-full);
+  background: var(--surface-raised); box-shadow: inset 0 0 0 1px var(--stroke-neutral-base); font: 500 12px/16px var(--font-brand); color: var(--content-muted); }
+.rj-count::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--content-positive); box-shadow: 0 0 0 3px var(--surface-status-positive-subtle, #EAFAF0); flex: none; }
+.rj-count b { font-weight: 800; color: var(--content-base); }
+
+.jsrp-m-results { padding-bottom: 16px !important; }
+
+/* onboarding step: no floating top bar (back / See all jobs) — user 2026-11-08 */
+#jsrpMNav { display: none !important; }
+#jsrpMFb { display: none !important; }   /* the relevance sheet is not part of onboarding (user 2026-11-08) */
+.rj-head { padding-top: calc(env(safe-area-inset-top, 0px) + 40px); }
+@media (max-height: 780px) { .rj-head { padding-top: calc(env(safe-area-inset-top, 0px) + 24px); } .rj-title { font-size: 26px; line-height: 30px; } .rj-count { margin-top: 10px; } }
+/* the screen is one column: header · deck (centred in what's left) · the sticky bottom */
+.view-jsrp-m { display: flex !important; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+.view-jsrp-m > .jsrp-m-results { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-top: 0;
+  padding-bottom: calc(var(--rj-foot-h, 96px) + 8px) !important; }
+@media (max-height: 780px) { .rj-fan { padding-top: 20px !important; gap: 12px !important; } }
+.rj-fan { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 28px 0 8px; }
+.rj-fan-stage { position: relative; display: grid; width: min(100%, max(274px, min(calc(100% - 32px), 336px))); margin: 0 auto; perspective: 1000px; }   /* = App-login JD page › Similar jobs (.jdp-fan-stage v2.3) */
+.rj-fan-card { grid-area: 1 / 1; display: flex; min-width: 0; border-radius: var(--card-radius, 16px); cursor: grab; user-select: none; -webkit-user-select: none; touch-action: pan-y; position: relative;
+  transform-origin: center bottom; will-change: transform; transition: transform 420ms cubic-bezier(.22,1,.36,1), opacity 320ms ease;
+  box-shadow: 0 24px 60px -12px rgba(13,17,23,.16), 0 8px 20px -6px rgba(13,17,23,.08); }
+.rj-fan-card::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; background: var(--surface-base); opacity: 0; pointer-events: none; transition: opacity 320ms ease; }
+/* the job card component (App-components/cards/job-card v2.7.0) inside — placed as the JD page's Similar jobs stack:
+   one height for the deck (Share · Save · Apply now on the bottom edge), the role stops at two lines */
+.rj-fan-card > .jcard { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.rj-fan-card > .jcard > .jcard-actions { margin-top: auto; }
+.rj-fan-card .jcard-role { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.rj-fan-card.is-dragging { transition: none; cursor: grabbing; }
+.rj-fan-card[data-pos="0"] { transform: none; z-index: 4; }
+.rj-fan-card[data-pos="1"] { transform: translate3d(0,-8px,0) rotate(-5deg) scale(.96); z-index: 3; }
+.rj-fan-card[data-pos="1"]::after { opacity: .1; }
+.rj-fan-card[data-pos="2"] { transform: translate3d(0,-12px,0) rotate(5deg) scale(.93); z-index: 2; }
+.rj-fan-card[data-pos="2"]::after { opacity: .18; }
+.rj-fan-card[data-pos="3"] { transform: translate3d(0,-12px,0) rotate(5deg) scale(.93); z-index: 1; opacity: 0; }
+/* applied → the card lifts off the deck and the next one comes forward */
+.rj-fan-card.is-sent { z-index: 5; transition: transform 380ms cubic-bezier(.4,0,.2,1), opacity 300ms ease 60ms; transform: translate3d(0,-56px,0) scale(.9) !important; opacity: 0; pointer-events: none; }
+@media (max-height: 680px) { .rj-head { padding-top: calc(env(safe-area-inset-top, 0px) + 16px); } .rj-count { display: none; } .rj-fan-hint { display: none; } .rj-fan { padding-top: 16px !important; padding-bottom: 0 !important; gap: 10px !important; } }   /* small phones (SE): the deck still fits */
+.rj-fan-hint { margin: 0; font: 500 12px/18px var(--font-brand); color: var(--content-faded); }
+.rj-fan.is-one .rj-dots, .rj-fan.is-one .rj-fan-hint { visibility: hidden; }
+.rj-count b { font-variant-numeric: tabular-nums; }
+/* sticky bottom = the sign-up pages' bottom section (signup-manual .mo-foot): 16 · gutter 24 · max(16, safe area) ·
+   A.11 separator while more is below · one Secondary · lg · block — the way out, as "I'll do it later" there */
+.rj-foot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; flex-direction: column; gap: var(--spacing-stack-md);
+  padding: var(--spacing-inset-xl) var(--spacing-layout-sm) max(var(--spacing-inset-xl), env(safe-area-inset-bottom));
+  background: var(--surface-base); transition: box-shadow 160ms ease, transform 260ms ease, opacity 200ms ease; }
+.rj-foot.is-more { box-shadow: 0 calc(-1 * var(--size-stroke-thin)) 0 var(--stroke-neutral-base); }
+.rj-foot[hidden] { display: none; }
+/* every pick applied → the status screen */
+.rj-done { display: none; flex-direction: column; align-items: center; text-align: center; padding: calc(env(safe-area-inset-top, 0px) + 24px) 0 8px; }
+.view-jsrp-m.is-all-applied .rj-head, .view-jsrp-m.is-all-applied .rj-fan { display: none; }
+.view-jsrp-m.is-all-applied .rj-done { display: flex; animation: rjDoneIn 420ms cubic-bezier(.22,1,.36,1) both; }
+@keyframes rjDoneIn { from { opacity: 0; transform: translateY(16px); } }
+.rj-done-ic { display: grid; place-items: center; width: 80px; height: 80px; border-radius: 50%; background: var(--surface-status-positive-subtle, #EAFAF0); color: var(--content-status-positive); }
+.rj-done-ic svg { width: 40px; height: 40px; }
+.rj-done h1 { margin: 24px 0 0; font: 800 28px/32px var(--font-brand); letter-spacing: -.6px; color: var(--content-base); text-wrap: balance; }
+.rj-done-sub { margin: 8px 0 0; font: 500 14px/20px var(--font-brand); color: var(--content-muted); }
+.rj-done h1:focus { outline: none; }   /* focused for screen readers on arrival — no ring for a tap user */
+
+.rj-d { width: 100%; }
+.rj-d h1 { margin: 0; font: 800 30px/34px var(--font-brand); letter-spacing: -.7px; color: var(--content-base); text-wrap: balance; }
+.rj-d h1:focus { outline: none; }
+.rj-d h1 .accent { color: var(--content-brand); }
+.rj-d-sub { margin: 8px 0 0; font: 500 14px/20px var(--font-brand); color: var(--content-muted); }
+.rj-d-logo { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-md); font: var(--type-label-md-bold); text-transform: uppercase; }
+.view-jsrp-m.is-all-applied > .jsrp-m-results { justify-content: center; padding-bottom: calc(var(--rj-foot-h, 96px) + 16px) !important; }
+.view-jsrp-m.is-all-applied .rj-done { padding-top: calc(env(safe-area-inset-top, 0px) + 32px); }
+@media (max-height: 760px) { .view-jsrp-m.is-all-applied .rj-done { padding-top: calc(env(safe-area-inset-top, 0px) + 20px); } }
+
+.rj-tk-h { text-align: center; margin-bottom: 28px; }
+/* the shadow sits on a wrapper so it follows the cut-outs (a mask would clip a box-shadow) */
+.rj-tk-wrap { width: min(100%, max(274px, min(calc(100% - 32px), 336px))); margin: 0 auto;   /* = the deck's width */
+  position: relative; isolation: isolate; filter: drop-shadow(0 0 .5px rgba(13,17,23,.22)); animation: rjTk 560ms cubic-bezier(.22,1,.36,1) both; }
+/* the lift: a soft shadow under the stub only, so the cut-outs read as holes (no grey half-moons) */
+.rj-tk-wrap::before { content: ""; position: absolute; z-index: -1; left: 18px; right: 18px; bottom: -4px; height: 46%; border-radius: 24px; background: rgba(13,17,23,.16); filter: blur(16px); transform: translateY(10px); }
+@keyframes rjTk { from { opacity: 0; transform: translateY(20px); } }
+.rj-tk { --ny: 120px; --nr: 12px; border-radius: var(--radius-2xl); background: var(--surface-raised);
+  -webkit-mask: radial-gradient(circle var(--nr) at 0 var(--ny), transparent 98%, #000 100%) left / 51% 100% no-repeat,
+                radial-gradient(circle var(--nr) at 100% var(--ny), transparent 98%, #000 100%) right / 51% 100% no-repeat;
+          mask: radial-gradient(circle var(--nr) at 0 var(--ny), transparent 98%, #000 100%) left / 51% 100% no-repeat,
+                radial-gradient(circle var(--nr) at 100% var(--ny), transparent 98%, #000 100%) right / 51% 100% no-repeat; }
+.rj-tk-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 22px 24px 20px; }
+.rj-tk-l { display: block; font: 700 10px/12px var(--font-brand); letter-spacing: 1.5px; text-transform: uppercase; color: var(--content-faded); }
+.rj-tk-n { display: block; margin: 8px 0 0 -4px;   /* optical: the 0's side bearing lines up with the label */
+   font: 800 64px/56px var(--font-brand); letter-spacing: -2px; color: var(--content-base); font-variant-numeric: tabular-nums; }
+.rj-tk-date { text-align: right; }
+.rj-tk-v { display: block; margin-top: 8px; font: 700 18px/24px var(--font-brand); color: var(--content-base); white-space: nowrap; }
+.rj-tk-y { display: block; font: 500 12px/16px var(--font-brand); color: var(--content-muted); }
+.rj-tk-cut { height: 0; margin: 0 calc(var(--nr) + 8px); border-top: 2px dashed var(--stroke-neutral-base); }
+.rj-tk-stub { padding: 18px 24px 22px; }
+.rj-tk-stub-hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.rj-tk-logos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.rj-tk-logos .rj-d-logo { width: 40px; height: 40px; }
+</style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shine Preview"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-startup-image" href="icons/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1260x2736.png" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})</script>
 </head>
 <body>
@@ -2852,6 +3641,7 @@ body { background: var(--surface-base, var(--surface-base)); }
 
       // Kick things off.
       if (window.__REC_LIMIT && MOBILE_JOBS.length > window.__REC_LIMIT) MOBILE_JOBS.length = window.__REC_LIMIT;   // recommended mode
+      window.__REC_JOBS = MOBILE_JOBS;   // the onboarding deck reads the 4 picks
       function renderResults(){
         setupInfiniteScroll();
         if (!MOBILE_JOBS.length && listEl) listEl.insertAdjacentHTML('afterbegin', emptyStateHTML());
@@ -3245,6 +4035,392 @@ body { background: var(--surface-base, var(--surface-base)); }
     }, true);
   }
 })();
+</script>
+<!-- ▼ COMPONENT · job-card v2.7.0 · verbatim copy of App-components/cards/job-card/job-card.js — do not edit here -->
+<script data-component="job-card">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · JOB CARD  (app component · App-login · cards/)        v2.7.0
+   Pair with job-card.css (and, before it, atoms/buttons/buttons.css and cards/card-container/card-container.css). One renderer for every job card.
+   Each card renders as <article class="card card--interactive jcard …"> — the shared card container draws its
+   surface, edge, shadow, padding and corners (expired cards leave out card--interactive: inert).
+   Variants (cards/README): 2.1 Job card { state: active | done | expired } · 2.2 Recruiter's invite
+   { ctx: { kind: 'invite' }, state: 'invite' } · 2.3 Matched job { ctx: { kind: 'match' } } · 2.4 Saved job
+   { ctx: { kind: 'saved' }, saved: true } · 2.5 JD job card — ShineJobCard.jd(job), the job at the top of the JD page (v2.3.0).
+
+   ShineJobCard.html(job)  → markup for one card
+   ShineJobCard.list(jobs) → markup for several (wrap them in .jcard-list)
+   ShineJobCard.setSaved(cardOrId, on)  → bookmark state (aria-pressed + label + ic_bookmark-outline / -solid)
+   Atoms (v2.7.0): badges = the BADGES ATOM, Small (badge badge--sm badge--<intent>, + badge-dot for Actively Hiring); the unread
+   dot = the PILLS ATOM (pill pill--md pill--dot). Load atoms/badges/badges.css and atoms/pills/pills.css before job-card.css.
+   Icons (v2.6.0): all from the icons atom (AT, icons.json v2.1.0) — the match sparkle is the one hand-drawn icon left.
+   ShineJobCard.jd(job)    → markup for the JD job card (2.5) — see "JD job card" below
+   ShineJobCard.replace(card, job) → swaps a rendered card for a new render of the same variant (e.g. after applying)
+   Event: 'shine:jobcard' bubbles from the card on any tap,
+          detail { action, id, card, button } — action: open | details | share | save | unsave |
+          apply | decline | interested · JD job card also: similar | company (it never fires open — not a tap target).
+          Cancelable; the page owns what happens next.
+
+   job = {
+     id, name, sub, logo: { text, person?, color? },   // color: violet|pink|aqua|cyan|lime|ey (default: hash of name)
+     ctx?: { kind: 'invite'|'match'|'saved', text },   // Docket: why the card is here (kept on done / expired cards)
+     role, badges?: ['actively'|'early'|'urgent' | { kind, text }], desc?, meta: { exp, pay, loc }, details?, skills?: [],
+     state: 'active'  → Share · Save · Apply            { saved?, apply?: 'native'|'external' }
+          | 'invite'  → Not interested · Interested + "Job details" link (default; details: false hides it) —
+                        not a tap target (v2.5.0): the link opens the job, the card body does nothing
+          | 'done'    → read-only outcome row           { outcome: 'applied'|'interested'|'declined', when }
+          | 'expired' → grey, inert, "Expired" + when   { when }
+     unread?                                            // Docket pending only: A.03 Pill dot on the logo
+   }
+   JD job card (2.5) = {
+     id, role, posted, company, badges?, facts?: [[label, value], …] (Location · Experience · Salary · Type),
+     state: 'active'  → Share · Save · Apply Now — the list cards' order (+ the similar-jobs strip when similar > 0)
+                                                        { saved?, apply?: 'native'|'external', similar? }
+     similar?: N  |  { count: N, logos: [{ name, src? | text?, color? }, …] }   // the strip: up to 3 logos + the total (99+) · "Similar jobs found" · round arrow
+          | 'applied' → Applied + when · Share · Explore Similar Jobs   { when }
+          | 'expired' → Expired + when · Share · Explore Similar Jobs   { when }
+     level?: heading level of the role (default 1 — it is the screen's heading)
+   }
+   Cards only. The list around them is the page's: the expired row is the nav-card component, the Expired-page note
+   is the alert component, day headers are page markup.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function (global) {
+  'use strict';
+  if (global.ShineJobCard) return;
+  var S = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  var AT = {   // icons atom (atoms/icons/icons.json v2.1.0, verbatim) — every job-card icon but the sparkle
+    'ic_job-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_job-outline" viewBox="0 0 20 20" fill="none"><path d="M6.91186 3.16702C6.87646 3.43818 6.87546 3.74633 6.87546 4.12504V4.16671H12.2921V4.12504C12.2921 3.74633 12.2911 3.43818 12.2557 3.16702C12.221 2.90149 12.1587 2.72274 12.0696 2.59393C11.9169 2.37296 11.525 2.08337 10.2505 2.08337H8.91712C7.64253 2.08337 7.25066 2.37296 7.09794 2.59393C7.00891 2.72274 6.94653 2.90149 6.91186 3.16702ZM13.5421 4.16671V4.10339C13.5421 3.75045 13.5422 3.36495 13.4952 3.0052C13.4465 2.63244 13.3422 2.23671 13.0979 1.88323C12.584 1.13962 11.6425 0.833374 10.2505 0.833374H8.91712C7.52505 0.833374 6.58358 1.13962 6.06964 1.88323C5.82533 2.23671 5.72105 2.63244 5.67238 3.0052C5.62541 3.36494 5.62544 3.75044 5.62545 4.10338L5.62546 4.16671H5.41698C3.56445 4.16671 2.29944 4.59552 1.56159 5.47273C0.830911 6.34143 0.761412 7.48268 0.878519 8.54682L1.50304 15.2083L1.50387 15.2166C1.59566 16.0733 1.81069 17.0126 2.57563 17.7114C3.33492 18.4051 4.51127 18.75 6.25031 18.75H12.917C14.656 18.75 15.8324 18.4051 16.5917 17.7114C17.3566 17.0126 17.5716 16.0733 17.6634 15.2166L18.239 9.07731C18.2468 9.0371 18.2507 8.99616 18.2505 8.95511L18.2888 8.5468C18.4059 7.48267 18.3364 6.34143 17.6057 5.47273C16.8679 4.59552 15.6028 4.16671 13.7503 4.16671H13.5421ZM5.41698 5.41671C3.71118 5.41671 2.90535 5.81706 2.5182 6.27735C2.12509 6.74471 2.01444 7.44695 2.12152 8.41463L2.12267 8.42503L2.14704 8.68593C3.72877 9.76288 5.48759 10.4608 7.29212 10.7649V10.625C7.29212 10.6159 7.29212 10.6068 7.29212 10.5976C7.29208 10.4134 7.29203 10.2266 7.30897 10.0742C7.32622 9.91892 7.37237 9.66091 7.57935 9.45393C7.78632 9.24696 8.04434 9.20081 8.19967 9.18355C8.35205 9.16662 8.5388 9.16666 8.72308 9.1667C8.73221 9.1667 8.74134 9.16671 8.75046 9.16671H10.4171C10.4262 9.16671 10.4354 9.1667 10.4445 9.1667C10.6288 9.16666 10.8155 9.16662 10.9679 9.18355C11.1232 9.20081 11.3813 9.24696 11.5882 9.45393C11.7952 9.66091 11.8414 9.91892 11.8586 10.0742C11.8755 10.2266 11.8755 10.4134 11.8755 10.5976C11.8755 10.6068 11.8755 10.6159 11.8755 10.625V10.7473C13.6887 10.4198 15.4493 9.7129 17.0267 8.61722L17.0457 8.41462C17.1528 7.44694 17.0422 6.74471 16.6491 6.27735C16.2619 5.81706 15.4561 5.41671 13.7503 5.41671H5.41698ZM16.8785 10.1974C15.309 11.1285 13.6041 11.7328 11.8614 12.018C11.8568 12.0789 11.8507 12.1398 11.8426 12.1998C11.8085 12.4519 11.7338 12.7381 11.5509 12.9992C11.161 13.556 10.4725 13.75 9.58379 13.75C8.69998 13.75 8.01322 13.5585 7.6218 13.0062C7.43775 12.7465 7.36157 12.4614 7.32647 12.2092C7.31838 12.151 7.31219 12.0922 7.30747 12.0332C5.56665 11.7688 3.8635 11.1721 2.29425 10.2562L2.74719 15.0875C2.83056 15.8619 3.00316 16.4089 3.41874 16.7886C3.8407 17.1741 4.63935 17.5 6.25031 17.5H12.917C14.5279 17.5 15.3266 17.1741 15.7485 16.7886C16.1641 16.4089 16.3367 15.8619 16.4201 15.0875L16.8785 10.1974ZM8.54279 10.4173C8.54214 10.4768 8.54212 10.5446 8.54212 10.625V11.4833C8.54212 11.7179 8.54417 11.8905 8.56454 12.0369C8.58413 12.1777 8.61525 12.2462 8.64162 12.2834C8.67102 12.3249 8.81759 12.5 9.58379 12.5C10.3534 12.5 10.4983 12.3232 10.5271 12.2821C10.5536 12.2442 10.5846 12.1746 10.6039 12.0322C10.6239 11.8841 10.6255 11.7108 10.6255 11.475V10.625C10.6255 10.5446 10.6254 10.4768 10.6248 10.4173C10.5653 10.4167 10.4975 10.4167 10.4171 10.4167H8.75046C8.67008 10.4167 8.60227 10.4167 8.54279 10.4173Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg>',
+    'ic_rupee-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_rupee-outline" viewBox="0 0 20 20" fill="none"><path d="M7.56381 9.95855C7.19914 9.9518 6.89525 10.2422 6.8885 10.6136C6.8885 10.7959 6.96278 10.9783 7.09109 11.1133L10.3596 14.1995C10.4812 14.3143 10.65 14.3751 10.8256 14.3751C11.197 14.3751 11.5009 14.0712 11.5009 13.6998C11.5009 13.5107 11.4266 13.3351 11.2916 13.2068L9.23858 11.2619C9.80584 11.1876 10.3326 10.931 10.7446 10.5258C11.062 10.1949 11.2983 9.78972 11.4266 9.35077H12.1289C12.5004 9.35077 12.8043 9.04688 12.8043 8.67546C12.8043 8.30404 12.5004 8.00015 12.1289 8.00015H11.4199C11.3658 7.73003 11.2781 7.52743 11.17 7.39237H12.1289C12.5004 7.39237 12.8043 7.08848 12.8043 6.71706C12.8043 6.34564 12.5004 6.04175 12.1289 6.04175H7.55706C7.18564 6.04175 6.88175 6.34564 6.88175 6.71706C6.88175 7.08848 7.18564 7.39237 7.55706 7.39237H8.86041C9.31962 7.39237 9.72481 7.59496 9.95441 8.00015H7.55031C7.17889 8.00015 6.875 8.30404 6.875 8.67546C6.875 9.04688 7.17889 9.35077 7.55031 9.35077H9.95441C9.90039 9.43181 9.83961 9.50609 9.77208 9.58038C9.52896 9.82349 9.19806 9.95855 8.86041 9.95855H7.56381Z" fill="currentColor"/><path d="M10.0003 1.04175C5.05277 1.04175 1.04199 5.05253 1.04199 10.0001C1.04199 14.9476 5.05277 18.9584 10.0003 18.9584C14.9479 18.9584 18.9587 14.9476 18.9587 10.0001C18.9587 5.05253 14.9479 1.04175 10.0003 1.04175ZM2.29199 10.0001C2.29199 5.74289 5.74313 2.29175 10.0003 2.29175C14.2575 2.29175 17.7087 5.74289 17.7087 10.0001C17.7087 14.2573 14.2575 17.7084 10.0003 17.7084C5.74313 17.7084 2.29199 14.2573 2.29199 10.0001Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg>',
+    'ic_location-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_location-outline" viewBox="0 0 20 20" fill="none"><path d="M10.0026 2.29163C7.15535 2.2897 4.37046 3.94189 3.62611 7.21322C2.74522 11.1051 5.15666 14.4801 7.42508 16.6664C8.86717 18.0508 11.1338 18.0491 12.5659 16.667L12.567 16.6659C14.8436 14.4796 17.2546 11.1128 16.3737 7.22129C15.6332 3.94975 12.8501 2.29355 10.0026 2.29163ZM17.5928 6.9453C16.6999 3.0002 13.3206 1.04387 10.0035 1.04163C6.68628 1.03939 3.3046 2.99124 2.40716 6.93633C1.37157 11.5109 4.22642 15.3197 6.55788 17.5667L6.55867 17.5674C8.48316 19.4157 11.5159 19.4173 13.4336 17.5667C15.7735 15.3195 18.6284 11.5199 17.5928 6.9453ZM9.99992 6.61663C8.90916 6.61663 8.02492 7.50087 8.02492 8.59163C8.02492 9.68239 8.90916 10.5667 9.99992 10.5667C11.0907 10.5667 11.9749 9.68239 11.9749 8.59163C11.9749 7.50087 11.0907 6.61663 9.99992 6.61663ZM6.77492 8.59163C6.77492 6.81051 8.21881 5.36663 9.99992 5.36663C11.781 5.36663 13.2249 6.81051 13.2249 8.59163C13.2249 10.3728 11.781 11.8167 9.99992 11.8167C8.21881 11.8167 6.77492 10.3728 6.77492 8.59163Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg>',
+    'ic_share-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_share-outline" viewBox="0 0 20 20" fill="none"><path d="M11.9747 3.25511C12.5783 2.97559 13.2625 2.92397 13.9014 3.10913C14.5404 3.29443 15.0911 3.70483 15.4516 4.26411C15.8119 4.82329 15.9579 5.49365 15.8628 6.15201C15.7675 6.81046 15.4382 7.41298 14.9342 7.84725C14.4301 8.28153 13.7851 8.51889 13.1198 8.51561C12.4546 8.51225 11.813 8.26843 11.3133 7.82938L11.2408 7.76582L8.39358 9.59413L8.42138 9.68649C8.58068 10.2116 8.58077 10.7722 8.42138 11.2973L8.39358 11.3897L11.1604 13.1654L11.2418 13.218L11.3133 13.1534C11.8181 12.7066 12.4695 12.4612 13.1436 12.4622C13.7261 12.4623 14.2943 12.6453 14.7664 12.9866C15.2384 13.3279 15.5908 13.8099 15.7734 14.363C15.9559 14.9161 15.9593 15.5131 15.7833 16.0682C15.6072 16.6233 15.26 17.1089 14.7922 17.4556C14.3243 17.8023 13.7587 17.9929 13.1764 17.9998C12.5942 18.0067 12.0246 17.8297 11.5487 17.4943C11.0726 17.1587 10.714 16.6807 10.5248 16.1298C10.3358 15.579 10.3257 14.9827 10.495 14.4256L10.5228 14.3332L10.4414 14.2816L7.756 12.5526L7.67457 12.501L7.60306 12.5645C7.20359 12.9175 6.71002 13.1482 6.18292 13.2279C5.65589 13.3076 5.11662 13.2334 4.63069 13.0144C4.14476 12.7953 3.73222 12.4402 3.44293 11.9925C3.1537 11.5448 3.00006 11.0229 3 10.4899C3 9.95697 3.15379 9.43503 3.44293 8.98734C3.73218 8.53966 4.14481 8.18454 4.63069 7.96543C5.11665 7.74636 5.65585 7.67223 6.18292 7.75191C6.71004 7.83165 7.20358 8.06227 7.60306 8.41531L7.67457 8.47887L7.75501 8.42623L10.5228 6.65254L10.495 6.56018C10.3014 5.92362 10.3444 5.23787 10.6162 4.63057C10.888 4.02336 11.3711 3.5348 11.9747 3.25511ZM13.6968 13.8973C13.4331 13.788 13.1425 13.7592 12.8626 13.8148C12.5826 13.8705 12.3255 14.0083 12.1237 14.2101C11.9219 14.4119 11.7842 14.6691 11.7284 14.949C11.6728 15.229 11.7016 15.5195 11.8109 15.7832C11.9201 16.0468 12.1049 16.2721 12.3422 16.4307C12.5794 16.5892 12.8583 16.6739 13.1436 16.674C13.5263 16.674 13.8939 16.5224 14.1645 16.2519C14.4352 15.9813 14.5875 15.6137 14.5876 15.231C14.5876 14.9455 14.5029 14.666 14.3443 14.4286C14.1857 14.1914 13.9603 14.0065 13.6968 13.8973ZM6.32493 9.15816C6.06124 9.04893 5.77066 9.0201 5.49072 9.07573C5.21082 9.13141 4.95369 9.26924 4.75184 9.47099C4.55006 9.67279 4.41232 9.92998 4.35659 10.2099C4.30093 10.4898 4.32885 10.7804 4.43802 11.0441C4.54728 11.3078 4.73299 11.533 4.97033 11.6916C5.20761 11.8501 5.48641 11.9348 5.77177 11.9349C6.15446 11.9349 6.522 11.7833 6.79268 11.5128C7.06333 11.2422 7.21567 10.8746 7.21575 10.4919C7.21575 10.2064 7.13102 9.92684 6.97244 9.68947C6.81391 9.45228 6.58847 9.26741 6.32493 9.15816ZM13.1436 4.3088C12.761 4.30891 12.3943 4.46138 12.1237 4.73187C11.853 5.00258 11.7006 5.36996 11.7006 5.75278C11.7007 6.03811 11.7855 6.31696 11.9439 6.55422C12.1025 6.79155 12.3277 6.97728 12.5914 7.08653C12.8552 7.19577 13.1457 7.22365 13.4257 7.16796C13.7055 7.11229 13.9627 6.97537 14.1645 6.7737C14.3664 6.57185 14.5041 6.31381 14.5598 6.03383C14.6154 5.75406 14.5865 5.46418 14.4774 5.20062C14.3681 4.93687 14.1834 4.71073 13.9461 4.55212C13.7087 4.39354 13.4291 4.3088 13.1436 4.3088Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg>',
+    'ic_bookmark-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_bookmark-outline" viewBox="0 0 20 20" fill="none"><path d="M14.5664 2C14.9116 2.00021 15.2431 2.13686 15.4873 2.38086C15.7317 2.62527 15.8682 2.95806 15.8682 3.30371V16.2871L15.8623 16.3818C15.8496 16.4756 15.8179 16.5664 15.7695 16.6484C15.7051 16.7577 15.6128 16.8476 15.502 16.9092C15.3908 16.9708 15.2647 17.0022 15.1377 16.999C15.0107 16.9958 14.8861 16.9587 14.7783 16.8916L10.4346 14.1768L6.09082 16.8916C5.983 16.9589 5.8585 16.9966 5.73145 17C5.60452 17.0033 5.47927 16.9716 5.36816 16.9102C5.25696 16.8486 5.16326 16.7589 5.09863 16.6494C5.05022 16.5673 5.01952 16.4757 5.00684 16.3818L5 16.2871V3.30371C5 2.95806 5.13645 2.62527 5.38086 2.38086C5.62527 2.13645 5.95806 2 6.30371 2H14.5664ZM6.42676 15L10.0557 12.7324C10.1689 12.6617 10.3 12.6241 10.4336 12.624C10.5672 12.624 10.6982 12.6616 10.8115 12.7324L14.4434 15.001V3.42676H6.42676V15Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg>',
+    'ic_bookmark-solid': '<svg aria-hidden="true" focusable="false" data-icon="ic_bookmark-solid" viewBox="0 0 20 20" fill="none"><path d="M14.6002 3H6.20002C5.88176 3 5.57653 3.12643 5.35148 3.35148C5.12643 3.57653 5 3.88176 5 4.20002V17.4003C5.00005 17.5074 5.02876 17.6125 5.08314 17.7047C5.13753 17.797 5.21561 17.873 5.30928 17.9249C5.40295 17.9767 5.50879 18.0026 5.61584 17.9998C5.72288 17.997 5.82721 17.9655 5.91802 17.9088L10.4001 15.1075L14.8829 17.9088C14.9737 17.9654 15.078 17.9966 15.1849 17.9993C15.2919 18.0021 15.3976 17.9762 15.4911 17.9243C15.5847 17.8724 15.6627 17.7965 15.717 17.7044C15.7713 17.6122 15.8001 17.5073 15.8002 17.4003V4.20002C15.8002 3.88176 15.6738 3.57653 15.4487 3.35148C15.2237 3.12643 14.9185 3 14.6002 3Z" fill="currentColor"/></svg>',
+    'ic_arrow-right-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_arrow-right-outline" viewBox="0 0 20 20" fill="none"><path d="M10.7118 4C10.9329 4 11.145 4.08781 11.3013 4.24414L16.7559 9.69869C16.8332 9.77603 16.8942 9.86783 16.9361 9.96857C16.9779 10.0696 17 10.1786 17 10.2882C17 10.3976 16.9787 10.506 16.937 10.6069C16.8951 10.7077 16.8335 10.8002 16.7559 10.8777L11.3013 16.3322C11.1449 16.4885 10.9328 16.5763 10.7118 16.5763C10.4908 16.5763 10.2787 16.4885 10.1223 16.3322C9.96608 16.176 9.87829 15.9637 9.8782 15.7427C9.8782 15.5217 9.96613 15.3095 10.1223 15.1532L14.1538 11.1218H2.83363C2.61268 11.1218 2.40035 11.0337 2.24414 10.8777C2.08789 10.7214 2.00004 10.5091 2 10.2882C2 10.0672 2.08787 9.85496 2.24414 9.69869C2.40041 9.54246 2.61266 9.45455 2.83363 9.45455H14.1547L10.1223 5.42312C9.96602 5.26679 9.8782 5.05473 9.8782 4.83363C9.8782 4.61252 9.96601 4.40046 10.1223 4.24414C10.2787 4.08782 10.4907 4 10.7118 4Z" fill="currentColor"/></svg>',
+    'ic_arrow-up-right-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_arrow-up-right-outline" viewBox="0 0 20 20" fill="none"><path d="M17 3.77775V13.8886C17 14.0948 16.9181 14.2927 16.7722 14.4385C16.6264 14.5844 16.4285 14.6663 16.2222 14.6663C16.016 14.6663 15.8181 14.5844 15.6723 14.4385C15.5264 14.2927 15.4445 14.0948 15.4445 13.8886V5.65506L4.32845 16.7721C4.18251 16.918 3.98458 17 3.77819 17C3.57179 17 3.37386 16.918 3.22793 16.7721C3.08199 16.6261 3 16.4282 3 16.2218C3 16.0154 3.08199 15.8175 3.22793 15.6716L14.3449 4.55551H6.11145C5.90518 4.55551 5.70735 4.47356 5.56149 4.32771C5.41564 4.18185 5.33369 3.98403 5.33369 3.77775C5.33369 3.57148 5.41564 3.37366 5.56149 3.2278C5.70735 3.08194 5.90518 3 6.11145 3H16.2222C16.4285 3 16.6264 3.08194 16.7722 3.2278C16.9181 3.37366 17 3.57148 17 3.77775Z" fill="currentColor"/></svg>',
+    'ic_chevron-right-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_chevron-right-outline" viewBox="0 0 20 20" fill="none"><path d="M8.37402 2C8.08113 2.00007 7.79989 2.11613 7.59277 2.32324C7.38566 2.53036 7.2696 2.81159 7.26953 3.10449C7.26953 3.39736 7.38576 3.67859 7.59277 3.88574L13.332 9.62402L7.59277 15.3643C7.38576 15.5714 7.26953 15.8526 7.26953 16.1455C7.2696 16.4384 7.38566 16.7196 7.59277 16.9268C7.79989 17.1339 8.08113 17.2499 8.37402 17.25C8.6669 17.25 8.94812 17.1338 9.15527 16.9268L15.6758 10.4062C15.7785 10.3038 15.8604 10.1819 15.916 10.0479C15.9716 9.91385 16 9.77009 16 9.625C16 9.47991 15.9716 9.33615 15.916 9.20215C15.8604 9.06813 15.7785 8.9462 15.6758 8.84375L9.15527 2.32324C8.94812 2.11623 8.6669 2 8.37402 2Z" fill="currentColor"/></svg>',
+    'ic_heart-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_heart-outline" viewBox="0 0 20 20" fill="none"><path d="M13.4483 3.10315C12.0628 3.10315 10.8331 3.65005 10 4.59005C9.1669 3.65005 7.93724 3.10315 6.55172 3.10315C5.34498 3.10461 4.18808 3.58463 3.33478 4.43793C2.48148 5.29123 2.00146 6.44813 2 7.65487C2 12.6438 9.29724 16.63 9.60759 16.7976C9.72819 16.8626 9.86302 16.8966 10 16.8966C10.137 16.8966 10.2718 16.8626 10.3924 16.7976C10.7028 16.63 18 12.6438 18 7.65487C17.9985 6.44813 17.5185 5.29123 16.6652 4.43793C15.8119 3.58463 14.655 3.10461 13.4483 3.10315ZM13.0697 12.9211C12.1092 13.7361 11.0824 14.4697 10 15.1142C8.91762 14.4697 7.89085 13.7361 6.93034 12.9211C5.43586 11.639 3.65517 9.68384 3.65517 7.65487C3.65517 6.88666 3.96034 6.14991 4.50355 5.6067C5.04676 5.06349 5.78351 4.75832 6.55172 4.75832C7.77931 4.75832 8.8069 5.4066 9.23379 6.45074C9.29593 6.60295 9.40199 6.7332 9.53845 6.82489C9.67491 6.91658 9.83559 6.96555 10 6.96555C10.1644 6.96555 10.3251 6.91658 10.4615 6.82489C10.598 6.7332 10.7041 6.60295 10.7662 6.45074C11.1931 5.4066 12.2207 4.75832 13.4483 4.75832C14.2165 4.75832 14.9532 5.06349 15.4964 5.6067C16.0397 6.14991 16.3448 6.88666 16.3448 7.65487C16.3448 9.68384 14.5641 11.639 13.0697 12.9211Z" fill="currentColor"/></svg>',
+    'ic_clock-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_clock-outline" viewBox="0 0 20 20" fill="none"><path d="M9.72865 6.04408C10.0933 6.04427 10.3892 6.33994 10.3892 6.70462V9.71402C10.3893 9.80308 10.4246 9.94758 10.513 10.1028C10.6017 10.2581 10.708 10.3621 10.784 10.4072L10.7865 10.409L10.7883 10.4098L13.0614 11.7662C13.3746 11.9531 13.4772 12.3595 13.2902 12.6727C13.1032 12.9856 12.6977 13.0874 12.3846 12.9006L10.1105 11.5443C9.83078 11.3783 9.60151 11.1308 9.43364 10.87L9.36569 10.7573C9.19401 10.4563 9.06825 10.0872 9.06811 9.71402V6.70462C9.06811 6.33982 9.36384 6.04408 9.72865 6.04408Z" fill="currentColor"/><path d="M9.99957 2C14.4156 2 17.9998 5.58359 18 9.99957C17.9999 14.4156 14.4156 18 9.99957 18C5.58368 17.9999 2.00012 14.4155 2 9.99957C2.00015 5.58368 5.5837 2.00014 9.99957 2ZM9.99957 3.32108C6.31331 3.32122 3.32123 6.31329 3.32108 9.99957C3.32119 13.6859 6.31329 16.6788 9.99957 16.6789C13.686 16.6789 16.6788 13.686 16.6789 9.99957C16.6788 6.31321 13.686 3.32108 9.99957 3.32108Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg>',
+    'ic_check-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_check-outline" viewBox="0 0 20 20" fill="none"><path d="M7.071 15.244L7.364 15.435L7.708 15.5L8.05 15.429L8.34 15.233L17.24 6.23295L17.433 5.93995L17.5 5.59495L17.43 5.25095L17.233 4.95995L16.94 4.76695L16.595 4.69995L16.251 4.76995L15.96 4.96695L7.689 13.331L3.891 9.64595L3.565 9.51495L3.214 9.51895L2.891 9.65795L2.756 9.77095L2.565 10.065L2.5 10.411L2.573 10.754L2.658 10.909L7.071 15.244Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg>'
+  };
+  var OWN = { spark: S + '<path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5 10.1 11.9 4.5 10l5.6-1.4z"/></svg>' };   // the match sparkle — not in the icons atom yet (hand-drawn, 24 grid)
+  var COLORS = ['violet', 'aqua', 'pink', 'cyan', 'lime', 'ey'];   // same hash rule as JSRP
+  var BADGES = { actively: ['brand', '<span class="badge-dot" aria-hidden="true"></span>', 'Actively Hiring'],
+                 early: ['pink', '', 'Be An Early Applicant'], urgent: ['negative', '', 'Urgent'] };   // A.04: brand (live dot) · decorative pink · negative
+  var CTX = { invite: AT['ic_heart-outline'], match: OWN.spark, saved: AT['ic_bookmark-solid'] };
+
+  function esc(t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function color(name) { var h = 0; for (var i = 0; i < (name || '').length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0; return COLORS[h % COLORS.length]; }
+  function act(a, id, label, inner, cls, extra) {
+    return '<button class="' + cls + '" type="button" data-jc-act="' + a + '" data-id="' + esc(id) + '"' + (label ? ' aria-label="' + label + '"' : '') + (extra || '') + '>' + inner + '</button>';
+  }
+  function saveBtn(id, on) {
+    return act(on ? 'unsave' : 'save', id, on ? 'Saved — remove job' : 'Save job', AT[on ? 'ic_bookmark-solid' : 'ic_bookmark-outline'], 'btn btn--secondary btn--xl btn--icon jcard-ib jcard-save', ' aria-pressed="' + (on ? 'true' : 'false') + '"');
+  }
+  var OUT = { applied: ['positive', 'Applied'], interested: ['positive', 'Interest sent'], declined: ['neutral', 'Not interested'], expired: ['neutral', 'Expired'] };
+  function state(j) { return j.state || 'active'; }
+  function actions(j) {
+    var st = state(j), id = j.id;
+    if (st === 'invite')
+      return act('decline', id, '', 'Not interested', 'btn btn--secondary btn--xl btn--fill jcard-cta jcard-cta--secondary') + act('interested', id, '', 'Interested' + AT['ic_arrow-right-outline'], 'btn btn--primary btn--xl btn--fill jcard-cta');
+    if (st === 'done' || st === 'expired') {
+      var o = OUT[st === 'expired' ? 'expired' : (j.outcome || 'applied')] || OUT.applied;
+      return '<span class="badge badge--sm badge--' + o[0] + ' jcard-badge">' + o[1] + '</span>' +
+             (j.when ? '<span class="jcard-when">' + esc(j.when) + '</span>' : '');
+    }
+    var ext = j.apply === 'external';
+    return act('share', id, 'Share', AT['ic_share-outline'], 'btn btn--secondary btn--xl btn--icon jcard-ib') + saveBtn(id, !!j.saved) +
+      act('apply', id, ext ? 'Apply now on the company site' : 'Apply now', 'Apply now' + (ext ? AT['ic_arrow-up-right-outline'] : ''), 'btn btn--primary btn--xl btn--fill jcard-cta', ' data-apply="' + (ext ? 'external' : 'native') + '"');   // M.02 portrait wording
+  }
+  function html(j) {
+    var lg = j.logo || {}, c = lg.color || color(j.name), m = j.meta || {};
+    var row = function (ic, t) { return t ? '<li><span class="jcard-ico">' + ic + '</span><span>' + esc(t) + '</span></li>' : ''; };
+    var badges = (j.badges || []).map(function (b) {      // 'early' or { kind: 'early', text: 'Early Applicant' }
+      var k = typeof b === 'string' ? b : b.kind, d = BADGES[k]; if (!d) return '';
+      return '<span class="badge badge--sm badge--' + d[0] + ' jcard-badge">' + d[1] + esc(typeof b === 'string' ? d[2] : (b.text || d[2])) + '</span>'; }).join('');
+    var st = state(j), ex = st === 'expired', ro = st === 'done' || ex;
+    var tap = !ex && st !== 'invite';                   // v2.5.0: the whole card opens the job — except an invite (its Job details link does) and expired cards
+    return '<article class="card' + (tap ? ' card--interactive' : '') + ' jcard jcard--' + st + (j.unread && !ro ? ' jcard--unread' : '') + '" data-id="' + esc(j.id) + '" data-state="' + st + '"' + (tap ? ' tabindex="0"' : ex ? ' tabindex="-1" aria-disabled="true"' : '') + '>' +
+      (j.ctx ? '<div class="jcard-ctx jcard-ctx--' + j.ctx.kind + '">' + (CTX[j.ctx.kind] || '') + '<span>' + esc(j.ctx.text) + '</span></div>' : '') +
+      '<div class="jcard-head">' +                       // name + time left, logo right (v1.2)
+        '<div class="jcard-who"><span class="jcard-name">' + esc(j.name) + (j.unread && !ro ? '<span class="jc-sr"> · new</span>' : '') + '</span>' + (j.sub ? '<span class="jcard-sub">' + esc(j.sub) + '</span>' : '') + '</div>' +
+        '<span class="jcard-av"><span class="jcard-logo ' + (lg.person ? 'jcard-logo--person' : 'jcard-logo--' + c) + '" aria-hidden="true">' + esc(lg.text) + '</span>' +
+          (j.unread && !ro ? '<span class="pill pill--md pill--dot jcard-dot" aria-hidden="true"></span>' : '') + '</span></div>' +
+      '<h3 class="jcard-role">' + esc(j.role) + '</h3>' +
+      (badges ? '<div class="jcard-badges">' + badges + '</div>' : '') +
+      (j.desc ? '<p class="jcard-desc">' + esc(j.desc) + '</p>' : '') +
+      '<div class="jcard-facts"><ul class="jcard-meta">' + row(AT['ic_job-outline'], m.exp) + row(AT['ic_rupee-outline'], m.pay) + row(AT['ic_location-outline'], m.loc) + '</ul>' +
+        (st === 'invite' && j.details !== false ? act('details', j.id, 'Job details: ' + esc(j.role), 'Job details' + AT['ic_chevron-right-outline'], 'btn btn--link btn--sm btn--flush jcard-link') : '') + '</div>' +   // v2.5.0: on by default — the invite's way into the job
+      (j.skills && j.skills.length ? '<div class="jcard-skills"><span class="jcard-skills-label">Required:</span><span class="jcard-skills-list">' +
+        j.skills.map(esc).join('<i aria-hidden="true">·</i>') + '</span></div>' : '') +
+      '<div class="jcard-actions' + (ro ? ' jcard-actions--outcome' : '') + '">' + actions(j) + '</div>' +
+    '</article>';
+  }
+  function setSaved(card, on) {
+    if (typeof card === 'string') card = document.querySelector('.jcard[data-id="' + card + '"]');
+    var b = card && card.querySelector('.jcard-save'); if (!b) return;
+    b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.setAttribute('data-jc-act', on ? 'unsave' : 'save');
+    b.setAttribute('aria-label', on ? 'Saved — remove job' : 'Save job');
+    var g = b.querySelector('svg'), n = document.createElement('span'); n.innerHTML = AT[on ? 'ic_bookmark-solid' : 'ic_bookmark-outline'];   // v2.6.0: saved = the solid bookmark
+    if (g) b.replaceChild(n.firstChild, g); else b.insertBefore(n.firstChild, b.firstChild);
+  }
+
+  /* ── 2.5 JD job card (v2.3.0) — the job at the top of the JD page ─────────────────────────────────────────────
+     Same job, shown in full: badges · role (the screen's heading) · posted · company · the facts grid · the actions.
+     Not a tap target (no card--interactive): only its buttons act. */
+  function badgesOf(j) {
+    return (j.badges || []).map(function (b) {
+      var k = typeof b === 'string' ? b : b.kind, d = BADGES[k]; if (!d) return '';
+      return '<span class="badge badge--sm badge--' + d[0] + ' jcard-badge">' + d[1] + esc(typeof b === 'string' ? d[2] : (b.text || d[2])) + '</span>'; }).join('');
+  }
+  var JD_OUT = { applied: ['positive', AT['ic_check-outline'] + 'Applied'], expired: ['neutral', 'Expired'] };
+  function jd(j) {
+    var st = JD_OUT[j.state] ? j.state : 'active', id = j.id, ext = j.apply === 'external', lv = Math.min(6, Math.max(1, j.level || 1));
+    var sim = j.similar && typeof j.similar === 'object' ? j.similar : { count: +j.similar || 0, logos: [] };
+    var b = badgesOf(j), n = +sim.count || 0, rid = 'jcjd-' + String(id).replace(/[^\w-]/g, '') + '-role';
+    var facts = (j.facts || []).map(function (f) { return '<div><dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd></div>'; }).join('');
+    var share = act('share', id, 'Share job', AT['ic_share-outline'], 'btn btn--secondary btn--xl btn--icon jcard-ib');
+    var bottom = st === 'active'
+      ? '<div class="jcard-actions jcard-jd-actions">' + share + saveBtn(id, !!j.saved) +       // Share · Save · Apply — as every job card (v2.3.2)
+          act('apply', id, ext ? 'Apply now on the company site' : '', 'Apply Now' + (ext ? AT['ic_arrow-up-right-outline'] : AT['ic_arrow-right-outline']), 'btn btn--primary btn--xl btn--fill jcard-cta', ' data-apply="' + (ext ? 'external' : 'native') + '"') + '</div>'
+      : '<p class="jcard-jd-done"><span class="badge badge--sm badge--' + JD_OUT[st][0] + ' jcard-badge">' + JD_OUT[st][1] + '</span>' +
+          (j.when ? '<span class="jcard-when">' + esc(j.when) + '</span>' : '') + '</p>' +
+        '<div class="jcard-actions jcard-jd-actions">' + share + act('similar', id, '', 'Explore Similar Jobs' + AT['ic_arrow-right-outline'], 'btn btn--primary btn--xl btn--fill jcard-cta') + '</div>';
+    return '<section class="card jcard jcard--jd jcard--jd-' + st + '" data-variant="jd" data-id="' + esc(id) + '" data-state="' + st + '" aria-labelledby="' + rid + '">' +
+      (b ? '<div class="jcard-badges">' + b + '</div>' : '') +
+      '<h' + lv + ' class="jcard-jd-role" id="' + rid + '">' + esc(j.role) + '</h' + lv + '>' +
+      '<p class="jcard-jd-by">' + (j.posted ? '<span class="jcard-jd-when">' + AT['ic_clock-outline'] + esc(j.posted) + '</span>' : '') +
+        (j.posted && j.company ? '<span class="jcard-jd-dot" aria-hidden="true"></span>' : '') +
+        (j.company ? act('company', id, '', esc(j.company), 'jcard-jd-co') : '') + '</p>' +
+      (facts ? '<dl class="jcard-jd-facts">' + facts + '</dl>' : '') +
+      bottom +
+      (st === 'active' && n > 0 ? strip(id, n, sim.logos || []) : '') +
+    '</section>';
+  }
+  /* the similar-jobs strip (v2.4.0, user's pick — sample E): a stack of up to three company logos + the total, the line
+     "Similar jobs found", a round arrow that opens them */
+  function strip(id, n, logos) {
+    var ls = logos.slice(0, 3), names = ls.map(function (l) { return l.name; }).filter(Boolean), total = n > 99 ? '99+' : String(n);
+    var tiles = ls.map(function (l) {
+      return l.src ? '<i class="jcard-jd-tile jcard-jd-tile--logo" style="background-image:url(\'' + esc(l.src) + '\')"></i>'
+                   : '<i class="jcard-jd-tile jcard-logo--' + (l.color || color(l.name)) + '">' + esc(l.text || String(l.name || '').slice(0, 1)) + '</i>';
+    }).join('') + '<i class="jcard-jd-tile jcard-jd-tile--count">' + total + '</i>';
+    var sr = n + ' similar job' + (n === 1 ? '' : 's') + ' found' + (names.length ? ', at ' + names.join(', ') + (n > names.length ? ' and more' : '') : '');
+    return '<div class="jcard-jd-strip"><span class="jcard-jd-stack" aria-hidden="true">' + tiles + '</span>' +
+      '<span class="jcard-jd-strip-text"><span aria-hidden="true">Similar jobs found</span><span class="jc-sr">' + esc(sr) + '</span></span>' +
+      act('similar', id, 'Explore ' + n + ' similar job' + (n === 1 ? '' : 's'), AT['ic_arrow-right-outline'], 'jcard-jd-go') + '</div>';
+  }
+  function replace(card, j) {
+    if (typeof card === 'string') card = document.querySelector('.jcard[data-id="' + card + '"]');
+    if (!card) return null;
+    var t = document.createElement('div'); t.innerHTML = card.getAttribute('data-variant') === 'jd' ? jd(j) : html(j);
+    var el = t.firstChild; card.parentNode.replaceChild(el, card); return el;
+  }
+  document.addEventListener('click', function (e) {
+    var card = e.target.closest && e.target.closest('.jcard'); if (!card || card.classList.contains('jcard--expired')) return;
+    var b = e.target.closest('[data-jc-act]');
+    if (!b && card.getAttribute('data-variant') === 'jd') return;     // the JD job card is not a tap target — only its buttons act
+    if (!b && card.classList.contains('jcard--invite')) return;       // v2.5.0: nor is a recruiter's invite — Job details opens the job
+    card.dispatchEvent(new CustomEvent('shine:jobcard', { bubbles: true, cancelable: true,
+      detail: { action: b ? b.getAttribute('data-jc-act') : 'open', id: card.getAttribute('data-id'), card: card, button: b || null } }));
+  });
+  document.addEventListener('keydown', function (e) {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('jcard')) { e.preventDefault(); e.target.click(); }
+  });
+  global.ShineJobCard = { version: '2.6.0', html: html, list: function (js) { return js.map(html).join(''); }, jd: jd, replace: replace, setSaved: setSaved, icons: AT };
+})(window);
+</script>
+<!-- ▲ COMPONENT · job-card -->
+<script data-page="recommended-onboarding">
+
+(function () {
+  'use strict';
+  var RJ = window.RJ = {};
+  RJ.$ = function (q, r) { return (r || document).querySelector(q); };
+  RJ.$$ = function (q, r) { return [].slice.call((r || document).querySelectorAll(q)); };
+  RJ.esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  RJ.ready = function (fn) { function go() { setTimeout(fn, 90); } if (document.readyState === 'complete') go(); else window.addEventListener('load', go); };
+  RJ.list = function () { return document.getElementById('jsrpMList'); };
+  RJ.cards = function () { return RJ.$$('.jsrp-m-jc', RJ.list()); };
+  RJ.jobs = function () { return window.__REC_JOBS || []; };
+  RJ.toast = function (m, t) { if (typeof showToast === 'function') showToast(m, t); };
+  var Q = new URLSearchParams(location.search);
+  RJ.name = (Q.get('name') || '').trim(); RJ.q = (Q.get('q') || '').trim(); RJ.loc = (Q.get('loc') || '').trim();
+  RJ.reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  RJ.press = function (card, act) { var b = card && card.querySelector('[data-act="' + act + '"]'); if (b) b.click(); return b; };   // the card's own buttons do the work (save · apply · share)
+  /* a deck the front card of which can be dragged sideways: onOut(dir) when it's thrown past the threshold */
+  RJ.drag = function (stage, getFront, onOut, onMove) {
+    var TH = 84, on = false, lock = null, sx = 0, sy = 0, dx = 0, f = null, pid = null, moved = false;
+    stage.addEventListener('pointerdown', function (e) {
+      moved = false; if (e.button > 0 || stage.__busy) return; f = getFront(); if (!f || !f.contains(e.target)) return;
+      if (e.target.closest('a, button')) return;
+      on = true; lock = null; moved = false; dx = 0; sx = e.clientX; sy = e.clientY; pid = e.pointerId;
+    });
+    stage.addEventListener('pointermove', function (e) {
+      if (!on || e.pointerId !== pid) return;
+      var x = e.clientX - sx, y = e.clientY - sy;
+      if (lock === null) { if (Math.abs(x) < 6 && Math.abs(y) < 6) return; lock = Math.abs(x) > Math.abs(y) ? 'x' : 'y';
+        if (lock === 'y') { on = false; return; } f.classList.add('is-dragging'); try { f.setPointerCapture(pid); } catch (_) {} }
+      dx = x; if (Math.abs(dx) > 4) moved = true;
+      f.style.transform = 'translate3d(' + dx + 'px,0,0) rotate(' + (dx * .05) + 'deg)';
+      if (onMove) onMove(f, dx / TH);
+      if (e.cancelable) e.preventDefault();
+    });
+    function up(e) {
+      if (!on) return; on = false; var c = f; c.classList.remove('is-dragging');
+      try { c.releasePointerCapture(pid); } catch (_) {}
+      if (onMove) onMove(c, 0);
+      if (e.type !== 'pointercancel' && Math.abs(dx) >= TH) onOut(c, dx < 0 ? -1 : 1); else c.style.transform = '';
+      dx = 0; f = null; if (moved) setTimeout(function () { moved = false; }, 400);   // touch: no click follows a pan
+    }
+    stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
+    stage.addEventListener('click', function (e) { if (moved && e.isTrusted) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);   // a swipe is not a tap
+    stage.addEventListener('dragstart', function (e) { e.preventDefault(); });
+  };
+  /* the page's "Are these jobs relevant?" sheet waits until the user has been through every pick (it used to wait for the last card to scroll in) */
+  var SS = window.ShineSheet, seen = {}, fbOk = false, fbQ = null;
+  if (SS && !SS.__rj) { var o = SS.open; SS.__rj = 1; SS.open = function (el) { if (el && el.id === 'jsrpMFb' && (fbBlocked || !fbOk)) { fbQ = arguments; return; } return o.apply(this, arguments); }; }
+  RJ.release = function () { if (fbOk) return; fbOk = true; setTimeout(function () {
+    var fb = document.getElementById('jsrpMFb'), done = false; try { done = sessionStorage.getItem('jsrpMFbDone') === '1'; } catch (_) {}
+    if (!fb || done || fbBlocked || !window.ShineSheet || ShineSheet.top()) return; ShineSheet.open(fb); }, 900); };
+  var fbBlocked = false;
+  RJ.blockFb = function () { fbBlocked = fbOk = true; fbQ = null; };   // the relevance sheet never opens after this
+  RJ.seen = function (i, n) { seen[i] = 1; if (Object.keys(seen).length >= n) RJ.release(); };
+  RJ.endWatch = function (el) { function chk() { if (fbOk) return window.removeEventListener('scroll', chk);
+      if (window.scrollY > 40 && el.getBoundingClientRect().top < innerHeight - 40) { window.removeEventListener('scroll', chk); RJ.release(); } }
+    window.addEventListener('scroll', chk, { passive: true }); };
+  RJ.head = function (o) {   // the light page header: title · optional count pill / line
+    var res = RJ.list().closest('.jsrp-m-results') || RJ.list().parentNode, first = RJ.name.split(' ')[0], n = RJ.cards().length;
+    var t = first ? 'Top picks for <span class="accent">' + RJ.esc(first) + '.</span>' : 'Your <span class="accent">top picks.</span>';
+    res.insertAdjacentHTML('beforebegin', '<header class="rj-head' + (o.center ? ' rj-head--c' : '') + '"><h1 class="rj-title">' + t + '</h1>' +
+      (o.count ? '<span class="rj-count"><span><b>' + n + '</b> jobs match your profile</span></span>' : '') + (o.sub ? '<p class="rj-sub">' + o.sub + '</p>' : '') + '</header>');
+  };
+  RJ.fling = function (card, dir, then) {
+    card.style.transition = 'transform 320ms cubic-bezier(.3,.7,.4,1), opacity 300ms ease';
+    card.style.transform = 'translate3d(' + (dir * 480) + 'px,0,0) rotate(' + (dir * 14) + 'deg)'; card.style.opacity = '0';
+    setTimeout(function () { card.style.transition = ''; then(); }, RJ.reduce ? 10 : 320);
+  };
+})();
+
+
+RJ.ready(function () {
+  var list = RJ.list(), cards = RJ.cards(), jobs = RJ.jobs(), N = cards.length; if (!N) return;
+  var TOTAL = N, view = document.getElementById('viewJsrpM'), first = RJ.name.split(' ')[0];
+  var WELCOME = 'signup-welcome.html' + (first ? '?name=' + encodeURIComponent(first) : '');   // the sign-up's end (stands in for the dashboard)
+  var IC_ARROW = "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_arrow-right-outline\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M10.7118 4C10.9329 4 11.145 4.08781 11.3013 4.24414L16.7559 9.69869C16.8332 9.77603 16.8942 9.86783 16.9361 9.96857C16.9779 10.0696 17 10.1786 17 10.2882C17 10.3976 16.9787 10.506 16.937 10.6069C16.8951 10.7077 16.8335 10.8002 16.7559 10.8777L11.3013 16.3322C11.1449 16.4885 10.9328 16.5763 10.7118 16.5763C10.4908 16.5763 10.2787 16.4885 10.1223 16.3322C9.96608 16.176 9.87829 15.9637 9.8782 15.7427C9.8782 15.5217 9.96613 15.3095 10.1223 15.1532L14.1538 11.1218H2.83363C2.61268 11.1218 2.40035 11.0337 2.24414 10.8777C2.08789 10.7214 2.00004 10.5091 2 10.2882C2 10.0672 2.08787 9.85496 2.24414 9.69869C2.40041 9.54246 2.61266 9.45455 2.83363 9.45455H14.1547L10.1223 5.42312C9.96602 5.26679 9.8782 5.05473 9.8782 4.83363C9.8782 4.61252 9.96601 4.40046 10.1223 4.24414C10.2787 4.08782 10.4907 4 10.7118 4Z\" fill=\"currentColor\"/></svg>", IC_DONE = "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_check-circle-solid\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M18 9.48516L17.8636 8.44631L17.7446 7.93559L17.5927 7.43401L17.1918 6.46656L16.9447 6.00435L16.3626 5.133L16.0303 4.72845L15.2889 3.98707L14.8844 3.65483L14.013 3.07271L13.5508 2.82558L12.5834 2.42469L12.0818 2.27275L11.0539 2.06865L10.0087 2L9.48516 2.01739L8.44631 2.15377L7.93559 2.27275L7.43401 2.42469L6.46656 2.82558L5.55952 3.35004L5.133 3.65483L4.72845 3.98707L3.98707 4.72845L3.65483 5.133L3.07271 6.00435L2.82558 6.46656L2.42469 7.43401L2.27275 7.93559L2.06865 8.96345L2 10.0087L2.01739 10.5322L2.15377 11.5711L2.27275 12.0818L2.42469 12.5834L2.82558 13.5508L3.35004 14.4579L3.65483 14.8844L3.98707 15.2889L4.72845 16.0303L5.55952 16.6674L6.00435 16.9447L6.46656 17.1918L7.43401 17.5927L8.44631 17.8636L8.96345 17.9487L9.48516 18H10.5322L11.5711 17.8636L12.0818 17.7446L13.073 17.4078L13.5508 17.1918L14.013 16.9447L14.8844 16.3626L15.2889 16.0303L16.0303 15.2889L16.6674 14.4579L16.9447 14.013L17.1918 13.5508L17.5927 12.5834L17.8636 11.5711L17.9487 11.0539L18.0174 10.0087L18 9.48516ZM8.41336 13.2149L5.85058 10.7016L5.72427 10.4059L5.70688 10.2458L5.76637 9.92998L5.84143 9.78628L6.06659 9.55746L6.36222 9.43115L6.68348 9.42841L6.98187 9.54831L7.10726 9.64899L8.85636 11.3633L13.0712 7.12923L13.3678 7.00475L13.689 7.00292L13.9865 7.12465L14.1119 7.22716L14.2922 7.49351L14.3398 7.64727L14.3416 7.96854L14.2949 8.12322L14.1174 8.3914L9.44946 13.1051L9.18494 13.2845L9.03118 13.3321L8.71083 13.3348L8.41336 13.2149Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" fill=\"currentColor\"/></svg>";
+  /* the 4 picks as the app's job card component (ShineJobCard — App-components/cards/job-card), not the page's JSRP card.
+     Onboarding picks apply in the app with the profile just made — one tap, no company-site hand-off (no apply: 'external'). */
+  var JC = jobs.map(function (j, i) { return { id: 'rec' + i, name: j.co, sub: j.time, logo: { text: j.short }, role: j.title,
+    badges: (j.chips || []).map(function (c) { return c.cls; }).filter(function (k) { return k === 'actively' || k === 'early' || k === 'urgent'; }),
+    meta: { exp: j.exp, pay: j.sal, loc: j.loc }, skills: Array.isArray(j.skills) ? j.skills : String(j.skills || '').split(/\s*[·,]\s*/).filter(Boolean), state: 'active' }; });
+  if (window.ShineNotify) ShineNotify.configure({ toastBottom: 104 });   // toasts sit above the sticky bottom
+
+  /* no "Are these jobs relevant?" sheet on this onboarding step (user 2026-11-08) */
+  RJ.blockFb(); var fbS = document.getElementById('jsrpMFb'); if (fbS) fbS.remove();
+  RJ.head({ center: true, count: true });
+  cards.forEach(function (c) { c.remove(); });   // the JSRP cards stay out of the deck (after the header has counted them)
+  var countEl = RJ.$('.rj-count');
+  var wrap = document.createElement('div'); wrap.className = 'rj-fan'; wrap.setAttribute('role', 'region'); wrap.setAttribute('aria-roledescription', 'carousel'); wrap.setAttribute('aria-label', 'Top picks');
+  wrap.innerHTML = '<div class="rj-fan-stage"></div><div class="rj-dots"></div><p class="rj-fan-hint">Swipe for the next pick</p><p class="rj-sr" aria-live="polite"></p>';
+  var stage = wrap.firstChild, dotsEl = RJ.$('.rj-dots', wrap), live = RJ.$('.rj-sr', wrap);
+  var holders = JC.map(function (jc, i) { var h = document.createElement('div'); h.className = 'rj-fan-card'; h.setAttribute('data-pos', i); h.setAttribute('role', 'group'); h.setAttribute('aria-roledescription', 'slide');
+    h.__job = jobs[i]; h.__jc = jc; h.innerHTML = ShineJobCard.html(jc); stage.appendChild(h);
+    var lg = h.querySelector('.jcard-logo'), m = lg && /jcard-logo--([a-z]+)/.exec(lg.className); jobs[i].__logo = m ? 'job-card-logo job-card-logo--' + m[1] : '';   // the ticket's logos: same colour
+    return h; });
+  list.appendChild(wrap);
+
+  /* status screen (shown once every pick is applied) */
+  var done = document.createElement('section'); done.className = 'rj-done'; done.setAttribute('aria-labelledby', 'rjDoneH');
+  list.appendChild(done);
+  /* sticky bottom */
+  var foot = document.createElement('footer'); foot.className = 'rj-foot';
+  foot.innerHTML = '<button class="btn btn--secondary btn--lg btn--block" type="button" data-rj="later">I’ll apply later</button>';
+  view.appendChild(foot);
+  function footH() { view.style.setProperty('--rj-foot-h', foot.hidden ? '0px' : foot.offsetHeight + 'px');
+    var se = document.scrollingElement; foot.classList.toggle('is-more', !foot.hidden && se.scrollHeight - se.scrollTop - innerHeight > 2); }
+  addEventListener('resize', footH); addEventListener('scroll', footH, { passive: true });
+  foot.addEventListener('click', function (e) { var b = e.target.closest('[data-rj="later"]'); if (!b) return;
+    b.disabled = true; setTimeout(function () { location.replace(WELCOME); }, 180); });
+
+  function front() { return holders.filter(function (h) { return h.getAttribute('data-pos') === '0'; })[0]; }
+  function dots() { dotsEl.innerHTML = holders.map(function (_, i) { return '<button type="button" class="rj-dot" data-i="' + i + '" aria-label="Job ' + (i + 1) + ' of ' + holders.length + '"></button>'; }).join('');
+    wrap.classList.toggle('is-one', holders.length < 2); }
+  function sync(say) { var f = front(), i = holders.indexOf(f), n = holders.length;
+    RJ.$$('.rj-dot', dotsEl).forEach(function (d, k) { d.classList.toggle('is-on', k === i); });
+    holders.forEach(function (h, k) { var on = h === f; h.setAttribute('aria-label', (k + 1) + ' of ' + n); h.setAttribute('aria-hidden', on ? 'false' : 'true'); if (on) h.removeAttribute('inert'); else h.setAttribute('inert', ''); });
+    if (f) RJ.seen(jobs.indexOf(f.__job), TOTAL);
+    if (say && f) live.textContent = 'Job ' + (i + 1) + ' of ' + n + ': ' + f.__job.title + ' at ' + f.__job.co; }
+  function cycle() { var n = holders.length; holders.forEach(function (h) { var p = +h.getAttribute('data-pos'); h.setAttribute('data-pos', p === 0 ? n - 1 : p - 1); }); sync(true); }
+  function goTo(t) { var n = holders.length; holders.forEach(function (h, i) { h.setAttribute('data-pos', (i - t + n) % n); }); sync(true); }
+  RJ.drag(stage, function () { return holders.length > 1 ? front() : null; }, function (c, dir) { stage.__busy = true; RJ.fling(c, dir, function () { cycle(); c.style.transform = ''; c.style.opacity = ''; stage.__busy = false; }); });
+  dotsEl.addEventListener('click', function (e) { var d = e.target.closest('.rj-dot'); if (d && !stage.__busy) goTo(+d.getAttribute('data-i')); });
+
+  /* the job card's taps (shine:jobcard). Apply → "Application sent", the card shows ✓ Applied for a beat, then leaves the deck */
+  var applied = [];
+  stage.addEventListener('shine:jobcard', function (e) {
+    var d = e.detail, h = d.card && d.card.closest('.rj-fan-card'); if (!h) return;
+    if (d.action === 'open') return RJ.toast('Opens job detail');
+    if (d.action === 'share') return RJ.toast('Share link copied', 'success');
+    if (d.action === 'save' || d.action === 'unsave') { var on = d.action === 'save'; h.__jc.saved = on; ShineJobCard.setSaved(d.card, on);
+      return RJ.toast(on ? 'Job saved' : 'Removed from saved', on ? 'success' : 'neutral'); }
+    if (d.action !== 'apply' || stage.__busy || h.__gone) return;
+    h.__gone = true; stage.__busy = true;
+    h.__jc.state = 'done'; h.__jc.outcome = 'applied'; h.__jc.when = 'Just now';
+    ShineJobCard.replace(d.card, h.__jc);                  // the component re-renders its own card: ✓ Applied · Just now
+    RJ.toast('Application sent', 'success');
+    applied.push(h.__job);
+    countEl.innerHTML = '<span><b>' + applied.length + '</b> of ' + TOTAL + ' applied</span>';
+    setTimeout(function () { h.classList.add('is-sent');
+      setTimeout(function () { var at = holders.indexOf(h); holders.splice(at, 1); h.remove(); stage.__busy = false;
+        if (!holders.length) return allDone();
+        var n = holders.length; holders.forEach(function (x, k) { x.setAttribute('data-pos', (k - at + n) % n); });
+        dots(); sync(false); live.textContent = 'Applied. ' + n + (n === 1 ? ' pick' : ' picks') + ' left.'; }, RJ.reduce ? 10 : 400);
+    }, RJ.reduce ? 10 : 650);   // a beat on "Applied" first
+  });
+  function allDone() {
+    if (window.RJ_DONE) {   // a status-screen sample (samples/recommended-jobs-1-done-*.html)
+      view.classList.add('is-all-applied'); foot.hidden = true; window.scrollTo(0, 0);
+      window.RJ_DONE({ el: done, view: view, foot: foot, total: TOTAL, esc: RJ.esc, reduce: RJ.reduce,
+        jobs: applied.map(function (j) { return { title: j.title, co: j.co, short: j.short, sal: j.sal, loc: j.loc, logo: j.__logo || '' }; }),
+        showFoot: function (html) { foot.innerHTML = html; foot.hidden = false; footH(); },
+        go: function (b) { if (b) b.disabled = true; setTimeout(function () { location.replace(WELCOME); }, 180); } });
+      footH(); setTimeout(footH, 800);   // re-check the separator once the entrance motion has settled
+      live.textContent = 'Applied to all ' + TOTAL + ' picks.';
+      setTimeout(function () { var h = done.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } }, 450);
+      return;
+    }
+    /* status: applied to every pick → explore more on the dashboard (no My Jobs: job tracking isn't on the platform — user 2026-11-08) */
+    done.innerHTML = '<span class="rj-done-ic" aria-hidden="true">' + IC_DONE + '</span>' +
+      '<h1 id="rjDoneH">You’ve applied to all ' + TOTAL + ' jobs.</h1><p class="rj-done-sub">Explore more jobs on your dashboard.</p>';
+    foot.innerHTML = '<button class="btn btn--primary btn--lg btn--block" type="button" data-rj="dash">Go to dashboard</button>';   // same sticky bottom, now the way forward
+    view.classList.add('is-all-applied'); footH(); window.scrollTo(0, 0);
+    live.textContent = 'You’ve applied to all ' + TOTAL + ' jobs.';
+    var go = RJ.$('[data-rj="dash"]', foot); go.addEventListener('click', function () { go.disabled = true; setTimeout(function () { location.replace(WELCOME); }, 180); });
+    setTimeout(function () { try { RJ.$('#rjDoneH').setAttribute('tabindex', '-1'); RJ.$('#rjDoneH').focus({ preventScroll: true }); } catch (_) {} }, 450);
+  }
+  dots(); sync(false); footH(); setTimeout(footH, 300); setTimeout(footH, 1200); if (document.fonts && document.fonts.ready) document.fonts.ready.then(footH);
+  window.__rj1 = { applyFront: function () { var f = front(); f && f.querySelector('[data-jc-act="apply"]').click(); }, left: function () { return holders.length; } };
+});
+
+
+window.RJ_DONE = function (c) {
+  var e = c.esc, d = new Date(), M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], W = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  c.el.innerHTML = '<div class="rj-d"><div class="rj-tk-h"><h1>That’s all ' + c.total + '.</h1><p class="rj-d-sub">Explore more jobs on your dashboard.</p></div>' +
+    '<div class="rj-tk-wrap"><div class="rj-tk" role="group" aria-label="' + c.total + ' jobs applied on ' + d.getDate() + ' ' + M[d.getMonth()] + '">' +
+      '<div class="rj-tk-top"><div><span class="rj-tk-l">Jobs applied</span><span class="rj-tk-n">' + (c.total < 10 ? '0' : '') + c.total + '</span></div>' +
+        '<div class="rj-tk-date"><span class="rj-tk-l">Date</span><span class="rj-tk-v">' + d.getDate() + ' ' + M[d.getMonth()] + '</span><span class="rj-tk-y">' + W[d.getDay()] + '</span></div></div>' +
+      '<div class="rj-tk-cut" aria-hidden="true"></div>' +
+      '<div class="rj-tk-stub"><div class="rj-tk-stub-hd"><span class="rj-tk-l">Your top picks</span><span class="badge badge--sm badge--positive">All applied</span></div>' +
+        '<div class="rj-tk-logos" aria-label="' + e(c.jobs.map(function (j) { return j.co; }).join(', ')) + '">' + c.jobs.map(function (j) { return '<span class="rj-d-logo ' + e(j.logo) + '" aria-hidden="true">' + e(j.short) + '</span>'; }).join('') + '</div></div>' +
+    '</div></div></div>';
+  var tk = c.el.querySelector('.rj-tk'), top = c.el.querySelector('.rj-tk-top');
+  function notch() { tk.style.setProperty('--ny', (top.offsetHeight + 1) + 'px'); }   // the cut-outs sit exactly on the perforation
+  notch(); addEventListener('resize', notch); if (document.fonts && document.fonts.ready) document.fonts.ready.then(notch);
+
+  c.showFoot('<button class="btn btn--primary btn--lg btn--block" type="button" data-rj="dash">Go to dashboard</button>');
+  c.foot.addEventListener('click', function (e) { var b = e.target.closest('[data-rj="dash"]'); if (b) c.go(b); });
+  c.el.addEventListener('click', function (e) { var b = e.target.closest('[data-rj="dash"]'); if (b) c.go(b); });
+
+};
+
 </script>
 </body>
 </html>
