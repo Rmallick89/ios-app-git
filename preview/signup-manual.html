@@ -26,7 +26,10 @@
   Components: Shine App/App-components, inlined verbatim (all fields Small). Demo data: the key in the top bar · OTP 1234 ·
   ?demo=0 hides it · ?st=nudge opens on the resume screen · ?st=worked on the fresher’s “worked as an intern or freelancer?”
   sheet · ?st=exit on the leave sheet (review).
-  Leave sign-up? (2026-11-11, user): Back on Basic details — and the phone’s / browser’s Back from Basic details — opens
+  Job preferences (2026-11-11, user): onboarding is done by then — no back arrow, and Back stays on the screen.
+  Help me fill (2026-11-11, user’s pick of 6): a white pill with a slowly turning gradient edge (the Profile dial’s colours).
+  Leave sign-up? (2026-11-11, user): × on Basic details (it replaced ←; shown before and after the account exists) — and the
+  phone’s / browser’s Back from Basic details — opens
   “Recruiters are already looking.” with the sign-up screen’s 4 Why Shine reasons (2 × 2) · Continue setting up · Yes, exit
   (→ the sign-up screen before the account exists, the welcome screen once it does).
   Freshers (2026-11-11, user): Continue on Education asks “Have you worked as an intern or freelancer?” (bottom sheet ·
@@ -2310,7 +2313,7 @@ html.in-app .bs, html.in-app .bs-statusbar { --bs-safe: 0px; --bs-safe-top: 0px;
 </style>
 <style data-component="top-app-bar">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · TOP APP BAR  (app component · App-login)              v3.4.0
+   SHINE · TOP APP BAR  (app component · App-login)              v3.5.0
    One top bar for every logged-in screen: ONE floating bar (any items, light
    or dark) and the title bar, on one shared frame, so the leading item, the
    logo / title and the trailing action sit on exactly the same spot — and
@@ -2526,6 +2529,11 @@ html.bs-lock .stp-strip { display: none; }                 /* a bottom sheet's s
   display: flex; align-items: center; min-width: 0; max-width: calc(100% - var(--stp-anchor) - var(--stp-hit-edge));
 }
 .stp-end { margin-left: auto; display: flex; align-items: center; gap: 8px; min-width: 0; }   /* spacing.inline.md · may shrink (a long byline ellipsises) */
+/* v3.5.0 — title bar with no leading button (.stp--title.stp--no-lead): no back / menu, and the title starts on the container
+   edge (24 = the cards' edge) instead of 72 — for a screen with no way back (user 2026-11-11: sign-up › Job preferences,
+   "onboarding is completed … they can go further but can't go back"; Basic details once the account exists) */
+.stp--title.stp--no-lead .stp-row > .stp-back, .stp--title.stp--no-lead .stp-row > .stp-menu { display: none !important; }
+.stp--title.stp--no-lead .stp-anchor { left: var(--stp-hit-edge); max-width: calc(100% - var(--stp-hit-edge) * 2); }
 
 /* ── Floating bar · one pill for any items (Home, Me, any screen) ─── */
 .stp--float .stp-row {
@@ -3177,6 +3185,17 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 .xs2 b { margin-top: 12px; font: var(--weight-extrabold) var(--type-display-sm-size)/var(--type-display-sm-line) var(--font-brand); letter-spacing: var(--type-display-sm-track); color: var(--content-neutral-base); }
 .xs2 span:last-child { margin-top: 4px; font: var(--weight-medium) var(--type-body-sm-size)/var(--type-body-sm-line) var(--font-brand); color: var(--content-neutral-muted); }
 </style>
+<style data-page="help-fill">
+/* Help me fill — the gradient ring (user 2026-11-11, sample 4 of 6): white pill, a turning edge in the Profile dial's colours */
+@property --hf-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.hf--ring { position: relative; isolation: isolate; background: var(--surface-neutral-raised); color: var(--content-neutral-base); }
+.hf--ring::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; padding: 1.5px;
+  background: conic-gradient(from var(--hf-a), #1A56FF, #7A5AF8, #E31B8F, #FAB663, #1A56FF);   /* brand-500 · violet-500 · pink-500 · amber-400 — the Profile dial */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: hf-spin 4s linear infinite; }
+@keyframes hf-spin { to { --hf-a: 360deg; } }
+@media (prefers-reduced-motion: reduce) { .hf, .hf::before, .hf::after, .hf * { animation: none !important; } }
+</style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shine Preview"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-startup-image" href="icons/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1260x2736.png" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})</script>
 </head>
 <body>
@@ -3187,12 +3206,12 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     <!-- top bar · top-app-bar title bar: back · title · end (demo key · Help me fill) · progress on the bottom edge -->
     <header class="stp stp--title mo-hdr mo-h-edge" data-shine-topbar>
       <div class="stp-row">
-        <button class="btn btn--muted btn--sm btn--icon btn--icon-lg btn--pill stp-back" type="button" data-act="back" aria-label="Back"><svg aria-hidden="true" focusable="false" data-icon="ic_arrow-left-outline" viewBox="0 0 20 20" fill="none"><path d="M8.28818 4C8.06711 4 7.85504 4.08781 7.69869 4.24414L2.24414 9.69869C2.16676 9.77603 2.1058 9.86783 2.06392 9.96857C2.02209 10.0696 2 10.1786 2 10.2882C2.00002 10.3976 2.0213 10.506 2.06303 10.6069C2.1049 10.7077 2.16655 10.8002 2.24414 10.8777L7.69869 16.3322C7.85507 16.4885 8.06724 16.5763 8.28818 16.5763C8.50916 16.5763 8.7213 16.4885 8.87766 16.3322C9.03392 16.176 9.12171 15.9637 9.1218 15.7427C9.1218 15.5217 9.03387 15.3095 8.87766 15.1532L4.84624 11.1218H16.1664C16.3873 11.1218 16.5997 11.0337 16.7559 10.8777C16.9121 10.7214 17 10.5091 17 10.2882C17 10.0672 16.9121 9.85496 16.7559 9.69869C16.5996 9.54246 16.3873 9.45455 16.1664 9.45455H4.84535L8.87766 5.42312C9.03398 5.26679 9.1218 5.05473 9.1218 4.83363C9.1218 4.61252 9.03399 4.40046 8.87766 4.24414C8.72133 4.08782 8.50929 4 8.28818 4Z" fill="currentColor"/></svg></button>
+        <button class="btn btn--muted btn--sm btn--icon btn--icon-lg btn--pill stp-back" type="button" data-act="back" aria-label="Exit sign up"><svg aria-hidden="true" focusable="false" data-icon="ic_close-outline" viewBox="0 0 20 20" fill="none"><path d="M16.2528 3.00257L16.3599 3.01371L16.3814 3.01543L16.4028 3.02228L16.5056 3.05313L16.5253 3.05999L16.5433 3.06942L16.6582 3.12941L16.6753 3.14398L16.7584 3.21254L16.7747 3.22625L16.7884 3.24253L16.857 3.32566L16.8716 3.3428L16.9316 3.45764L16.941 3.47564L16.947 3.49535L16.9787 3.59819L16.9855 3.61876L16.9873 3.64104L16.9984 3.74816L17.0001 3.76959L16.9984 3.79101L16.9873 3.89814L16.9855 3.92042L16.9787 3.94099L16.947 4.04383L16.941 4.06354L16.9316 4.08154L16.8716 4.19638L16.857 4.21352L16.7884 4.29665L16.7816 4.30522L11.0859 10L16.7816 15.6956L16.7884 15.7042L16.857 15.7873L16.8716 15.8045L16.9316 15.9193L16.941 15.9373L16.947 15.957L16.9787 16.0599L16.9855 16.0804L16.9873 16.1027L16.9984 16.2098L17.0001 16.2313L16.9984 16.2527L16.9873 16.3598L16.9855 16.3812L16.9787 16.4027L16.947 16.5055L16.941 16.5252L16.9316 16.5432L16.8716 16.6581L16.857 16.6752L16.7884 16.7583L16.7747 16.7746L16.7584 16.7883L16.6753 16.8569L16.6582 16.8714L16.5433 16.9314L16.5253 16.9409L16.5056 16.9469L16.4028 16.9786L16.3814 16.9854L16.3599 16.9871L16.2528 16.9983L16.2314 17L16.21 16.9983L16.1028 16.9871L16.0806 16.9854L16.06 16.9786L15.9571 16.9469L15.9374 16.9409L15.9194 16.9314L15.8046 16.8714L15.7875 16.8569L15.7043 16.7883L15.6958 16.7815L10.0001 11.0858L4.30534 16.7815L4.29676 16.7883L4.21364 16.8569L4.1965 16.8714L4.08166 16.9314L4.06366 16.9409L4.04395 16.9469L3.94111 16.9786L3.92054 16.9854L3.89826 16.9871L3.79113 16.9983L3.76971 17L3.74828 16.9983L3.64116 16.9871L3.61888 16.9854L3.59831 16.9786L3.49547 16.9469L3.47576 16.9409L3.45776 16.9314L3.34292 16.8714L3.32578 16.8569L3.24265 16.7883L3.22637 16.7746L3.21266 16.7583L3.1441 16.6752L3.12953 16.6581L3.06954 16.5432L3.06011 16.5252L3.05325 16.5055L3.0224 16.4027L3.01555 16.3812L3.01383 16.3598L3.00269 16.2527L3.00098 16.2313L3.00269 16.2098L3.01383 16.1027L3.01555 16.0804L3.0224 16.0599L3.05325 15.957L3.06011 15.9373L3.06954 15.9193L3.12953 15.8045L3.1441 15.7873L3.21266 15.7042L3.21951 15.6956L3.22637 15.6879L8.91344 10L3.21866 4.30522L3.21266 4.29665L3.1441 4.21352L3.12953 4.19638L3.06954 4.08154L3.06011 4.06354L3.05325 4.04383L3.0224 3.94099L3.01555 3.92042L3.01383 3.89814L3.00269 3.79101L3.00098 3.76959L3.00269 3.74816L3.01383 3.64104L3.01555 3.61876L3.0224 3.59819L3.05325 3.49535L3.06011 3.47564L3.06954 3.45764L3.12953 3.3428L3.1441 3.32566L3.21266 3.24253L3.22637 3.22625L3.24265 3.21254L3.32578 3.14398L3.34292 3.12941L3.45776 3.06942L3.47576 3.05999L3.49547 3.05313L3.59831 3.02228L3.61888 3.01543L3.64116 3.01371L3.74828 3.00257L3.76971 3L3.79113 3.00257L3.89826 3.01371L3.92054 3.01543L3.94111 3.02228L4.04395 3.05313L4.06366 3.05999L4.08166 3.06942L4.1965 3.12941L4.21364 3.14398L4.29676 3.21254L4.30534 3.21854L10.0001 8.91332L15.688 3.22625L15.6958 3.21939L15.7043 3.21254L15.7875 3.14398L15.8046 3.12941L15.9194 3.06942L15.9374 3.05999L15.9571 3.05313L16.06 3.02228L16.0806 3.01543L16.1028 3.01371L16.21 3.00257L16.2314 3L16.2528 3.00257Z" fill="currentColor"/></svg></button>
         <div class="stp-anchor" data-fit><div class="mo-tt"><h1 class="stp-title" id="moTitle" data-mo-title>Basic details.</h1></div></div>
         <div class="stp-end">
           <!-- demo data (prototype helper · ?demo=0 hides it) -->
           <button class="mo-key" type="button" data-act="demo" aria-label="Open demo data" title="Demo data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3L20 3M16 7l3 3M14 9l2 2"/></svg></button>
-          <button class="btn btn--muted btn--sm btn--pill" type="button" data-act="help" aria-haspopup="dialog">Help me fill</button>
+          <button class="btn btn--muted hf--ring btn--sm btn--pill hf" type="button" data-act="help" aria-haspopup="dialog">Help me fill</button>   <!-- the gradient ring (user 2026-11-11 · sample 4) -->
         </div>
       </div>
       <div class="mo-edge" role="progressbar" aria-label="Sign-up progress" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1"><span class="mo-prog-bar"></span></div>
@@ -3577,7 +3596,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 
 <script data-component="top-app-bar">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · TOP APP BAR  (app component · App-login)              v3.4.0
+   SHINE · TOP APP BAR  (app component · App-login)              v3.5.0
    Pair with top-app-bar.css. The menu button is part of this component (v2.3.0). Its buttons (menu, back,
    Search Jobs, status) are the buttons atom (atoms/buttons, inlined before this component) — v3.0.0.
 
@@ -3903,7 +3922,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     doc.dispatchEvent(new CustomEvent('shine:menu', { detail: { button: b, page: b.getAttribute('data-page') || '' } }));
   });
   global.ShineTopBar = {
-    version: '3.4.0', mount: mount, initials: initials,
+    version: '3.5.0', mount: mount, initials: initials,
     update: function () { bars.forEach(function (b) { if (b.__stpT) paint(b); }); },
     reveal: function () { bars.forEach(function (b) { if (b.__stpReveal) b.__stpReveal(); }); }   // bring a tucked row back
   };
@@ -6596,7 +6615,8 @@ window.__MO_CFG = {
     progress();
     k(foot, 'terms').hidden = step !== 'basic' || st.created;
     k(foot, 'later').hidden = step !== 'prefs';                      // job preferences are optional (user 2026-11-06)
-    $('.stp-back').hidden = step === 'basic' && st.created;          // the account exists: nothing to go back to
+    $('.mo-hdr').classList.toggle('stp--no-lead', step === 'prefs');   // top-app-bar v3.5.0: no leading button → the title on the 24 edge (preferences: onboarding is done, no way back)
+    lead(step === 'basic');                                          // Basic details: × = leave sign-up (user 2026-11-11) · other steps: ← one step back
     $$('[data-cv]').forEach(function (n) { var s = n.closest('.mo-step').getAttribute('data-step'); n.hidden = !(st.cv && st.cv[s]); });
     if (step === 'edu') eduStep.enter();
     if (step === 'emp') { empType(); empStep.enter(); }
@@ -6606,7 +6626,12 @@ window.__MO_CFG = {
     window.scrollTo(0, 0); moreBelow();
     var h = $('#moTitle'); h.setAttribute('tabindex', '-1'); try { h.focus({ preventScroll: true }); } catch (e) {}
   }
-  function back() { if (st.step === 'basic') openSheet(XS); else history.back(); }   // Basic details: leave sign-up? (user 2026-11-11)
+  function back() { if (st.step === 'basic') openSheet(XS); else history.back(); }
+  /* the bar's leading button (user 2026-11-11): × on Basic details — the flow's first screen, before or after the account exists —
+     opens the leave sheet; ← on Education → Key skills; none on Job preferences */
+  var ARROW = "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_arrow-left-outline\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M8.28818 4C8.06711 4 7.85504 4.08781 7.69869 4.24414L2.24414 9.69869C2.16676 9.77603 2.1058 9.86783 2.06392 9.96857C2.02209 10.0696 2 10.1786 2 10.2882C2.00002 10.3976 2.0213 10.506 2.06303 10.6069C2.1049 10.7077 2.16655 10.8002 2.24414 10.8777L7.69869 16.3322C7.85507 16.4885 8.06724 16.5763 8.28818 16.5763C8.50916 16.5763 8.7213 16.4885 8.87766 16.3322C9.03392 16.176 9.12171 15.9637 9.1218 15.7427C9.1218 15.5217 9.03387 15.3095 8.87766 15.1532L4.84624 11.1218H16.1664C16.3873 11.1218 16.5997 11.0337 16.7559 10.8777C16.9121 10.7214 17 10.5091 17 10.2882C17 10.0672 16.9121 9.85496 16.7559 9.69869C16.5996 9.54246 16.3873 9.45455 16.1664 9.45455H4.84535L8.87766 5.42312C9.03398 5.26679 9.1218 5.05473 9.1218 4.83363C9.1218 4.61252 9.03399 4.40046 8.87766 4.24414C8.72133 4.08782 8.50929 4 8.28818 4Z\" fill=\"currentColor\"/></svg>", CLOSE_X = "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_close-outline\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M16.2528 3.00257L16.3599 3.01371L16.3814 3.01543L16.4028 3.02228L16.5056 3.05313L16.5253 3.05999L16.5433 3.06942L16.6582 3.12941L16.6753 3.14398L16.7584 3.21254L16.7747 3.22625L16.7884 3.24253L16.857 3.32566L16.8716 3.3428L16.9316 3.45764L16.941 3.47564L16.947 3.49535L16.9787 3.59819L16.9855 3.61876L16.9873 3.64104L16.9984 3.74816L17.0001 3.76959L16.9984 3.79101L16.9873 3.89814L16.9855 3.92042L16.9787 3.94099L16.947 4.04383L16.941 4.06354L16.9316 4.08154L16.8716 4.19638L16.857 4.21352L16.7884 4.29665L16.7816 4.30522L11.0859 10L16.7816 15.6956L16.7884 15.7042L16.857 15.7873L16.8716 15.8045L16.9316 15.9193L16.941 15.9373L16.947 15.957L16.9787 16.0599L16.9855 16.0804L16.9873 16.1027L16.9984 16.2098L17.0001 16.2313L16.9984 16.2527L16.9873 16.3598L16.9855 16.3812L16.9787 16.4027L16.947 16.5055L16.941 16.5252L16.9316 16.5432L16.8716 16.6581L16.857 16.6752L16.7884 16.7583L16.7747 16.7746L16.7584 16.7883L16.6753 16.8569L16.6582 16.8714L16.5433 16.9314L16.5253 16.9409L16.5056 16.9469L16.4028 16.9786L16.3814 16.9854L16.3599 16.9871L16.2528 16.9983L16.2314 17L16.21 16.9983L16.1028 16.9871L16.0806 16.9854L16.06 16.9786L15.9571 16.9469L15.9374 16.9409L15.9194 16.9314L15.8046 16.8714L15.7875 16.8569L15.7043 16.7883L15.6958 16.7815L10.0001 11.0858L4.30534 16.7815L4.29676 16.7883L4.21364 16.8569L4.1965 16.8714L4.08166 16.9314L4.06366 16.9409L4.04395 16.9469L3.94111 16.9786L3.92054 16.9854L3.89826 16.9871L3.79113 16.9983L3.76971 17L3.74828 16.9983L3.64116 16.9871L3.61888 16.9854L3.59831 16.9786L3.49547 16.9469L3.47576 16.9409L3.45776 16.9314L3.34292 16.8714L3.32578 16.8569L3.24265 16.7883L3.22637 16.7746L3.21266 16.7583L3.1441 16.6752L3.12953 16.6581L3.06954 16.5432L3.06011 16.5252L3.05325 16.5055L3.0224 16.4027L3.01555 16.3812L3.01383 16.3598L3.00269 16.2527L3.00098 16.2313L3.00269 16.2098L3.01383 16.1027L3.01555 16.0804L3.0224 16.0599L3.05325 15.957L3.06011 15.9373L3.06954 15.9193L3.12953 15.8045L3.1441 15.7873L3.21266 15.7042L3.21951 15.6956L3.22637 15.6879L8.91344 10L3.21866 4.30522L3.21266 4.29665L3.1441 4.21352L3.12953 4.19638L3.06954 4.08154L3.06011 4.06354L3.05325 4.04383L3.0224 3.94099L3.01555 3.92042L3.01383 3.89814L3.00269 3.79101L3.00098 3.76959L3.00269 3.74816L3.01383 3.64104L3.01555 3.61876L3.0224 3.59819L3.05325 3.49535L3.06011 3.47564L3.06954 3.45764L3.12953 3.3428L3.1441 3.32566L3.21266 3.24253L3.22637 3.22625L3.24265 3.21254L3.32578 3.14398L3.34292 3.12941L3.45776 3.06942L3.47576 3.05999L3.49547 3.05313L3.59831 3.02228L3.61888 3.01543L3.64116 3.01371L3.74828 3.00257L3.76971 3L3.79113 3.00257L3.89826 3.01371L3.92054 3.01543L3.94111 3.02228L4.04395 3.05313L4.06366 3.05999L4.08166 3.06942L4.1965 3.12941L4.21364 3.14398L4.29676 3.21254L4.30534 3.21854L10.0001 8.91332L15.688 3.22625L15.6958 3.21939L15.7043 3.21254L15.7875 3.14398L15.8046 3.12941L15.9194 3.06942L15.9374 3.05999L15.9571 3.05313L16.06 3.02228L16.0806 3.01543L16.1028 3.01371L16.21 3.00257L16.2314 3L16.2528 3.00257Z\" fill=\"currentColor\"/></svg>";
+  function lead(root) { var b = $('.mo-hdr .stp-back'); b.hidden = st.step === 'prefs'; if (b.__root === root) return; b.__root = root;
+    b.innerHTML = root ? CLOSE_X : ARROW; b.setAttribute('aria-label', root ? 'Exit sign up' : 'Back'); }   // Basic details: leave sign-up? (user 2026-11-11)
   function leave() {                                   // the sign-up screen that opened this flow (no account yet)
     if (doc.referrer && doc.referrer.indexOf(CFG.entryUrl.split('/').pop()) > -1) history.go(-2); else location.href = CFG.entryUrl;   // over the gate entry and Basic details
   }
@@ -6617,6 +6642,10 @@ window.__MO_CFG = {
   window.addEventListener('popstate', function (e) {
     var s = e.state && e.state.mo;
     if (!s) return;
+    if (st.step === 'prefs' && !$('[data-view="steps"]').hidden) {   // preferences: onboarding is done — Back stays here (user 2026-11-11)
+      if (S.top && S.top()) S.closeAll && S.closeAll('route');
+      history.pushState({ mo: 'prefs' }, '', '#prefs'); return;
+    }
     if (s === 'nudge') { view('nudge'); return; }
     if (S.top && S.top()) S.closeAll && S.closeAll('route');
     if (s === 'gate') { history.pushState({ mo: 'basic' }, '', '#basic'); if (st.step !== 'basic' || $('[data-view="steps"]').hidden) go('basic', false); setTimeout(function () { openSheet(XS); }, 30); return; }   // Back from Basic details: leave sign-up?
@@ -7057,7 +7086,7 @@ window.__MO_CFG = {
   }
   function openProfile() { profileFacts(); var p = $('#profileSheet'); p.classList.remove('is-shown'); openSheet(p); }
   $('#profileSheet').addEventListener('shine:sheet-opened', function (e) { if (e.target.id === 'profileSheet') { e.target.classList.add('is-shown'); dialRun(); } });
-  function toPrefs() {                                    // the resume screen is done with: Back from preferences goes to Key skills
+  function toPrefs() {                                    // the resume screen is done with · no Back from preferences (user 2026-11-11)
     var fromNudge = history.state && history.state.mo === 'nudge';
     go('prefs', !fromNudge); if (fromNudge) history.replaceState({ mo: 'prefs' }, '', '#prefs');
   }

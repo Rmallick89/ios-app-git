@@ -25,8 +25,10 @@
     3 signup-manual.html  fill details manually
   Components: Shine App/App-components, inlined verbatim (fields Small · bottom sheet incl. full-screen · alert · cards · top bar).
   Review: ?st=verify · ?st=prefs (+ &sim=partial for missing details) · ?st=exit (the leave sheet) · ?demo=0 hides the demo key.
-  Leave sign-up? (user 2026-11-11): × on Verify details / Back once the account exists → “Recruiters are already looking.” with
-  the sign-up screen’s 4 Why Shine reasons (2 × 2) · Continue setting up · Yes, exit (→ welcome).
+  Leave sign-up? (user 2026-11-11): × on Almost there, × on Verify details, Back once the account exists → “Recruiters are already
+  looking.” with the sign-up screen’s 4 Why Shine reasons (2 × 2) · Continue setting up · Yes, exit (→ the sign-up screen from
+  Almost there — no account yet; → welcome once the account exists).
+  Job preferences (user 2026-11-11): onboarding is done by then — no back arrow, and Back stays on the screen.
   Standard fields (2026-11-04, user — the same in App-login): current salary = the input fields atom's amount field (2026-11-05): Indian commas as you type, digits only, the amount in
   words in green ("Seventy-Eight Lakh Ninety Thousand Eight Hundred Ninety-Eight Rupees"), ₹1 lakh – ₹1 crore, errors
   "₹3 is too low. Annual salary must be at least ₹1 lakh." · "Enter your annual salary."; expected salary = a list in lakhs (bottom sheet: 1 Lac ·
@@ -2305,7 +2307,7 @@ html.in-app .bs, html.in-app .bs-statusbar { --bs-safe: 0px; --bs-safe-top: 0px;
 </style>
 <style data-component="top-app-bar">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · TOP APP BAR  (app component · App-login)              v3.4.0
+   SHINE · TOP APP BAR  (app component · App-login)              v3.5.0
    One top bar for every logged-in screen: ONE floating bar (any items, light
    or dark) and the title bar, on one shared frame, so the leading item, the
    logo / title and the trailing action sit on exactly the same spot — and
@@ -2521,6 +2523,11 @@ html.bs-lock .stp-strip { display: none; }                 /* a bottom sheet's s
   display: flex; align-items: center; min-width: 0; max-width: calc(100% - var(--stp-anchor) - var(--stp-hit-edge));
 }
 .stp-end { margin-left: auto; display: flex; align-items: center; gap: 8px; min-width: 0; }   /* spacing.inline.md · may shrink (a long byline ellipsises) */
+/* v3.5.0 — title bar with no leading button (.stp--title.stp--no-lead): no back / menu, and the title starts on the container
+   edge (24 = the cards' edge) instead of 72 — for a screen with no way back (user 2026-11-11: sign-up › Job preferences,
+   "onboarding is completed … they can go further but can't go back"; Basic details once the account exists) */
+.stp--title.stp--no-lead .stp-row > .stp-back, .stp--title.stp--no-lead .stp-row > .stp-menu { display: none !important; }
+.stp--title.stp--no-lead .stp-anchor { left: var(--stp-hit-edge); max-width: calc(100% - var(--stp-hit-edge) * 2); }
 
 /* ── Floating bar · one pill for any items (Home, Me, any screen) ─── */
 .stp--float .stp-row {
@@ -3347,9 +3354,8 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
 
   <!-- ═════════ 3 · JOB PREFERENCES (final step) ═════════ -->
   <div class="mo-view rs-view" data-view="prefs" hidden>
-    <header class="stp stp--title rs-bar" data-shine-topbar>
+    <header class="stp stp--title stp--no-lead rs-bar" data-shine-topbar>   <!-- no back arrow: onboarding is done (user 2026-11-11) · top-app-bar v3.5.0 -->
       <div class="stp-row">
-        <button class="btn btn--muted btn--sm btn--icon btn--icon-lg btn--pill stp-back" type="button" data-act="to-verify" aria-label="Back"><svg aria-hidden="true" focusable="false" data-icon="ic_arrow-left-outline" viewBox="0 0 20 20" fill="none"><path d="M8.28818 4C8.06711 4 7.85504 4.08781 7.69869 4.24414L2.24414 9.69869C2.16676 9.77603 2.1058 9.86783 2.06392 9.96857C2.02209 10.0696 2 10.1786 2 10.2882C2.00002 10.3976 2.0213 10.506 2.06303 10.6069C2.1049 10.7077 2.16655 10.8002 2.24414 10.8777L7.69869 16.3322C7.85507 16.4885 8.06724 16.5763 8.28818 16.5763C8.50916 16.5763 8.7213 16.4885 8.87766 16.3322C9.03392 16.176 9.12171 15.9637 9.1218 15.7427C9.1218 15.5217 9.03387 15.3095 8.87766 15.1532L4.84624 11.1218H16.1664C16.3873 11.1218 16.5997 11.0337 16.7559 10.8777C16.9121 10.7214 17 10.5091 17 10.2882C17 10.0672 16.9121 9.85496 16.7559 9.69869C16.5996 9.54246 16.3873 9.45455 16.1664 9.45455H4.84535L8.87766 5.42312C9.03398 5.26679 9.1218 5.05473 9.1218 4.83363C9.1218 4.61252 9.03399 4.40046 8.87766 4.24414C8.72133 4.08782 8.50929 4 8.28818 4Z" fill="currentColor"/></svg></button>
         <div class="stp-anchor"><h1 class="stp-title" tabindex="-1" id="pTitle">Job preferences.</h1></div>
       </div>
     </header>
@@ -3681,7 +3687,7 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
 
 <script data-component="top-app-bar">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · TOP APP BAR  (app component · App-login)              v3.4.0
+   SHINE · TOP APP BAR  (app component · App-login)              v3.5.0
    Pair with top-app-bar.css. The menu button is part of this component (v2.3.0). Its buttons (menu, back,
    Search Jobs, status) are the buttons atom (atoms/buttons, inlined before this component) — v3.0.0.
 
@@ -4007,7 +4013,7 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
     doc.dispatchEvent(new CustomEvent('shine:menu', { detail: { button: b, page: b.getAttribute('data-page') || '' } }));
   });
   global.ShineTopBar = {
-    version: '3.4.0', mount: mount, initials: initials,
+    version: '3.5.0', mount: mount, initials: initials,
     update: function () { bars.forEach(function (b) { if (b.__stpT) paint(b); }); },
     reveal: function () { bars.forEach(function (b) { if (b.__stpReveal) b.__stpReveal(); }); }   // bring a tucked row back
   };
@@ -6749,6 +6755,7 @@ window.__MO_CFG = {
     var s = e.state && e.state.rs; if (!s) return;
     if (S.top && S.top()) S.closeAll('route');
     if (!st.created) { toStart(); return; }
+    if (st.view === 'prefs') { history.pushState({ rs: 'prefs' }, '', '#prefs'); return; }   // job preferences: onboarding is done — Back stays here (user 2026-11-11)
     if (s === 'parse') { history.pushState({ rs: st.view }, '', '#' + st.view); setTimeout(function () { openSheet($('#exitSheet')); }, 30); return; }   // the account exists: back = leave?
     view(s, false);
   });
@@ -6817,7 +6824,12 @@ window.__MO_CFG = {
     $$('.field', BF).forEach(function (f) { if (!f.closest('[data-salary]')) FLD.set(f, null); });
     openSheet(BS);
   }
-  BS.addEventListener('shine:sheet-closed', function (e) { if (e.target === BS && !st.created && !st.toOtp && !st.leaving) toStart(); });   // × before the account exists → the sign-up screen
+  BS.addEventListener('shine:sheet-closed', function (e) { if (e.target === BS && !st.created && !st.toOtp && !st.leaving) toStart(); });   // closed before the account exists → the sign-up screen
+  BS.addEventListener('shine:sheet-close', function (e) {   // × / Escape / the phone's Back on Almost there: leave sign-up? first (user 2026-11-11)
+    var r = e.detail && e.detail.reason;
+    if (e.target !== BS || st.created || st.toOtp || st.leaving || ['close-button', 'escape', 'back'].indexOf(r) < 0) return;
+    e.preventDefault(); openSheet($('#exitSheet'));
+  });
   function basicNext(btn) {
     var ok = FLD.validate(BF) && bExp.check();
     if (!ok) { firstInvalid(BF); return; }
@@ -7074,9 +7086,8 @@ window.__MO_CFG = {
       case 'retry': st.leaving = true; S.closeAll('retry'); toStart(); break;
       case 'manual': e.preventDefault(); st.leaving = true; cancelParse(); location.replace(CFG.manualUrl); break;
       case 'exit': openSheet($('#exitSheet'), a); break;
-      case 'exit-yes': welcome(); break;
+      case 'exit-yes': if (st.created) welcome(); else { st.leaving = true; toStart(); } break;   // no account yet (Almost there) → the sign-up screen
       case 'later': welcome(); break;
-      case 'to-verify': history.back(); break;
       case 'reupload': e.preventDefault(); say('Your details are saved. Upload a new resume from your profile anytime.'); break;
       case 'edit': edit(kind, i, a); break;
       case 'add': if (kind === 'emp') editEmp(-1, a); else if (kind === 'edu') editEdu(-1, a); else edit(kind, -1, a); break;
