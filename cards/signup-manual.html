@@ -1586,7 +1586,7 @@ legend.field-label--hidden { float: none; width: 1px; }
 </style>
 <style data-component="alert">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · ALERT  (app component · App-login)                     v1.1.0
+   SHINE · ALERT  (app component · App-login)                     v1.2.0
    Design-system A.07 Alert: an inline, persistent message that sits in the page flow next to what it is
    about. Five intents (neutral · info · positive · notice · negative), one size, optional title, optional
    close column. Not a toast (floats, auto-dismisses) and not a badge (card status).
@@ -1633,6 +1633,8 @@ legend.field-label--hidden { float: none; width: 1px; }
 .alert-icon { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; margin-top: 2px; color: currentColor; }   /* size.icon.lg box · A.07 optical offset */
 .alert-icon svg { display: block; width: 16px; height: 16px; fill: currentColor; stroke: none; }   /* size.icon.md · icons atom (solid by default) */
 .alert--text-only .alert-icon { margin-top: -1px; }      /* no title: centre the 20 box on the first 18 body line */
+.alert--title-only .alert-title { margin: 0; }           /* v1.2.0 — title only (no body): one line in the intent colour */
+.alert--title-only .alert-icon { margin-top: 0; }        /*          the 20 icon box sits on the 20 title line */
 .alert-body { flex: 1 1 0; min-width: 0; }
 .alert-title { margin: 0 0 4px; font: 700 14px/20px var(--al-font); color: currentColor; }   /* Body / md bold · stack.xxs */
 .alert-text { margin: 0; font: 500 12px/18px var(--al-font); color: var(--al-text); }        /* Body / sm medium · always neutral */
@@ -6197,13 +6199,14 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 </script>
 <script data-component="alert">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · ALERT  (app component · App-login)                     v1.1.0
+   SHINE · ALERT  (app component · App-login)                     v1.2.0
    Pair with alert.css. Renders the design-system A.07 Alert.
 
    ShineAlert.html({
      intent: 'neutral' | 'info' | 'positive' | 'notice' | 'negative',   // default 'neutral'
      title?:  'Profile incomplete',            // Body / md bold, intent colour
-     text:    'Add 2 more skills…',            // Body / sm medium, always neutral muted
+     text?:   'Add 2 more skills…',            // Body / sm medium, always neutral muted — required unless a title is given
+                                               // (v1.2.0: title only = one short line, .alert--title-only)
      icon?:   an icons-atom name — 'ic_info-solid' | 'ic_check-circle-solid' | 'ic_alert-solid' | 'ic_alert-outline' |
               'ic_info-outline' | 'ic_clock-outline' | 'ic_bookmark-solid' — or '<svg…>' (any other atom icon) | false,   // default per intent
      dismissible?: true,                       // adds the 44 close column
@@ -6232,10 +6235,11 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     o = o || {};
     var intent = DEFAULT[o.intent] ? o.intent : 'neutral';
     var ic = o.icon === false ? '' : (o.icon && o.icon.charAt(0) === '<' ? o.icon : ICONS[o.icon || DEFAULT[intent]] || '');
+    var body = o.text != null && o.text !== '';
     var role = o.live ? (intent === 'negative' ? ' role="alert"' : ' role="status"') : (o.title ? '' : ' role="note"');
-    return '<div class="alert alert--' + intent + (o.title ? '' : ' alert--text-only') + '"' + (o.id ? ' data-alert-id="' + esc(o.id) + '"' : '') + role + '>' +
+    return '<div class="alert alert--' + intent + (o.title ? (body ? '' : ' alert--title-only') : ' alert--text-only') + '"' + (o.id ? ' data-alert-id="' + esc(o.id) + '"' : '') + role + '>' +
       '<div class="alert-main">' + (ic ? '<span class="alert-icon" aria-hidden="true">' + ic + '</span>' : '') +
-        '<div class="alert-body">' + (o.title ? '<p class="alert-title">' + esc(o.title) + '</p>' : '') + '<p class="alert-text">' + esc(o.text) + '</p></div></div>' +
+        '<div class="alert-body">' + (o.title ? '<p class="alert-title">' + esc(o.title) + '</p>' : '') + (body ? '<p class="alert-text">' + esc(o.text) + '</p>' : '') + '</div></div>' +
       (o.dismissible ? '<button class="alert-close-col" type="button" data-alert-close aria-label="Dismiss' + (o.title ? ' ' + esc(o.title) : '') + '">' + CLOSE + '</button>' : '') +
     '</div>';
   }
@@ -6245,7 +6249,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     var ev = new CustomEvent('shine:alert', { bubbles: true, cancelable: true, detail: { action: 'dismiss', id: al.getAttribute('data-alert-id'), alert: al } });
     if (al.dispatchEvent(ev)) al.remove();
   });
-  global.ShineAlert = { version: '1.1.0', html: html, icons: ICONS };
+  global.ShineAlert = { version: '1.2.0', html: html, icons: ICONS };
 })(window);
 
 </script>
@@ -7097,8 +7101,10 @@ window.__MO_CFG = {
   /* Help me fill → Upload resume, part-way through (user 2026-11-02): the resume fills the CURRENT step and the ones
      still ahead — only where nothing is entered yet. Earlier steps (and anything the user already typed) never change.
      The flow itself doesn't change: the user still goes step by step and checks what the resume filled. */
-  var CV_NOTE = { basic: 'Filled from your resume. Check it and change anything that’s off.', edu: 'Filled from your resume. Check it and change anything that’s off.', emp: 'Filled from your resume. Check it and change anything that’s off.',
-    skills: 'Filled from your resume. Check them and add more if you like.', prefs: 'Partly filled from your resume. Check it and fill the rest.' };
+  /* the alert component v1.2.0, title only (user 2026-11-11: no subtext, a short heading) · intent positive — the resume
+     filled the step (A.07.3 “something worked”); not info: blue blended with the selected chips, focused fields and progress */
+  var CV_NOTE = { basic: 'Filled from your resume', edu: 'Filled from your resume', emp: 'Filled from your resume',
+    skills: 'Filled from your resume', prefs: 'Partly filled from your resume' };
   function readResume(f) {
     var R = $('#readSheet');
     R.addEventListener('shine:sheet-opened', function h(e) {
@@ -7143,7 +7149,7 @@ window.__MO_CFG = {
       }
       if (did) { st.cv[s] = true; out.push(s); }
     });
-    $$('[data-cv]').forEach(function (n) { var s = n.closest('.mo-step').getAttribute('data-step'); n.innerHTML = window.ShineAlert.html({ intent: 'info', text: CV_NOTE[s] }); });
+    $$('[data-cv]').forEach(function (n) { var s = n.closest('.mo-step').getAttribute('data-step'); n.innerHTML = window.ShineAlert.html({ intent: 'positive', title: CV_NOTE[s], live: true }); });
     return out;
   }
 
