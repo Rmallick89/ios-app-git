@@ -25,7 +25,10 @@
     3 signup-manual.html  this page
   Components: Shine App/App-components, inlined verbatim (all fields Small). Demo data: the key in the top bar · OTP 1234 ·
   ?demo=0 hides it · ?st=nudge opens on the resume screen · ?st=worked on the fresher’s “worked as an intern or freelancer?”
-  sheet (review).
+  sheet · ?st=exit on the leave sheet (review).
+  Leave sign-up? (2026-11-11, user): Back on Basic details — and the phone’s / browser’s Back from Basic details — opens
+  “Recruiters are already looking.” with the sign-up screen’s 4 Why Shine reasons (2 × 2) · Continue setting up · Yes, exit
+  (→ the sign-up screen before the account exists, the welcome screen once it does).
   Freshers (2026-11-11, user): Continue on Education asks “Have you worked as an intern or freelancer?” (bottom sheet ·
   display · Large · × · inline stacked buttons): Yes, I’ve worked → Employment as step 3, where Employment type (3rd field,
   a dropdown → bottom sheet) offers Internship · Freelance · No → Key skills. Experienced users go straight to Employment.
@@ -3157,6 +3160,23 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 .stp-title[tabindex="-1"]:focus, .mo-nudge-h:focus { outline: none; }
 
 </style>
+<style data-page="exit-sheet">
+/* Leave sign-up? (user 2026-11-11) — the sign-up screen’s 4 Why Shine reasons, 2 × 2 (sample 2 “All four at a glance”) */
+/* tints of the Why Shine icons (signup-flow.html › .su-stat-ic--*) — DS decorative / status / brand pairs; pink isn't on this page yet */
+#exitSheet { --xs-pink-bg: #FCE7F3; --xs-pink-fg: #BE185D; }   /* surface.decorative.pink-subtle (pink-100) · content.decorative.pink (pink-600) */
+.xs-ic--ey { background: var(--surface-decorative-electric-yellow-subtle); color: var(--content-decorative-electric-yellow); }
+.xs-ic--pos { background: var(--surface-status-positive-subtle); color: var(--content-status-positive); }
+.xs-ic--brand { background: var(--surface-brand-brand-subtle); color: var(--content-neutral-brand); }
+.xs-ic--pink { background: var(--xs-pink-bg); color: var(--xs-pink-fg); }
+.xs [class*="xs-ic"] svg { display: block; }
+
+.xs2 { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.xs2 li { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; padding: 16px; border-radius: 16px; background: var(--surface-neutral-muted); }
+.xs2 .xs-ic { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; }
+.xs2 .xs-ic svg { width: 16px; height: 16px; }
+.xs2 b { margin-top: 12px; font: var(--weight-extrabold) var(--type-display-sm-size)/var(--type-display-sm-line) var(--font-brand); letter-spacing: var(--type-display-sm-track); color: var(--content-neutral-base); }
+.xs2 span:last-child { margin-top: 4px; font: var(--weight-medium) var(--type-body-sm-size)/var(--type-body-sm-line) var(--font-brand); color: var(--content-neutral-muted); }
+</style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Shine Folder"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-startup-image" href="icons/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><link rel="apple-touch-startup-image" href="icons/launch-1260x2736.png" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js")})</script>
 </head>
 <body>
@@ -3533,6 +3553,17 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
   </div>
   <div class="bs-body bs-body--gutter">
     <div class="bs-bottom"><div class="bs-actions"><button class="btn btn--primary btn--lg btn--block" type="button" data-wk="yes">Yes, I’ve worked</button><button class="btn btn--secondary btn--lg btn--block" type="button" data-wk="no">No</button></div></div>
+  </div>
+</div>
+
+<!-- Leave sign-up? (user 2026-11-11 · sample 2 “All four at a glance”: the sign-up screen’s Why Shine reasons) · bottom-sheet component: display · Large · × · strong scrim · inline stacked -->
+<div class="bs xs" id="exitSheet" data-bs-cta="inline" data-bs-scrim="strong" hidden>
+  <div class="bs-top"><div class="bs-handle" aria-hidden="true"></div>
+    <div class="bs-head bs-head--display bs-head--lg"><div class="bs-heading"><h2 class="bs-title">Recruiters are <span class="accent">already looking.</span></h2></div><button class="bs-close" type="button" data-bs-close aria-label="Close"><svg aria-hidden="true" focusable="false" data-icon="ic_close-outline" viewBox="0 0 20 20" fill="none"><path d="M16.2528 3.00257L16.3599 3.01371L16.3814 3.01543L16.4028 3.02228L16.5056 3.05313L16.5253 3.05999L16.5433 3.06942L16.6582 3.12941L16.6753 3.14398L16.7584 3.21254L16.7747 3.22625L16.7884 3.24253L16.857 3.32566L16.8716 3.3428L16.9316 3.45764L16.941 3.47564L16.947 3.49535L16.9787 3.59819L16.9855 3.61876L16.9873 3.64104L16.9984 3.74816L17.0001 3.76959L16.9984 3.79101L16.9873 3.89814L16.9855 3.92042L16.9787 3.94099L16.947 4.04383L16.941 4.06354L16.9316 4.08154L16.8716 4.19638L16.857 4.21352L16.7884 4.29665L16.7816 4.30522L11.0859 10L16.7816 15.6956L16.7884 15.7042L16.857 15.7873L16.8716 15.8045L16.9316 15.9193L16.941 15.9373L16.947 15.957L16.9787 16.0599L16.9855 16.0804L16.9873 16.1027L16.9984 16.2098L17.0001 16.2313L16.9984 16.2527L16.9873 16.3598L16.9855 16.3812L16.9787 16.4027L16.947 16.5055L16.941 16.5252L16.9316 16.5432L16.8716 16.6581L16.857 16.6752L16.7884 16.7583L16.7747 16.7746L16.7584 16.7883L16.6753 16.8569L16.6582 16.8714L16.5433 16.9314L16.5253 16.9409L16.5056 16.9469L16.4028 16.9786L16.3814 16.9854L16.3599 16.9871L16.2528 16.9983L16.2314 17L16.21 16.9983L16.1028 16.9871L16.0806 16.9854L16.06 16.9786L15.9571 16.9469L15.9374 16.9409L15.9194 16.9314L15.8046 16.8714L15.7875 16.8569L15.7043 16.7883L15.6958 16.7815L10.0001 11.0858L4.30534 16.7815L4.29676 16.7883L4.21364 16.8569L4.1965 16.8714L4.08166 16.9314L4.06366 16.9409L4.04395 16.9469L3.94111 16.9786L3.92054 16.9854L3.89826 16.9871L3.79113 16.9983L3.76971 17L3.74828 16.9983L3.64116 16.9871L3.61888 16.9854L3.59831 16.9786L3.49547 16.9469L3.47576 16.9409L3.45776 16.9314L3.34292 16.8714L3.32578 16.8569L3.24265 16.7883L3.22637 16.7746L3.21266 16.7583L3.1441 16.6752L3.12953 16.6581L3.06954 16.5432L3.06011 16.5252L3.05325 16.5055L3.0224 16.4027L3.01555 16.3812L3.01383 16.3598L3.00269 16.2527L3.00098 16.2313L3.00269 16.2098L3.01383 16.1027L3.01555 16.0804L3.0224 16.0599L3.05325 15.957L3.06011 15.9373L3.06954 15.9193L3.12953 15.8045L3.1441 15.7873L3.21266 15.7042L3.21951 15.6956L3.22637 15.6879L8.91344 10L3.21866 4.30522L3.21266 4.29665L3.1441 4.21352L3.12953 4.19638L3.06954 4.08154L3.06011 4.06354L3.05325 4.04383L3.0224 3.94099L3.01555 3.92042L3.01383 3.89814L3.00269 3.79101L3.00098 3.76959L3.00269 3.74816L3.01383 3.64104L3.01555 3.61876L3.0224 3.59819L3.05325 3.49535L3.06011 3.47564L3.06954 3.45764L3.12953 3.3428L3.1441 3.32566L3.21266 3.24253L3.22637 3.22625L3.24265 3.21254L3.32578 3.14398L3.34292 3.12941L3.45776 3.06942L3.47576 3.05999L3.49547 3.05313L3.59831 3.02228L3.61888 3.01543L3.64116 3.01371L3.74828 3.00257L3.76971 3L3.79113 3.00257L3.89826 3.01371L3.92054 3.01543L3.94111 3.02228L4.04395 3.05313L4.06366 3.05999L4.08166 3.06942L4.1965 3.12941L4.21364 3.14398L4.29676 3.21254L4.30534 3.21854L10.0001 8.91332L15.688 3.22625L15.6958 3.21939L15.7043 3.21254L15.7875 3.14398L15.8046 3.12941L15.9194 3.06942L15.9374 3.05999L15.9571 3.05313L16.06 3.02228L16.0806 3.01543L16.1028 3.01371L16.21 3.00257L16.2314 3L16.2528 3.00257Z" fill="currentColor"/></svg></button></div>
+  </div>
+  <div class="bs-body bs-body--gutter">
+    <ul class="xs2" aria-label="Why Shine"><li><span class="xs-ic xs-ic--ey" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6.5 6.5 0 0 1 3.5 6"/></svg></span><b>10K+</b><span>Recruiters searching for the right candidate</span></li><li><span class="xs-ic xs-ic--pos" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></span><b>50K+</b><span>Profiles noticed by recruiters every month</span></li><li><span class="xs-ic xs-ic--brand" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M16 9h2a2 2 0 0 1 2 2v10M2 21h20M8 7h4M8 11h4M8 15h4"/></svg></span><b>2K+</b><span>Companies hiring across all roles</span></li><li><span class="xs-ic xs-ic--pink" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span><b>85%</b><span>Profiles get noticed by recruiters in 48h</span></li></ul>
+    <div class="bs-bottom"><div class="bs-actions"><button class="btn btn--primary btn--lg btn--block" type="button" data-bs-close>Continue setting up</button><button class="btn btn--secondary btn--lg btn--block" type="button" data-act="exit-yes">Yes, exit</button></div></div>
   </div>
 </div>
 
@@ -6575,15 +6606,20 @@ window.__MO_CFG = {
     window.scrollTo(0, 0); moreBelow();
     var h = $('#moTitle'); h.setAttribute('tabindex', '-1'); try { h.focus({ preventScroll: true }); } catch (e) {}
   }
-  function back() { if (st.step === 'basic') leave(); else history.back(); }
-  function leave() {                                   // the first step → the sign-up screen that opened this flow
-    if (doc.referrer && doc.referrer.indexOf(CFG.entryUrl.split('/').pop()) > -1) history.back(); else location.href = CFG.entryUrl;
+  function back() { if (st.step === 'basic') openSheet(XS); else history.back(); }   // Basic details: leave sign-up? (user 2026-11-11)
+  function leave() {                                   // the sign-up screen that opened this flow (no account yet)
+    if (doc.referrer && doc.referrer.indexOf(CFG.entryUrl.split('/').pop()) > -1) history.go(-2); else location.href = CFG.entryUrl;   // over the gate entry and Basic details
   }
+  /* Leave sign-up? (user 2026-11-11) — the sign-up screen's Why Shine reasons. A 'gate' history entry sits under Basic details, so
+     the phone's / browser's Back from Basic details asks too. Yes, exit: no account yet → the sign-up screen; account made → welcome. */
+  var XS = $('#exitSheet');
+  function exitYes() { after(XS, function () { if (st.created) toWelcome(); else leave(); }); }
   window.addEventListener('popstate', function (e) {
     var s = e.state && e.state.mo;
     if (!s) return;
     if (s === 'nudge') { view('nudge'); return; }
     if (S.top && S.top()) S.closeAll && S.closeAll('route');
+    if (s === 'gate') { history.pushState({ mo: 'basic' }, '', '#basic'); if (st.step !== 'basic' || $('[data-view="steps"]').hidden) go('basic', false); setTimeout(function () { openSheet(XS); }, 30); return; }   // Back from Basic details: leave sign-up?
     if (st.created && s === 'basic') { go('basic', false); return; }
     go(s, false);
   });
@@ -7107,6 +7143,7 @@ window.__MO_CFG = {
       case 'profile-prefs': after($('#profileSheet'), toPrefs); break;
       case 'profile-later': after($('#profileSheet'), toWelcome); break;
       case 'prefs-later': toWelcome(); break;
+      case 'exit-yes': exitYes(); break;   // leave sign-up? → Yes, exit
       case 'demo': demoOpen(a); break;
       case 'demo-otp': F(otpF).set(DB.otp); verifyOtp(); break;
     }
@@ -7173,9 +7210,10 @@ window.__MO_CFG = {
   OTP.addEventListener('shine:sheet-closed', function () { otpKey.hidden = true; });
 
   /* ═══ boot ═══════════════════════════════════════════════════════════════════════════════════════════ */
-  history.replaceState({ mo: 'basic' }, '', '#basic');
+  history.replaceState({ mo: 'gate' }, '', '#basic'); history.pushState({ mo: 'basic' }, '', '#basic');   // the gate: Back from Basic details asks first (2026-11-11)
   go('basic', false);
   if (/[?&]st=worked\b/.test(location.search)) { fillBasic('fresher'); st.fresher = true; eduStep.fill(PERSONA.fresher.edu); go('edu', false); history.replaceState({ mo: 'edu' }, '', '#edu'); setTimeout(function () { openSheet(WS); }, 350); }   // review: a fresher on the sheet
+  if (/[?&]st=exit\b/.test(location.search)) setTimeout(function () { openSheet(XS); }, 350);   // review: the leave sheet on Basic details
   if (/[?&]st=nudge\b/.test(location.search)) { st.created = true; st.fresher = false; st.name = 'Ananya Sharma'; toNudge(true); }   // review: open on the resume screen
   window.__mo = { strength: function () { return strength(); }, st: st, go: go, edu: eduStep, emp: empStep, skills: skills, roles: roles, locs: locs, fill: fillStep };   // test hook
 })();
