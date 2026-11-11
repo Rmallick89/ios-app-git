@@ -3367,21 +3367,21 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
         <!-- the resume flow's Job preferences (user 2026-11-02): numbered questions · chips first, a search for anything else -->
         <div class="pk-form" id="fPrefs">
           <section class="pk-q"><p class="pk-qh"><b>1</b>Roles <span id="pkRolesN">· pick up to 3</span></p>
-            <fieldset class="field pf-choice" data-choice="roles" data-multi><legend class="mo-sr">Roles</legend><div class="chips pf-chips"></div></fieldset>
+            <fieldset class="field pf-choice" data-choice="roles" data-multi data-chip-size="sm"><legend class="mo-sr">Roles</legend><div class="chips pf-chips"></div></fieldset>
             <div class="field field--sm pk-more" data-field="combo" data-combo="inline" data-combo-free id="pkRoleMore"><label class="field-label field-label--hidden" for="moRole">Another role</label><div class="field-control"><input class="field-input" id="moRole" placeholder="Something else? Search roles" autocomplete="off"></div></div>
           </section>
           <section class="pk-q"><p class="pk-qh"><b>2</b>Cities <span id="pkLocsN">· pick up to 4</span></p>
-            <fieldset class="field pf-choice" data-choice="locs" data-multi><legend class="mo-sr">Cities</legend><div class="chips pf-chips"></div></fieldset>
+            <fieldset class="field pf-choice" data-choice="locs" data-multi data-chip-size="sm"><legend class="mo-sr">Cities</legend><div class="chips pf-chips"></div></fieldset>
             <div class="field field--sm pk-more" data-field="combo" data-combo="inline" data-combo-free id="pkLocMore"><label class="field-label field-label--hidden" for="moPLoc">Another city</label><div class="field-control"><input class="field-input" id="moPLoc" placeholder="Another city? Search" autocomplete="off"></div></div>
           </section>
           <section class="pk-q"><p class="pk-qh"><b>3</b>Expected salary <span>· a year</span></p>
             <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Expected annual salary" data-combo-placeholder="Search, e.g. 35" data-k="esal" data-error-empty="Choose your expected salary"><label class="field-label field-label--hidden" for="moESal">Expected annual salary</label><div class="field-control"><input class="field-input" id="moESal" placeholder="Select" required></div></div>
           </section>
           <section class="pk-q"><p class="pk-qh"><b>4</b>Job type <span>· optional</span></p>
-            <fieldset class="pf-choice" data-choice="ptype" data-multi><legend class="mo-sr">Job type</legend><div class="chips pf-chips"></div></fieldset>
+            <fieldset class="pf-choice" data-choice="ptype" data-multi data-chip-size="sm"><legend class="mo-sr">Job type</legend><div class="chips pf-chips"></div></fieldset>
           </section>
           <section class="pk-q"><p class="pk-qh"><b>5</b>Work mode <span>· optional</span></p>
-            <fieldset class="pf-choice" data-choice="pmode" data-multi><legend class="mo-sr">Work mode</legend><div class="chips pf-chips"></div></fieldset>
+            <fieldset class="pf-choice" data-choice="pmode" data-multi data-chip-size="sm"><legend class="mo-sr">Work mode</legend><div class="chips pf-chips"></div></fieldset>
           </section>
         </div>
       </section>
@@ -6469,9 +6469,10 @@ window.__MO_CFG = {
   /* ── page-local choice chips: A.06 Chip (as Profile) ── */
   function multi(fs) { return fs.hasAttribute('data-multi'); }
   function chips(fs, opts) {
+    var sz = fs.getAttribute('data-chip-size'), cls = 'chip pf-chip' + (sz ? ' chip--' + sz : '');   // chips atom size per group (Job preferences: sm · 2026-11-11)
     $('.pf-chips', fs).innerHTML = opts.map(function (o) {
-      return multi(fs) ? '<button class="chip pf-chip" type="button" aria-pressed="false" data-value="' + esc(o[0]) + '"><span class="chip-label">' + esc(o[1]) + '</span></button>'
-        : '<button class="chip pf-chip" type="button" role="radio" aria-checked="false" tabindex="-1" data-value="' + esc(o[0]) + '"><span class="chip-label">' + esc(o[1]) + '</span></button>';
+      return multi(fs) ? '<button class="' + cls + '" type="button" aria-pressed="false" data-value="' + esc(o[0]) + '"><span class="chip-label">' + esc(o[1]) + '</span></button>'
+        : '<button class="' + cls + '" type="button" role="radio" aria-checked="false" tabindex="-1" data-value="' + esc(o[0]) + '"><span class="chip-label">' + esc(o[1]) + '</span></button>';
     }).join('');
     setChoice(fs, multi(fs) ? [] : '');
   }
@@ -6967,10 +6968,10 @@ window.__MO_CFG = {
     return { list: function () { return getChoice(fs); }, set: function (l) { var base = opts().map(function (x) { return x.toLowerCase(); }); extra = uniq(extra.concat(l.filter(function (v) { return base.indexOf(String(v).toLowerCase()) < 0; }))); render(); setChoice(fs, uniq(l).slice(0, o.max).map(find)); count(); },
       add: add, render: render, error: function (t) { msg(fs, t); } };
   }
-  var roles = ChipPick(choice('roles', P), $('#pkRoleMore'), { max: 3, label: 'roles', count: '#pkRolesN', show: 6, all: D.ROLES,
+  var roles = ChipPick(choice('roles', P), $('#pkRoleMore'), { max: 3, label: 'roles', count: '#pkRolesN', show: 3, all: D.ROLES,   // 3 suggestions (user 2026-11-11)
     base: function () { return uniq(roleHints().concat(D.ROLES)); } });
-  var locs = ChipPick(choice('locs', P), $('#pkLocMore'), { max: 4, label: 'cities', count: '#pkLocsN', show: 8, all: D.CITIES.map(cityName),
-    base: function () { var c = F(k(B, 'loc')).value(); return uniq((c ? [cityName(c)] : []).concat(['Bengaluru', 'Delhi', 'Mumbai', 'Hyderabad', 'Pune', 'Noida', 'Chennai'])); } });
+  var locs = ChipPick(choice('locs', P), $('#pkLocMore'), { max: 4, label: 'cities', count: '#pkLocsN', show: 5, all: D.CITIES.map(cityName),
+    base: function () { var c = F(k(B, 'loc')).value(); return uniq((c ? [cityName(c)] : []).concat(['Bengaluru', 'Hyderabad', 'Pune', 'Chennai'])); } });   // their city + India's 4 IT cities (user 2026-11-11)
   /* salary: one field — the hint is a step above their current salary */
   function salHint() { var cur = st.fresher ? 0 : +digits(F(k(B, 'salary')).value()) || 0, v = cur ? cur * 1.1 : 300000, unit = v >= 1000000 ? 100000 : 50000; return 'e.g. ' + lacsLabel(Math.ceil(v / unit) * unit); }   // a step above the current salary, on the lakhs list
   var prefsSeen = false;

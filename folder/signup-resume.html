@@ -3361,21 +3361,21 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
     </header>
     <main class="rs-main" id="pMain">
       <section class="pk-q"><p class="pk-qh"><b>1</b>Roles <span id="pkRolesN">· pick up to 3</span></p>
-        <fieldset class="pf-choice" data-choice="broles" data-multi><legend class="mo-sr">Roles</legend><div class="chips pf-chips"></div></fieldset>
+        <fieldset class="pf-choice" data-choice="broles" data-multi data-chip-size="sm"><legend class="mo-sr">Roles</legend><div class="chips pf-chips"></div></fieldset>
         <div class="field field--sm pk-more" data-field="combo" data-combo="inline" data-combo-free id="pkRoleMore"><label class="field-label field-label--hidden" for="pkRoleIn">Another role</label><div class="field-control"><input class="field-input" id="pkRoleIn" placeholder="Something else? Search roles" autocomplete="off"></div></div>
       </section>
       <section class="pk-q"><p class="pk-qh"><b>2</b>Cities <span id="pkLocsN">· pick up to 4</span></p>
-        <fieldset class="pf-choice" data-choice="blocs" data-multi><legend class="mo-sr">Cities</legend><div class="chips pf-chips"></div></fieldset>
+        <fieldset class="pf-choice" data-choice="blocs" data-multi data-chip-size="sm"><legend class="mo-sr">Cities</legend><div class="chips pf-chips"></div></fieldset>
         <div class="field field--sm pk-more" data-field="combo" data-combo="inline" data-combo-free id="pkLocMore"><label class="field-label field-label--hidden" for="pkLocIn">Another city</label><div class="field-control"><input class="field-input" id="pkLocIn" placeholder="Another city? Search" autocomplete="off"></div></div>
       </section>
       <section class="pk-q"><p class="pk-qh"><b>3</b>Expected salary <span>· a year</span></p>
         <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Expected annual salary" data-combo-placeholder="Search, e.g. 35" id="pkSal"><label class="field-label field-label--hidden" for="pkSalIn">Expected annual salary</label><div class="field-control"><input class="field-input" id="pkSalIn" placeholder="Select"></div></div>
       </section>
       <section class="pk-q"><p class="pk-qh"><b>4</b>Job type <span>· optional</span></p>
-        <fieldset class="pf-choice" data-choice="ptype" data-multi><legend class="mo-sr">Job type</legend><div class="chips pf-chips"></div></fieldset>
+        <fieldset class="pf-choice" data-choice="ptype" data-multi data-chip-size="sm"><legend class="mo-sr">Job type</legend><div class="chips pf-chips"></div></fieldset>
       </section>
       <section class="pk-q"><p class="pk-qh"><b>5</b>Work mode <span>· optional</span></p>
-        <fieldset class="pf-choice" data-choice="pmode" data-multi><legend class="mo-sr">Work mode</legend><div class="chips pf-chips"></div></fieldset>
+        <fieldset class="pf-choice" data-choice="pmode" data-multi data-chip-size="sm"><legend class="mo-sr">Work mode</legend><div class="chips pf-chips"></div></fieldset>
       </section>
 
     </main>
@@ -6549,9 +6549,10 @@ window.__MO_CFG = {
   /* ── page-local choice chips: A.06 Chip (as Profile) ── */
   function multi(fs) { return fs.hasAttribute('data-multi'); }
   function chips(fs, opts) {
+    var sz = fs.getAttribute('data-chip-size'), cls = 'chip pf-chip' + (sz ? ' chip--' + sz : '');   // chips atom size per group (Job preferences: sm · 2026-11-11)
     $('.pf-chips', fs).innerHTML = opts.map(function (o) {
-      return multi(fs) ? '<button class="chip pf-chip" type="button" aria-pressed="false" data-value="' + esc(o[0]) + '"><span class="chip-label">' + esc(o[1]) + '</span></button>'
-        : '<button class="chip pf-chip" type="button" role="radio" aria-checked="false" tabindex="-1" data-value="' + esc(o[0]) + '"><span class="chip-label">' + esc(o[1]) + '</span></button>';
+      return multi(fs) ? '<button class="' + cls + '" type="button" aria-pressed="false" data-value="' + esc(o[0]) + '"><span class="chip-label">' + esc(o[1]) + '</span></button>'
+        : '<button class="' + cls + '" type="button" role="radio" aria-checked="false" tabindex="-1" data-value="' + esc(o[0]) + '"><span class="chip-label">' + esc(o[1]) + '</span></button>';
     }).join('');
     setChoice(fs, multi(fs) ? [] : '');
   }
@@ -7220,8 +7221,9 @@ window.__MO_CFG = {
   var PICK = {
     render: function () {
       if (!roleOpts.length) {
-        roleOpts = rolesFor().slice(0, 6).map(function (r) { return [r, r]; });
-        locOpts = [cityName(PF.loc), 'Bengaluru', 'Delhi', 'Mumbai', 'Hyderabad', 'Pune', 'Noida', 'Chennai'].filter(function (c, i, a) { return c && a.indexOf(c) === i; }).map(function (c) { return [c, c]; });
+        roleOpts = rolesFor().slice(0, 3).map(function (r) { return [r, r]; });   // 3 suggestions (user 2026-11-11)
+        locOpts = [cityName(PF.loc)].concat(['Bengaluru', 'Hyderabad', 'Pune', 'Chennai']).filter(   // their city + India's 4 IT cities (user 2026-11-11)
+          function (c, i, a) { return c && a.indexOf(c) === i; }).map(function (c) { return [c, c]; });
       }
       salIn.placeholder = salHint();
       chips(bRoles, roleOpts); chips(bLocs, locOpts); setChoice(bRoles, PR.roles.slice()); setChoice(bLocs, PR.locs.slice());
