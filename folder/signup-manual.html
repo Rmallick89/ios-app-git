@@ -17,14 +17,18 @@
 <!--
   SHINE APP · SIGN UP · 3 — FILL DETAILS MANUALLY (logged out)        signup-manual.html
   Opened by "Fill details manually" on the sign-up screen (signup-flow.html) or the "can’t read" sheet (signup-resume.html).
-  Basic details → OTP (4 boxes) → Account created → Education → Employment (experienced only) → Key skills →
+  Basic details → OTP (4 boxes) → Account created → Education → Employment → Key skills →
   Job preferences → Add your resume (Spotlight · upload or skip) → signup-welcome.html.
   Sign up is three connected pages in this folder:
     1 signup-flow.html    the sign-up screen: upload resume (→ 2) · fill details manually (→ 3) · log in
     2 signup-resume.html  reading your resume → … → Job preferences → recommended-jobs.html · signup-welcome.html
     3 signup-manual.html  this page
   Components: Shine App/App-components, inlined verbatim (all fields Small). Demo data: the key in the top bar · OTP 1234 ·
-  ?demo=0 hides it · ?st=nudge opens on the resume screen (review).
+  ?demo=0 hides it · ?st=nudge opens on the resume screen · ?st=worked on the fresher’s “worked as an intern or freelancer?”
+  sheet (review).
+  Freshers (2026-11-11, user): Continue on Education asks “Have you worked as an intern or freelancer?” (bottom sheet ·
+  display · Large · × · inline stacked buttons): Yes, I’ve worked → Employment as step 3, where Employment type (3rd field,
+  a dropdown → bottom sheet) offers Internship · Freelance · No → Key skills. Experienced users go straight to Employment.
   Standard fields (2026-11-04, user — the same in App-login): current salary = the input fields atom's amount field (2026-11-05): Indian commas as you type, digits only, the amount in
   words in green ("Seventy-Eight Lakh Ninety Thousand Eight Hundred Ninety-Eight Rupees"), ₹1 lakh – ₹1 crore, errors
   "₹3 is too low. Annual salary must be at least ₹1 lakh." · "Enter your annual salary."; expected salary = a list in lakhs (bottom sheet: 1 Lac ·
@@ -3258,7 +3262,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
         </div>
       </section>
 
-      <!-- ── 3 · Employment (experienced only) ── -->
+      <!-- ── 3 · Employment (experienced · a fresher who has worked as an intern or freelancer — user 2026-11-11) ── -->
       <section class="mo-step" data-step="emp" aria-labelledby="moTitle" hidden>
         <div class="mo-cv" data-cv hidden></div>
         <div class="mo-entries">
@@ -3273,6 +3277,10 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
               <div class="field field--sm" data-field="text" data-k="company" data-error-empty="Enter the company name">
                 <label class="field-label" for="moEmCompany">Company name</label>
                 <div class="field-control"><input class="field-input" id="moEmCompany" placeholder="e.g. XYZ Technologies Pvt. Ltd." autocomplete="organization" required></div>
+              </div>
+              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Employment type" data-k="etype" data-error-empty="Choose the employment type" hidden>   <!-- a fresher only: Internship · Freelance (user 2026-11-11) -->
+                <label class="field-label" for="moEmType">Employment type</label>
+                <div class="field-control"><input class="field-input" id="moEmType" placeholder="Select employment type" required disabled></div>
               </div>
               <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Department" data-k="dept" data-error-empty="Select a department">
                 <label class="field-label" for="moEmDept">Department</label>
@@ -3514,6 +3522,17 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
         <button class="btn btn--primary btn--destructive btn--lg btn--fill" type="button" data-act="delete-yes">Delete</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- A fresher, after Education: worked as an intern or freelancer? (user 2026-11-11 · sample 1 “Just the question”) —
+     bottom-sheet component: display · Large · floating × · strong scrim · inline stacked buttons (the answer first, No under it) -->
+<div class="bs" id="workSheet" data-bs-cta="inline" data-bs-scrim="strong" hidden>
+  <div class="bs-top"><div class="bs-handle" aria-hidden="true"></div>
+    <div class="bs-head bs-head--display bs-head--lg"><div class="bs-heading"><h2 class="bs-title">Have you worked as an <span class="accent">intern or freelancer?</span></h2></div><button class="bs-close" type="button" data-bs-close aria-label="Close"><svg aria-hidden="true" focusable="false" data-icon="ic_close-outline" viewBox="0 0 20 20" fill="none"><path d="M16.2528 3.00257L16.3599 3.01371L16.3814 3.01543L16.4028 3.02228L16.5056 3.05313L16.5253 3.05999L16.5433 3.06942L16.6582 3.12941L16.6753 3.14398L16.7584 3.21254L16.7747 3.22625L16.7884 3.24253L16.857 3.32566L16.8716 3.3428L16.9316 3.45764L16.941 3.47564L16.947 3.49535L16.9787 3.59819L16.9855 3.61876L16.9873 3.64104L16.9984 3.74816L17.0001 3.76959L16.9984 3.79101L16.9873 3.89814L16.9855 3.92042L16.9787 3.94099L16.947 4.04383L16.941 4.06354L16.9316 4.08154L16.8716 4.19638L16.857 4.21352L16.7884 4.29665L16.7816 4.30522L11.0859 10L16.7816 15.6956L16.7884 15.7042L16.857 15.7873L16.8716 15.8045L16.9316 15.9193L16.941 15.9373L16.947 15.957L16.9787 16.0599L16.9855 16.0804L16.9873 16.1027L16.9984 16.2098L17.0001 16.2313L16.9984 16.2527L16.9873 16.3598L16.9855 16.3812L16.9787 16.4027L16.947 16.5055L16.941 16.5252L16.9316 16.5432L16.8716 16.6581L16.857 16.6752L16.7884 16.7583L16.7747 16.7746L16.7584 16.7883L16.6753 16.8569L16.6582 16.8714L16.5433 16.9314L16.5253 16.9409L16.5056 16.9469L16.4028 16.9786L16.3814 16.9854L16.3599 16.9871L16.2528 16.9983L16.2314 17L16.21 16.9983L16.1028 16.9871L16.0806 16.9854L16.06 16.9786L15.9571 16.9469L15.9374 16.9409L15.9194 16.9314L15.8046 16.8714L15.7875 16.8569L15.7043 16.7883L15.6958 16.7815L10.0001 11.0858L4.30534 16.7815L4.29676 16.7883L4.21364 16.8569L4.1965 16.8714L4.08166 16.9314L4.06366 16.9409L4.04395 16.9469L3.94111 16.9786L3.92054 16.9854L3.89826 16.9871L3.79113 16.9983L3.76971 17L3.74828 16.9983L3.64116 16.9871L3.61888 16.9854L3.59831 16.9786L3.49547 16.9469L3.47576 16.9409L3.45776 16.9314L3.34292 16.8714L3.32578 16.8569L3.24265 16.7883L3.22637 16.7746L3.21266 16.7583L3.1441 16.6752L3.12953 16.6581L3.06954 16.5432L3.06011 16.5252L3.05325 16.5055L3.0224 16.4027L3.01555 16.3812L3.01383 16.3598L3.00269 16.2527L3.00098 16.2313L3.00269 16.2098L3.01383 16.1027L3.01555 16.0804L3.0224 16.0599L3.05325 15.957L3.06011 15.9373L3.06954 15.9193L3.12953 15.8045L3.1441 15.7873L3.21266 15.7042L3.21951 15.6956L3.22637 15.6879L8.91344 10L3.21866 4.30522L3.21266 4.29665L3.1441 4.21352L3.12953 4.19638L3.06954 4.08154L3.06011 4.06354L3.05325 4.04383L3.0224 3.94099L3.01555 3.92042L3.01383 3.89814L3.00269 3.79101L3.00098 3.76959L3.00269 3.74816L3.01383 3.64104L3.01555 3.61876L3.0224 3.59819L3.05325 3.49535L3.06011 3.47564L3.06954 3.45764L3.12953 3.3428L3.1441 3.32566L3.21266 3.24253L3.22637 3.22625L3.24265 3.21254L3.32578 3.14398L3.34292 3.12941L3.45776 3.06942L3.47576 3.05999L3.49547 3.05313L3.59831 3.02228L3.61888 3.01543L3.64116 3.01371L3.74828 3.00257L3.76971 3L3.79113 3.00257L3.89826 3.01371L3.92054 3.01543L3.94111 3.02228L4.04395 3.05313L4.06366 3.05999L4.08166 3.06942L4.1965 3.12941L4.21364 3.14398L4.29676 3.21254L4.30534 3.21854L10.0001 8.91332L15.688 3.22625L15.6958 3.21939L15.7043 3.21254L15.7875 3.14398L15.8046 3.12941L15.9194 3.06942L15.9374 3.05999L15.9571 3.05313L16.06 3.02228L16.0806 3.01543L16.1028 3.01371L16.21 3.00257L16.2314 3L16.2528 3.00257Z" fill="currentColor"/></svg></button></div>
+  </div>
+  <div class="bs-body bs-body--gutter">
+    <div class="bs-bottom"><div class="bs-actions"><button class="btn btn--primary btn--lg btn--block" type="button" data-wk="yes">Yes, I’ve worked</button><button class="btn btn--secondary btn--lg btn--block" type="button" data-wk="no">No</button></div></div>
   </div>
 </div>
 
@@ -6496,10 +6515,10 @@ window.__MO_CFG = {
   var DB = { emails: { 'ramaraj.lingam@gmail.com': 1 }, phones: { '9876543210': 1 }, otp: '1234' };
 
   /* ═══ state + routing ═════════════════════════════════════════════════════════════════════════════════ */
-  var st = { step: 'basic', created: false, fresher: null, phone: '', name: '', persona: null, cv: null };   // cv: { step: true } — the steps the resume filled
+  var st = { step: 'basic', created: false, fresher: null, worked: null, phone: '', name: '', persona: null, cv: null };   // worked: a fresher's answer on the sheet after Education   // cv: { step: true } — the steps the resume filled
   var TITLES = { basic: 'Basic details.', edu: 'Education.', emp: 'Employment.', skills: 'Key skills.', prefs: 'Preferences.' };
   var LONG = { prefs: 'Job preferences.' };                         // where the title has a line of its own (not in the bar row)
-  function steps() { return st.fresher ? ['basic', 'edu', 'skills', 'prefs'] : ['basic', 'edu', 'emp', 'skills', 'prefs']; }
+  function steps() { return st.fresher && !st.worked ? ['basic', 'edu', 'skills', 'prefs'] : ['basic', 'edu', 'emp', 'skills', 'prefs']; }   // a fresher who has worked as an intern or freelancer gets Employment (user 2026-11-11)
   var main = $('#moMain'), foot = $('#moFoot'), next = $('#moNext');
 
   /* status bar (user 2026-11-03): on Add your resume it continues the screen's blue-tinted top — html.mo-on-nudge turns the
@@ -6549,7 +6568,7 @@ window.__MO_CFG = {
     $('.stp-back').hidden = step === 'basic' && st.created;          // the account exists: nothing to go back to
     $$('[data-cv]').forEach(function (n) { var s = n.closest('.mo-step').getAttribute('data-step'); n.hidden = !(st.cv && st.cv[s]); });
     if (step === 'edu') eduStep.enter();
-    if (step === 'emp') empStep.enter();
+    if (step === 'emp') { empType(); empStep.enter(); }
     if (step === 'skills') skillsEnter();
     if (step === 'prefs') prefsEnter();
     if (push !== false) history.pushState({ mo: step }, '', '#' + step);
@@ -6762,7 +6781,13 @@ window.__MO_CFG = {
   });
 
   /* Employment */
-  var MF = $('#fEmp'), emCur = choice('current', MF);
+  var MF = $('#fEmp'), emCur = choice('current', MF), emType = k(MF, 'etype');
+  /* Employment type (user 2026-11-11) — a fresher only, 3rd (after Job title · Company name): a dropdown → bottom sheet with
+     Internship · Freelance. Hidden (and not asked) for experienced users. */
+  F(emType).options([{ value: 'Internship', label: 'Internship' }, { value: 'Freelance', label: 'Freelance' }]);
+  function askType() { return st.fresher === true; }
+  function empType() { show(emType, askType()); if (!askType()) F(emType).clear(); }
+  function etSet(v) { if (v && askType() && F(emType).options().some(function (o) { return o.value === v; })) F(emType).set(v); else F(emType).clear(); FLD.set(emType, null); }
   linkDates(MF);
   chips(emCur, [['yes', 'Yes'], ['no', 'No']]);
   F(k(MF, 'title')).options(D.ROLES);
@@ -6772,8 +6797,8 @@ window.__MO_CFG = {
   emCur.addEventListener('pf:choice', function (e) { show(k(MF, 'end'), e.detail.value === 'no'); });
   var empStep = EntryStep({
     kind: 'emp', list: '#empList', card: '#empCard', form: '#fEmp', noun: 'Job', addText: 'Add another job',
-    empty: function (f) { return !F(k(f, 'title')).value() && !F(k(f, 'company')).value() && !getChoice(emCur); },
-    filled: function (f) { return ['title', 'company', 'dept', 'ind', 'start'].concat(getChoice(emCur) === 'no' ? ['end'] : []).filter(function (n) { return has1(k(f, n)); }).length + (getChoice(emCur) ? 1 : 0); },   // of 6 (7 with the last working day) required
+    empty: function (f) { return !F(emType).value() && !F(k(f, 'title')).value() && !F(k(f, 'company')).value() && !getChoice(emCur); },
+    filled: function (f) { return (askType() && F(emType).value() ? 1 : 0) + ['title', 'company', 'dept', 'ind', 'start'].concat(getChoice(emCur) === 'no' ? ['end'] : []).filter(function (n) { return has1(k(f, n)); }).length + (getChoice(emCur) ? 1 : 0); },   // of 6 (7 with the last working day) required
     check: function (f) {
       var ok = FLD.validate(f);
       if (!getChoice(emCur)) { msg(emCur, 'Tell us if you work here now'); ok = false; }
@@ -6784,15 +6809,15 @@ window.__MO_CFG = {
     },
     read: function (f) {
       var cur = getChoice(emCur) === 'yes';
-      return { title: F(k(f, 'title')).label() || F(k(f, 'title')).value(), company: F(k(f, 'company')).value(), dept: F(k(f, 'dept')).value(), deptLabel: F(k(f, 'dept')).label(),
+      return { title: F(k(f, 'title')).label() || F(k(f, 'title')).value(), company: F(k(f, 'company')).value(), type: askType() ? F(emType).value() : '', dept: F(k(f, 'dept')).value(), deptLabel: F(k(f, 'dept')).label(),
         ind: F(k(f, 'ind')).value(), indLabel: F(k(f, 'ind')).label(), current: cur, start: F(k(f, 'start')).value(), end: cur ? '' : F(k(f, 'end')).value() };
     },
     write: function (f, it) {
-      F(k(f, 'title')).set(it.title); F(k(f, 'company')).set(it.company); F(k(f, 'dept')).set(it.dept); F(k(f, 'ind')).set(it.ind);
+      F(k(f, 'title')).set(it.title); F(k(f, 'company')).set(it.company); etSet(it.type || ''); F(k(f, 'dept')).set(it.dept); F(k(f, 'ind')).set(it.ind);
       setChoice(emCur, it.current ? 'yes' : 'no'); F(k(f, 'start')).set(it.start); if (!it.current) F(k(f, 'end')).set(it.end);
     },
-    reset: function (f) { ['title', 'company', 'dept', 'ind', 'start', 'end'].forEach(function (n) { F(k(f, n)).clear(); FLD.set(k(f, n), null); }); setChoice(emCur, ''); msg(emCur, ''); show(k(f, 'end'), false); },
-    summary: function (it) { return { title: it.title, where: it.company, meta: [ym(it.start) + ' — ' + (it.current ? 'Present' : ym(it.end)), dur(months(it.start, it.current ? '' : it.end))] }; }
+    reset: function (f) { ['title', 'company', 'dept', 'ind', 'start', 'end'].forEach(function (n) { F(k(f, n)).clear(); FLD.set(k(f, n), null); }); etSet(''); setChoice(emCur, ''); msg(emCur, ''); show(k(f, 'end'), false); },
+    summary: function (it) { return { title: it.title, where: it.company, meta: [ym(it.start) + ' — ' + (it.current ? 'Present' : ym(it.end)), dur(months(it.start, it.current ? '' : it.end))] }; }   // no type on the card (it is in Edit)
   });
 
   /* item menu (⋮ → Edit · Delete) and the delete confirmation — as Profile */
@@ -6833,7 +6858,7 @@ window.__MO_CFG = {
   chips(jpMode, [['Remote', 'Remote'], ['In Office', 'In Office'], ['Hybrid', 'Hybrid']]);
   F(k(P, 'esal')).options(LACS);                                   // expected salary: the lakhs list
   function roleHints() {
-    var cur = empStep.items().map(function (x) { return x.title; });
+    var cur = st.fresher ? [] : empStep.items().map(function (x) { return x.title; });   // a fresher's internship isn't the role they want next
     var base = cur.length ? cur : (st.fresher ? ['Business Analyst', 'Data Analyst', 'Marketing Executive', 'Sales Executive', 'Content Writer'] : []);
     var more = D.ROLES.filter(function (r) { return cur.some(function (c) { var w = c.split(' ').pop(); return r.indexOf(w) > -1; }); });
     return base.concat(more).filter(function (r, i, a) { return !a.slice(0, i).some(function (x) { return x.toLowerCase() === r.toLowerCase(); }); });
@@ -6881,7 +6906,7 @@ window.__MO_CFG = {
     roles.render(); locs.render();
     if (!prefsSeen) {                                         // the first visit starts from what they told us: their current role · their city
       prefsSeen = true;
-      var cur = empStep.items().filter(function (x) { return x.current; })[0] || empStep.items()[0], c = F(k(B, 'loc')).value();
+      var cur = st.fresher ? null : empStep.items().filter(function (x) { return x.current; })[0] || empStep.items()[0], c = F(k(B, 'loc')).value();
       if (cur && cur.title && !roles.list().length) roles.set([cur.title]);
       if (c && !locs.list().length) locs.set([cityName(c)]);
     }
@@ -6929,7 +6954,7 @@ window.__MO_CFG = {
     var name = (st.name || F(k(B, 'name')).value() || '').trim(), first = name.split(' ')[0] || 'there';
     var done = steps().filter(function (s) { return s !== 'prefs'; }).map(function (s) { return LABEL[s]; }).concat('Resume');
     var pct = strength();
-    var cur = empStep.items().filter(function (x) { return x.current; })[0] || empStep.items()[0], city = F(k(B, 'loc')).value();
+    var cur = st.fresher ? null : empStep.items().filter(function (x) { return x.current; })[0] || empStep.items()[0], city = F(k(B, 'loc')).value();
     $$('[data-ps-first]').forEach(function (e) { e.textContent = first; });
     $$('[data-ps-initials]').forEach(function (e) { e.textContent = name ? name.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase() : 'You'; });
     $$('[data-ps-done]').forEach(function (e) { e.innerHTML = done.map(function (t) { return '<li>' + IC['ic_check-circle-solid'] + '<span>' + esc(t) + '</span></li>'; }).join(''); });
@@ -7037,11 +7062,21 @@ window.__MO_CFG = {
     return out;
   }
 
+  /* ═══ a fresher: worked as an intern or freelancer? — the sheet after Education (user 2026-11-11) ═══════════════════
+     Yes, I’ve worked → Employment as step 3 (Employment type: Internship · Freelance) · No → straight to Key skills. Asked
+     each time they continue from Education; × keeps them on Education. */
+  var WS = $('#workSheet');
+  WS.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-wk]'); if (!b || WS.__going) return; WS.__going = true;
+    st.worked = b.getAttribute('data-wk') === 'yes'; progress();
+    after(WS, function () { WS.__going = false; go(st.worked ? 'emp' : 'skills'); });
+  });
+
   /* ═══ actions ═══════════════════════════════════════════════════════════════════════════════════════ */
   function onNext() {
     var s = st.step, list = steps();
     if (s === 'basic') { basicNext(); return; }
-    if (s === 'edu') { if (!eduStep.save()) return; if (!eduStep.items().length) return; }
+    if (s === 'edu') { if (!eduStep.save()) return; if (!eduStep.items().length) return; if (st.fresher) { openSheet(WS); return; } }   // a fresher: worked as an intern or freelancer?
     if (s === 'emp') { if (!empStep.save()) return; if (!empStep.items().length) return; }
     if (s === 'skills') { if (skills.list().length < 3) { skills.error('Add at least 3 skills'); skills.combo.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
       if (st.cv) openProfile(); else toNudge(); return; }   // 2026-11-06 (user): the resume is next and required — or, already added (Help me fill), straight to Profile created
@@ -7091,6 +7126,7 @@ window.__MO_CFG = {
       basic: { name: 'Ananya Sharma', email: 'ananya.sharma@gmail.com', phone: '9811122334', exp: 'fresher', loc: 'Pune, Maharashtra', gender: 'Female', dob: '2003-04-12', dis: 'None' },
       edu: [{ level: 'BBA', levelLabel: 'BBA', ctype: 'Full time', inst: 'Symbiosis International', start: '2021-07', end: '2024-05', grade: '% Marks of 100', marks: '78' },
             { level: 'Class XII - Commerce', levelLabel: 'Class XII — Commerce', ctype: 'Full time', inst: 'CBSE', start: '2020-04', end: '2021-03', grade: '% Marks of 100', marks: '88' }],
+      emp: [{ title: 'Marketing Intern', company: 'Nykaa', type: 'Internship', dept: 'Marketing', deptLabel: 'Marketing', ind: 'Retail', indLabel: 'Retail / FMCG', current: false, start: '2023-05', end: '2023-07' }],
       skills: ['Excel', 'Communication', 'Market Research', 'Business Development'],
       prefs: { roles: ['Business Analyst', 'Marketing Executive'], locs: ['Pune', 'Mumbai'], salary: 400000, types: ['Full Time', 'Internship'], modes: ['In Office'] }
     }
@@ -7107,7 +7143,7 @@ window.__MO_CFG = {
     var d = PERSONA[p]; st.persona = p;
     if (st.step === 'basic') fillBasic(p);
     if (st.step === 'edu') eduStep.fill(d.edu);
-    if (st.step === 'emp') empStep.fill(d.emp || PERSONA.exp.emp);
+    if (st.step === 'emp') empStep.fill(st.fresher ? PERSONA.fresher.emp : d.emp || PERSONA.exp.emp);
     if (st.step === 'skills') skills.set(d.skills);
     if (st.step === 'prefs') { roles.set(d.prefs.roles); locs.set(d.prefs.locs); setESal(k(P, 'esal'), d.prefs.salary); setChoice(jpType, d.prefs.types.slice()); setChoice(jpMode, d.prefs.modes.slice()); }
     say('Filled with demo data');
@@ -7115,8 +7151,8 @@ window.__MO_CFG = {
   function row(kk, v, act, label) { return '<div class="mo-g-row"><span class="mo-g-txt"><span class="mo-g-k">' + kk + '</span><span class="mo-g-v">' + v + '</span></span><button class="btn btn--secondary btn--sm" type="button" data-demo="' + act + '" aria-label="' + esc(label || 'Use ' + kk) + '">Use</button></div>'; }
   function demoOpen(a) {
     var h = '<p class="mo-eyebrow mo-g-h">Fill this step</p>' +
-      (st.step === 'emp' ? '' : row('As a fresher', 'Ananya Sharma · BBA, Pune', 'fill-fresher', 'Fill this step as a fresher')) +
-      (st.step === 'basic' || st.step === 'emp' || st.persona !== 'fresher' ? row('With work experience', 'Ramalingam Murthy · Product Manager', 'fill-exp', 'Fill this step with work experience') : '');
+      (st.step === 'emp' && !st.fresher ? '' : row('As a fresher', 'Ananya Sharma · BBA, Pune', 'fill-fresher', 'Fill this step as a fresher')) +
+      (st.step === 'emp' && st.fresher ? '' : st.step === 'basic' || st.step === 'emp' || st.persona !== 'fresher' ? row('With work experience', 'Ramalingam Murthy · Product Manager', 'fill-exp', 'Fill this step with work experience') : '');
     if (st.step === 'basic') h += '<p class="mo-eyebrow mo-g-h">Already on Shine</p>' + row('Email', 'ramaraj.lingam@gmail.com', 'email') + row('Mobile number', '98765 43210', 'phone');
     h += '<p class="mo-eyebrow mo-g-h">OTP</p>' + row('4-digit OTP', '1234', 'otp');
     $('#demoBody').innerHTML = h; openSheet($('#demoSheet'), a);
@@ -7139,6 +7175,7 @@ window.__MO_CFG = {
   /* ═══ boot ═══════════════════════════════════════════════════════════════════════════════════════════ */
   history.replaceState({ mo: 'basic' }, '', '#basic');
   go('basic', false);
+  if (/[?&]st=worked\b/.test(location.search)) { fillBasic('fresher'); st.fresher = true; eduStep.fill(PERSONA.fresher.edu); go('edu', false); history.replaceState({ mo: 'edu' }, '', '#edu'); setTimeout(function () { openSheet(WS); }, 350); }   // review: a fresher on the sheet
   if (/[?&]st=nudge\b/.test(location.search)) { st.created = true; st.fresher = false; st.name = 'Ananya Sharma'; toNudge(true); }   // review: open on the resume screen
   window.__mo = { strength: function () { return strength(); }, st: st, go: go, edu: eduStep, emp: empStep, skills: skills, roles: roles, locs: locs, fill: fillStep };   // test hook
 })();
