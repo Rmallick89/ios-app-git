@@ -6549,7 +6549,7 @@ window.__MO_CFG = {
   /* ── page-local choice chips: A.06 Chip (as Profile) ── */
   function multi(fs) { return fs.hasAttribute('data-multi'); }
   function chips(fs, opts) {
-    var sz = fs.getAttribute('data-chip-size'), cls = 'chip pf-chip' + (sz ? ' chip--' + sz : '');   // chips atom size per group (Job preferences: sm · 2026-11-11)
+    var cls = 'chip pf-chip chip--' + (fs.getAttribute('data-chip-size') || 'sm');   // chips atom Small on every step (user 2026-11-12: one chip size across sign-up, as Job preferences)
     $('.pf-chips', fs).innerHTML = opts.map(function (o) {
       return multi(fs) ? '<button class="' + cls + '" type="button" aria-pressed="false" data-value="' + esc(o[0]) + '"><span class="chip-label">' + esc(o[1]) + '</span></button>'
         : '<button class="' + cls + '" type="button" role="radio" aria-checked="false" tabindex="-1" data-value="' + esc(o[0]) + '"><span class="chip-label">' + esc(o[1]) + '</span></button>';
