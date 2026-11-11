@@ -28,6 +28,8 @@
   sheet · ?st=exit on the leave sheet (review).
   Job preferences (2026-11-11, user): onboarding is done by then — no back arrow, and Back stays on the screen.
   Help me fill (2026-11-11, user’s pick of 6): a white pill with a slowly turning gradient edge (the Profile dial’s colours).
+  Its sheet: Upload resume opens the file picker here (also before the account exists — the resume then fills Basic details’
+  empty fields too) · I’ll fill manually.
   Leave sign-up? (2026-11-11, user): × on Basic details (it replaced ←; shown before and after the account exists) — and the
   phone’s / browser’s Back from Basic details — opens
   “Recruiters are already looking.” with the sign-up screen’s 4 Why Shine reasons (2 × 2) · Continue setting up · Yes, exit
@@ -3221,6 +3223,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 
       <!-- ── 1 · Basic details ── -->
       <section class="mo-step" data-step="basic" aria-labelledby="moTitle">
+        <div class="mo-cv" data-cv hidden></div>
         <div class="pf-form" id="fBasic">
           <div class="field field--sm" data-field="text" data-k="name" data-error-empty="Enter your full name">
             <label class="field-label" for="moName">Full name</label>
@@ -3516,7 +3519,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     <div class="bs-bottom">
       <div class="bs-actions">
         <button class="btn btn--primary btn--lg btn--block" type="button" data-act="help-upload"><svg aria-hidden="true" focusable="false" data-icon="ic_upload-outline" viewBox="0 0 20 20" fill="none"><path d="M17 11.438V16.438C17 16.6038 16.9342 16.7627 16.8169 16.8799C16.6997 16.9971 16.5408 17.063 16.375 17.063H2.625C2.45924 17.063 2.30027 16.9971 2.18306 16.8799C2.06585 16.7627 2 16.6038 2 16.438V11.438C2 11.2722 2.06585 11.1133 2.18306 10.996C2.30027 10.8788 2.45924 10.813 2.625 10.813C2.79076 10.813 2.94973 10.8788 3.06694 10.996C3.18415 11.1133 3.25 11.2722 3.25 11.438V15.813H15.75V11.438C15.75 11.2722 15.8158 11.1133 15.9331 10.996C16.0503 10.8788 16.2092 10.813 16.375 10.813C16.5408 10.813 16.6997 10.8788 16.8169 10.996C16.9342 11.1133 17 11.2722 17 11.438ZM6.375 7.37549H8.875V12.3755C8.875 12.5413 8.94085 12.7002 9.05806 12.8174C9.17527 12.9346 9.33424 13.0005 9.5 13.0005C9.66576 13.0005 9.82473 12.9346 9.94194 12.8174C10.0592 12.7002 10.125 12.5413 10.125 12.3755V7.37549H12.625C12.7487 7.37559 12.8696 7.33899 12.9725 7.27032C13.0754 7.20165 13.1555 7.104 13.2029 6.98974C13.2502 6.87547 13.2626 6.74973 13.2385 6.62842C13.2143 6.50712 13.1547 6.39571 13.0672 6.3083L9.94219 3.1833C9.88414 3.12519 9.81521 3.07909 9.73934 3.04764C9.66346 3.01619 9.58213 3 9.5 3C9.41787 3 9.33654 3.01619 9.26066 3.04764C9.18479 3.07909 9.11586 3.12519 9.05781 3.1833L5.93281 6.3083C5.84531 6.39571 5.7857 6.50712 5.76154 6.62842C5.73739 6.74973 5.74977 6.87547 5.79711 6.98974C5.84446 7.104 5.92464 7.20165 6.02751 7.27032C6.13038 7.33899 6.25132 7.37559 6.375 7.37549Z" fill="currentColor"/></svg>Upload resume</button>
-        <button class="btn btn--secondary btn--lg btn--block" type="button" data-bs-close>Keep filling</button>
+        <button class="btn btn--secondary btn--lg btn--block" type="button" data-bs-close>I’ll fill manually</button>
       </div>
     </div>
   </div>
@@ -6370,7 +6373,7 @@ window.__MO_DATA = {
 };
 window.__MO_IC = {"ic_close-outline": "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_close-outline\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M16.2528 3.00257L16.3599 3.01371L16.3814 3.01543L16.4028 3.02228L16.5056 3.05313L16.5253 3.05999L16.5433 3.06942L16.6582 3.12941L16.6753 3.14398L16.7584 3.21254L16.7747 3.22625L16.7884 3.24253L16.857 3.32566L16.8716 3.3428L16.9316 3.45764L16.941 3.47564L16.947 3.49535L16.9787 3.59819L16.9855 3.61876L16.9873 3.64104L16.9984 3.74816L17.0001 3.76959L16.9984 3.79101L16.9873 3.89814L16.9855 3.92042L16.9787 3.94099L16.947 4.04383L16.941 4.06354L16.9316 4.08154L16.8716 4.19638L16.857 4.21352L16.7884 4.29665L16.7816 4.30522L11.0859 10L16.7816 15.6956L16.7884 15.7042L16.857 15.7873L16.8716 15.8045L16.9316 15.9193L16.941 15.9373L16.947 15.957L16.9787 16.0599L16.9855 16.0804L16.9873 16.1027L16.9984 16.2098L17.0001 16.2313L16.9984 16.2527L16.9873 16.3598L16.9855 16.3812L16.9787 16.4027L16.947 16.5055L16.941 16.5252L16.9316 16.5432L16.8716 16.6581L16.857 16.6752L16.7884 16.7583L16.7747 16.7746L16.7584 16.7883L16.6753 16.8569L16.6582 16.8714L16.5433 16.9314L16.5253 16.9409L16.5056 16.9469L16.4028 16.9786L16.3814 16.9854L16.3599 16.9871L16.2528 16.9983L16.2314 17L16.21 16.9983L16.1028 16.9871L16.0806 16.9854L16.06 16.9786L15.9571 16.9469L15.9374 16.9409L15.9194 16.9314L15.8046 16.8714L15.7875 16.8569L15.7043 16.7883L15.6958 16.7815L10.0001 11.0858L4.30534 16.7815L4.29676 16.7883L4.21364 16.8569L4.1965 16.8714L4.08166 16.9314L4.06366 16.9409L4.04395 16.9469L3.94111 16.9786L3.92054 16.9854L3.89826 16.9871L3.79113 16.9983L3.76971 17L3.74828 16.9983L3.64116 16.9871L3.61888 16.9854L3.59831 16.9786L3.49547 16.9469L3.47576 16.9409L3.45776 16.9314L3.34292 16.8714L3.32578 16.8569L3.24265 16.7883L3.22637 16.7746L3.21266 16.7583L3.1441 16.6752L3.12953 16.6581L3.06954 16.5432L3.06011 16.5252L3.05325 16.5055L3.0224 16.4027L3.01555 16.3812L3.01383 16.3598L3.00269 16.2527L3.00098 16.2313L3.00269 16.2098L3.01383 16.1027L3.01555 16.0804L3.0224 16.0599L3.05325 15.957L3.06011 15.9373L3.06954 15.9193L3.12953 15.8045L3.1441 15.7873L3.21266 15.7042L3.21951 15.6956L3.22637 15.6879L8.91344 10L3.21866 4.30522L3.21266 4.29665L3.1441 4.21352L3.12953 4.19638L3.06954 4.08154L3.06011 4.06354L3.05325 4.04383L3.0224 3.94099L3.01555 3.92042L3.01383 3.89814L3.00269 3.79101L3.00098 3.76959L3.00269 3.74816L3.01383 3.64104L3.01555 3.61876L3.0224 3.59819L3.05325 3.49535L3.06011 3.47564L3.06954 3.45764L3.12953 3.3428L3.1441 3.32566L3.21266 3.24253L3.22637 3.22625L3.24265 3.21254L3.32578 3.14398L3.34292 3.12941L3.45776 3.06942L3.47576 3.05999L3.49547 3.05313L3.59831 3.02228L3.61888 3.01543L3.64116 3.01371L3.74828 3.00257L3.76971 3L3.79113 3.00257L3.89826 3.01371L3.92054 3.01543L3.94111 3.02228L4.04395 3.05313L4.06366 3.05999L4.08166 3.06942L4.1965 3.12941L4.21364 3.14398L4.29676 3.21254L4.30534 3.21854L10.0001 8.91332L15.688 3.22625L15.6958 3.21939L15.7043 3.21254L15.7875 3.14398L15.8046 3.12941L15.9194 3.06942L15.9374 3.05999L15.9571 3.05313L16.06 3.02228L16.0806 3.01543L16.1028 3.01371L16.21 3.00257L16.2314 3L16.2528 3.00257Z\" fill=\"currentColor\"/></svg>", "ic_plus-outline": "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_plus-outline\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M17 10C17 10.2228 16.9115 10.4364 16.754 10.594C16.5964 10.7515 16.3828 10.84 16.16 10.84H10.84V16.16C10.84 16.3828 10.7515 16.5964 10.594 16.754C10.4364 16.9115 10.2228 17 10 17C9.77722 17 9.56356 16.9115 9.40603 16.754C9.2485 16.5964 9.16 16.3828 9.16 16.16V10.84H3.84C3.61722 10.84 3.40356 10.7515 3.24603 10.594C3.0885 10.4364 3 10.2228 3 10C3 9.77722 3.0885 9.56356 3.24603 9.40603C3.40356 9.2485 3.61722 9.16 3.84 9.16H9.16V3.84C9.16 3.61722 9.2485 3.40356 9.40603 3.24603C9.56356 3.0885 9.77722 3 10 3C10.2228 3 10.4364 3.0885 10.594 3.24603C10.7515 3.40356 10.84 3.61722 10.84 3.84V9.16H16.16C16.3828 9.16 16.5964 9.2485 16.754 9.40603C16.9115 9.56356 17 9.77722 17 10Z\" fill=\"currentColor\"/></svg>", "ic_option-outline": "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_option-outline\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M11.8889 10.5C11.8889 10.8846 11.7748 11.2605 11.5612 11.5803C11.3475 11.9 11.0439 12.1493 10.6886 12.2964C10.3333 12.4436 9.94229 12.4821 9.5651 12.4071C9.18792 12.3321 8.84145 12.1469 8.56952 11.8749C8.29758 11.603 8.11239 11.2565 8.03736 10.8793C7.96234 10.5022 8.00084 10.1112 8.14801 9.75589C8.29518 9.40059 8.54441 9.09691 8.86417 8.88325C9.18393 8.6696 9.55987 8.55556 9.94445 8.55556C10.4601 8.55556 10.9547 8.76042 11.3194 9.12507C11.684 9.48972 11.8889 9.9843 11.8889 10.5ZM9.94445 6.88889C10.329 6.88889 10.705 6.77485 11.0247 6.56119C11.3445 6.34753 11.5937 6.04385 11.7409 5.68855C11.888 5.33325 11.9266 4.94229 11.8515 4.5651C11.7765 4.18792 11.5913 3.84145 11.3194 3.56952C11.0474 3.29758 10.701 3.11239 10.3238 3.03736C9.9466 2.96234 9.55564 3.00084 9.20034 3.14801C8.84504 3.29518 8.54136 3.54441 8.3277 3.86417C8.11404 4.18393 8 4.55987 8 4.94445C8 5.46014 8.20486 5.95472 8.56952 6.31937C8.93417 6.68403 9.42875 6.88889 9.94445 6.88889ZM9.94445 14.1111C9.55987 14.1111 9.18393 14.2252 8.86417 14.4388C8.54441 14.6525 8.29518 14.9561 8.14801 15.3114C8.00084 15.6667 7.96234 16.0577 8.03736 16.4349C8.11239 16.8121 8.29758 17.1585 8.56952 17.4305C8.84145 17.7024 9.18792 17.8876 9.5651 17.9626C9.94229 18.0377 10.3333 17.9992 10.6886 17.852C11.0439 17.7048 11.3475 17.4556 11.5612 17.1358C11.7748 16.8161 11.8889 16.4401 11.8889 16.0556C11.8889 15.5399 11.684 15.0453 11.3194 14.6806C10.9547 14.316 10.4601 14.1111 9.94445 14.1111Z\" fill=\"currentColor\"/></svg>", "ic_check-circle-solid": "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_check-circle-solid\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M18 9.48516L17.8636 8.44631L17.7446 7.93559L17.5927 7.43401L17.1918 6.46656L16.9447 6.00435L16.3626 5.133L16.0303 4.72845L15.2889 3.98707L14.8844 3.65483L14.013 3.07271L13.5508 2.82558L12.5834 2.42469L12.0818 2.27275L11.0539 2.06865L10.0087 2L9.48516 2.01739L8.44631 2.15377L7.93559 2.27275L7.43401 2.42469L6.46656 2.82558L5.55952 3.35004L5.133 3.65483L4.72845 3.98707L3.98707 4.72845L3.65483 5.133L3.07271 6.00435L2.82558 6.46656L2.42469 7.43401L2.27275 7.93559L2.06865 8.96345L2 10.0087L2.01739 10.5322L2.15377 11.5711L2.27275 12.0818L2.42469 12.5834L2.82558 13.5508L3.35004 14.4579L3.65483 14.8844L3.98707 15.2889L4.72845 16.0303L5.55952 16.6674L6.00435 16.9447L6.46656 17.1918L7.43401 17.5927L8.44631 17.8636L8.96345 17.9487L9.48516 18H10.5322L11.5711 17.8636L12.0818 17.7446L13.073 17.4078L13.5508 17.1918L14.013 16.9447L14.8844 16.3626L15.2889 16.0303L16.0303 15.2889L16.6674 14.4579L16.9447 14.013L17.1918 13.5508L17.5927 12.5834L17.8636 11.5711L17.9487 11.0539L18.0174 10.0087L18 9.48516ZM8.41336 13.2149L5.85058 10.7016L5.72427 10.4059L5.70688 10.2458L5.76637 9.92998L5.84143 9.78628L6.06659 9.55746L6.36222 9.43115L6.68348 9.42841L6.98187 9.54831L7.10726 9.64899L8.85636 11.3633L13.0712 7.12923L13.3678 7.00475L13.689 7.00292L13.9865 7.12465L14.1119 7.22716L14.2922 7.49351L14.3398 7.64727L14.3416 7.96854L14.2949 8.12322L14.1174 8.3914L9.44946 13.1051L9.18494 13.2845L9.03118 13.3321L8.71083 13.3348L8.41336 13.2149Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" fill=\"currentColor\"/></svg>"};
 window.__MO_CFG = {
-    entryUrl: 'signup-flow.html',                         // Back on step 1 · Help me fill before the account exists (the upload card)
+    entryUrl: 'signup-flow.html',                         // Yes, exit on the leave sheet before the account exists
     loginUrl: 'login-flow.html',             // "Log in instead" (email / number already on Shine)
     welcomeUrl: 'signup-welcome.html'                     // the end: Add your resume (upload or skip) → Welcome to Shine
   };
@@ -7094,7 +7097,7 @@ window.__MO_CFG = {
   /* Help me fill → Upload resume, part-way through (user 2026-11-02): the resume fills the CURRENT step and the ones
      still ahead — only where nothing is entered yet. Earlier steps (and anything the user already typed) never change.
      The flow itself doesn't change: the user still goes step by step and checks what the resume filled. */
-  var CV_NOTE = { edu: 'Filled from your resume. Check it and change anything that’s off.', emp: 'Filled from your resume. Check it and change anything that’s off.',
+  var CV_NOTE = { basic: 'Filled from your resume. Check it and change anything that’s off.', edu: 'Filled from your resume. Check it and change anything that’s off.', emp: 'Filled from your resume. Check it and change anything that’s off.',
     skills: 'Filled from your resume. Check them and add more if you like.', prefs: 'Partly filled from your resume. Check it and fill the rest.' };
   function readResume(f) {
     var R = $('#readSheet');
@@ -7108,10 +7111,27 @@ window.__MO_CFG = {
     });
     openSheet(R);
   }
+  function cvBasic(b) {                                  // no account yet (user 2026-11-11): the resume fills Basic details too — only what's empty
+    var did = false, v = function (n) { return F(k(B, n)).value(); };
+    function put(n, x) { if (x != null && x !== '' && !v(n)) { F(k(B, n)).set(x); FLD.set(k(B, n), null); did = true; } }
+    put('name', b.name); put('email', b.email); put('phone', b.phone);
+    if (!getChoice(bExp) && b.exp) { setChoice(bExp, b.exp); did = true; }
+    if (getChoice(bExp) === 'exp' && b.exp === 'exp') {
+      var ex = v('exp'); if (!ex || !ex.total) { F(k(B, 'exp')).set(b.years); did = true; }
+      if (!v('salary') && b.salary) { setSalary(k(B, 'salary'), b.salary); did = true; }
+      if (!notice.read().notice && b.notice) { notice.write(b.notice, b.lwd || ''); did = true; }
+    }
+    put('loc', b.loc);
+    if (!getChoice(bGender) && b.gender) { setChoice(bGender, b.gender); did = true; }
+    put('dob', b.dob); put('disability', b.dis);
+    return did;
+  }
   function cvFill() {                                     // → the steps it filled
-    var p = st.persona || (st.fresher ? 'fresher' : 'exp'), d = PERSONA[p], list = steps(), from = list.indexOf(st.step), out = [];
+    var p = st.persona || (st.fresher ? 'fresher' : 'exp'), d = PERSONA[p], out = [];
     st.cv = st.cv || {};
-    list.slice(Math.max(from, 1)).forEach(function (s) {    // never Basic details (the account's own details)
+    if (!st.created && st.step === 'basic' && cvBasic(d.basic)) { st.cv.basic = true; out.push('basic'); }   // before the OTP: Basic details too (sets fresher / experienced)
+    var list = steps(), from = list.indexOf(st.step);
+    list.slice(Math.max(from, 1)).forEach(function (s) {    // the steps ahead (Basic details once the account exists: never — the account's own details)
       var did = false;
       if (s === 'edu' && !eduStep.items().length && !eduStep.dirty()) { eduStep.fill(d.edu); did = true; }
       if (s === 'emp' && d.emp && !empStep.items().length && !empStep.dirty()) { empStep.fill(d.emp); did = true; }
@@ -7155,8 +7175,7 @@ window.__MO_CFG = {
       case 'back': back(); break;
       case 'help': openSheet($('#helpSheet'), a); break;
       case 'help-upload':
-        if (!st.created) { after($('#helpSheet'), leave); }          // no account yet: back to the upload card
-        else after($('#helpSheet'), function () { pickResume(function (f) { readResume(f); }); });
+        pickResume(function (f) { readResume(f); }); S.close($('#helpSheet'));   // the phone's file picker, straight from the tap (user 2026-11-11 — was: no account yet → the sign-up screen)
         break;
       case 'terms': e.preventDefault(); say('Terms & Privacy Policy open here'); break;
       case 'login': e.preventDefault(); location.href = CFG.loginUrl; break;
