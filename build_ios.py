@@ -1,4 +1,4 @@
-"""Build the three iPhone home-screen web apps from the three Android APK bundles.
+"""Build the iPhone home-screen web app (Shine Logout) from the finalized Android APK (android-preview/app-logout.apk).
 Usage: python3 build_ios.py <android-preview-dir> <ios-app-git-dir>"""
 import sys, os, zipfile, json, hashlib, re, shutil
 from PIL import Image
@@ -18,9 +18,7 @@ def launch_images(icons_dir):
         if not os.path.exists(p):                      # 1-colour palette PNG, a few KB
             im = Image.new('P', (w * r, h * r), 0); im.putpalette(list(SPLASH_BG)); im.save(p, optimize=True)
 APKS, OUT = sys.argv[1], sys.argv[2]
-APPS = [('preview', 'app-logout.apk',  'Shine Preview', 'Option 1 · animated logos'),
-        ('folder',  'app-logout2.apk', 'Shine Folder',  'Option 2 · career folder'),
-        ('cards',   'app-logout3.apk', 'Shine Cards',   'Option 3 · job cards & recruiters')]
+APPS = [('logout', 'app-logout.apk', 'Shine Logout', 'job cards & recruiters')]   # the one finalized app (2026-11-12)
 HEAD = ('<link rel="manifest" href="manifest.webmanifest">'
         '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">'
         '<meta name="apple-mobile-web-app-title" content="{name}"><meta name="apple-mobile-web-app-status-bar-style" content="default">'

@@ -3,53 +3,499 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#FAF9F6">
-<title>Shine — iPhone previews</title>
-<link rel="stylesheet" href="preview/fonts/fonts.css">
-<link rel="apple-touch-icon" href="preview/icons/icon-180.png">
+<meta name="theme-color" content="#0C1731">
+<title>Shine Logout — iPhone app</title>
+<link rel="stylesheet" href="logout/fonts/fonts.css">
+<link rel="apple-touch-icon" href="logout/icons/icon-180.png">
+<script>
+(function () {                                             // what's opening this page: iPhone Safari, another iPhone browser, Android, a computer
+  var ua = navigator.userAgent, d = document.documentElement, q = location.search.match(/[?&]env=([a-z-]+)/);
+  var ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var other = /CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo|GSA\/|FBAN|FBAV|Instagram|LinkedInApp|Line\/|Twitter|WhatsApp/.test(ua);
+  var env = ios ? (other ? 'ios-other' : 'safari') : /Android/.test(ua) ? 'android' : /Mobi/.test(ua) ? 'android' : 'desktop';
+  if (q) env = q[1];
+  d.dataset.env = env;
+})();
+</script>
 <style>
-:root{--ink:#0D1117;--muted:#5B6270;--faded:#8A909C;--line:#E7E8EC;--bg:#FAF9F6;--raised:#FFFFFF;--brand:#1A56FF;--brand-ink:#0B3FCC;--brand-50:#F0F5FF}
-*{box-sizing:border-box;margin:0}
-html,body{background:var(--bg)}
-body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;
-  background-image:linear-gradient(to top,#EBF0FF 0%,var(--brand-50) 18%,var(--bg) 46%);min-height:100vh;min-height:100dvh;
-  padding:max(24px,env(safe-area-inset-top)) 16px max(32px,env(safe-area-inset-bottom))}
-main{max-width:480px;margin:0 auto}
-.eb{font-size:11px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;color:var(--brand-ink)}
-h1{margin-top:8px;font-size:32px;line-height:36px;letter-spacing:-.4px;font-weight:800}
-.lede{margin-top:8px;font-size:15px;line-height:22px;color:var(--muted);font-weight:500}
-.apps{margin-top:24px;display:flex;flex-direction:column;gap:12px}
-.app{display:flex;align-items:center;gap:14px;padding:12px;border-radius:20px;background:var(--raised);border:1px solid var(--line);
-  box-shadow:0 10px 24px -16px rgba(13,17,23,.25);text-decoration:none;color:inherit;transition:transform .12s}
-.app:active{transform:scale(.98)}
-.app img{width:60px;height:60px;border-radius:14px;flex:none;box-shadow:0 0 0 1px rgba(13,17,23,.06)}
-.app b{display:block;font-size:16px;line-height:22px;font-weight:700}
-.app span{display:block;font-size:13px;line-height:18px;color:var(--muted);font-weight:500}
-.app i{margin-left:auto;flex:none;height:32px;padding:0 14px;border-radius:999px;background:var(--ink);color:#fff;font-style:normal;font-size:13px;font-weight:700;display:grid;place-items:center}
-h2{margin-top:32px;font-size:18px;line-height:24px;font-weight:800}
-ol{margin-top:10px;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:15px;line-height:22px;color:var(--muted);font-weight:500}
-ol b{color:var(--ink);font-weight:700}
-.note{margin-top:20px;padding:12px 14px;border-radius:14px;background:var(--brand-50);font-size:13px;line-height:19px;color:var(--brand-ink);font-weight:600}
+/* DS tokens — the app's own layers (logout/css/app-home-logout.css: primitives + semantic; components use semantic only) */
+:root{
+  --c-brand-50:#F0F5FF; --c-brand-100:#EBF0FF; --c-brand-200:#C9DBFF; --c-brand-300:#7EA3FF;
+  --c-brand-400:#4D7CFF; --c-brand-500:#1A56FF; --c-brand-600:#0B3FCC; --c-brand-700:#0A33A6;
+  --c-brand-500-op10:rgba(26,86,255,.10); --c-brand-500-op18:rgba(26,86,255,.18);
+  --c-brand-500-op40:rgba(26,86,255,.40); --c-brand-500-op45:rgba(26,86,255,.45);
+  --c-cn-50:#F7F9FB; --c-cn-100:#EEF1F5; --c-cn-200:#E4E7EC; --c-cn-300:#C8CED7; --c-cn-400:#98A2B3;
+  --c-cn-500:#667085; --c-cn-600:#4A5260; --c-cn-700:#344054; --c-cn-800:#232A38; --c-cn-900:#161B22;
+  --c-cn-black:#0D1117; --c-cn-white:#FFFFFF;
+  --c-cn-black-04:rgba(13,17,23,.04); --c-cn-black-06:rgba(13,17,23,.06); --c-cn-black-08:rgba(13,17,23,.08);
+  --c-cn-black-10:rgba(13,17,23,.10); --c-cn-black-20:rgba(13,17,23,.20); --c-cn-black-30:rgba(13,17,23,.30);
+  --c-cn-black-75:rgba(13,17,23,.36);
+  --c-wn-50:#FFFDF8; --c-wn-100:#FAF9F6; --c-wn-200:#F5F1E8; --c-wn-300:#E8E5DD;
+  --c-green-50:#EAFAF0; --c-green-500:#12B76A; --c-green-500-op30:rgba(18,183,106,.30); --c-green-600:#0E9A5A; --c-green-700:#027A48;
+  --c-red-600:#B42318; --c-red-700:#8B1A14; --c-amber-100:#FFF4ED; --c-amber-400:#FAB663; --c-amber-700:#A35A04;
+  --c-pink-100:#FCE7F3; --c-pink-600:#BE185D;
+  --c-violet-100:#F3EEFE; --c-violet-200:#DAC9FF; --c-violet-500:#7A5AF8; --c-violet-600:#6F46E0;
+  --c-aqua-100:#CCFBEE; --c-aqua-500:#14B8A6; --c-aqua-700:#0F766A;
+  --c-cyan-100:#CFFAFE; --c-cyan-700:#0E7490;
+  --c-lime-100:#EBFFB0; --c-lime-300:#C4FF38; --c-lime-700:#56770B;
+  --c-ey-100:#FFFCC0; --c-ey-400:#FFE419; --c-ey-800:#5F5200;
+  /* Shine logo artwork yellow — sampled from shine-logo-light.svg, outside the DS ramps */
+  --c-logo-yellow:#FACA22;
+
+  --unit-0:0; --unit-1:1px; --unit-1-5:1.5px; --unit-2:2px; --unit-4:4px; --unit-6:6px; --unit-8:8px;
+  --unit-10:10px; --unit-12:12px; --unit-14:14px; --unit-16:16px; --unit-18:18px; --unit-20:20px;
+  --unit-22:22px; --unit-24:24px; --unit-26:26px; --unit-28:28px; --unit-32:32px; --unit-36:36px; --unit-40:40px;
+  --unit-44:44px; --unit-48:48px; --unit-56:56px; --unit-64:64px; --unit-72:72px; --unit-96:96px;
+  --unit-240:240px; --unit-360:360px; --unit-480:480px; --unit-1024:1024px;
+
+  --typeface-family-brand:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
+  --typeface-weight-regular:400; --typeface-weight-medium:500; --typeface-weight-semibold:600;
+  --typeface-weight-bold:700; --typeface-weight-extrabold:800;
+}
+:root{
+  /* §2.1 Typography · mobile */
+  --type-display-lg-size:var(--unit-40); --type-display-lg-lh:var(--unit-40); --type-display-lg-ls:-1px;
+  --type-display-md-size:var(--unit-32); --type-display-md-lh:var(--unit-36); --type-display-md-ls:-0.4px;
+  --type-display-sm-size:var(--unit-24); --type-display-sm-lh:var(--unit-28); --type-display-sm-ls:-0.3px;
+  --type-heading-lg-size:var(--unit-22); --type-heading-lg-lh:var(--unit-26);
+  --type-heading-md-size:var(--unit-18); --type-heading-md-lh:var(--unit-22); --type-heading-md-ls:-0.2px;
+  --type-heading-sm-size:var(--unit-16); --type-heading-sm-lh:var(--unit-20);
+  --type-body-lg-size:var(--unit-16); --type-body-lg-lh:var(--unit-24);
+  --type-body-md-size:var(--unit-14); --type-body-md-lh:var(--unit-20);
+  --type-body-sm-size:var(--unit-12); --type-body-sm-lh:var(--unit-18);
+  --type-label-lg-size:var(--unit-14); --type-label-lg-lh:var(--unit-14);
+  --type-label-md-size:var(--unit-12); --type-label-md-lh:var(--unit-12);
+  --type-label-sm-size:var(--unit-10); --type-label-sm-lh:var(--unit-10);
+  --type-eyebrow-md-size:var(--unit-12); --type-eyebrow-md-lh:var(--unit-12); --type-eyebrow-md-ls:var(--unit-1-5);
+  --type-eyebrow-sm-size:var(--unit-10); --type-eyebrow-sm-lh:var(--unit-10); --type-eyebrow-sm-ls:var(--unit-1);
+
+  /* §2.2 Content */
+  --content-neutral-base:var(--c-cn-black); --content-neutral-muted:var(--c-cn-700);
+  --content-neutral-faded:var(--c-cn-500); --content-neutral-disabled:var(--c-cn-black-75);
+  --content-neutral-brand:var(--c-brand-600); --content-neutral-brand-hover:var(--c-brand-700);
+  --content-on-fill-dark-base:var(--c-cn-white); --content-on-fill-dark-muted:var(--c-cn-300);
+  --content-status-positive:var(--c-green-700); --content-status-notice:var(--c-amber-700);
+  --content-decorative-violet:var(--c-violet-600); --content-decorative-pink:var(--c-pink-600);
+  --content-decorative-aqua:var(--c-aqua-700); --content-decorative-cyan:var(--c-cyan-700);
+  --content-decorative-lime:var(--c-lime-700); --content-decorative-electric-yellow:var(--c-ey-800);
+
+  /* §2.2 Surface */
+  --surface-neutral-base:var(--c-wn-100); --surface-neutral-raised:var(--c-cn-white);
+  --surface-neutral-muted:var(--c-cn-100); --surface-neutral-sunken:var(--c-cn-200);
+  --surface-neutral-state-hover:var(--c-cn-100); --surface-neutral-state-pressed:var(--c-cn-200);
+  --surface-neutral-state-selected:var(--c-brand-50);
+  --surface-inverse-base:var(--c-cn-black); --surface-inverse-raised:var(--c-cn-800);
+  --surface-inverse-state-hover:var(--c-cn-700); --surface-inverse-state-pressed:var(--c-cn-600);
+  --surface-brand-brand-intense:var(--c-brand-500); --surface-brand-brand-intense-hover:var(--c-brand-600);
+  --surface-brand-brand-intense-pressed:var(--c-brand-700); --surface-brand-brand-subtle:var(--c-brand-100);
+  --surface-status-positive-intense:var(--c-green-700); --surface-status-positive-subtle:var(--c-green-50);
+  --surface-status-notice-subtle:var(--c-amber-100);
+  --surface-decorative-violet-subtle:var(--c-violet-100); --surface-decorative-pink-subtle:var(--c-pink-100);
+  --surface-decorative-aqua-subtle:var(--c-aqua-100); --surface-decorative-cyan-subtle:var(--c-cyan-100);
+  --surface-decorative-lime-subtle:var(--c-lime-100); --surface-decorative-lime-intense:var(--c-lime-300);
+  --surface-decorative-electric-yellow-subtle:var(--c-ey-100); --surface-decorative-electric-yellow-intense:var(--c-ey-400);
+  --surface-decorative-violet-intense:var(--c-violet-600);
+  /* alias — warm-neutral/200, the canvas tint used on Shine's warm pages */
+  --surface-neutral-warm:var(--c-wn-200);
+  /* alias — brand/50 wash for glows behind hero visuals */
+  --surface-brand-wash:var(--c-brand-50);
+
+  /* §2.2 Stroke */
+  --stroke-neutral-base:var(--c-cn-200); --stroke-neutral-muted:var(--c-cn-100);
+  --stroke-neutral-faded:var(--c-cn-50); --stroke-neutral-focus:var(--c-brand-500);
+  --stroke-neutral-strong:var(--c-cn-300); /* alias — JSRP hover border */
+  --stroke-status-positive:var(--c-green-600); --stroke-decorative-violet:var(--c-violet-500);
+
+  /* §2.3 Spacing · mobile */
+  --spacing-inset-xs:var(--unit-4); --spacing-inset-sm:var(--unit-6); --spacing-inset-md:var(--unit-8);
+  --spacing-inset-lg:var(--unit-12); --spacing-inset-xl:var(--unit-16); --spacing-inset-xxl:var(--unit-22);
+  --spacing-inline-xs:var(--unit-2); --spacing-inline-sm:var(--unit-4); --spacing-inline-md:var(--unit-8);
+  --spacing-inline-lg:var(--unit-12); --spacing-inline-xl:var(--unit-18);
+  --spacing-stack-3xs:var(--unit-2); --spacing-stack-xxs:var(--unit-4); --spacing-stack-xs:var(--unit-8);
+  --spacing-stack-md:var(--unit-12); --spacing-stack-lg:var(--unit-14); --spacing-stack-xl:var(--unit-20);
+  --spacing-stack-xxl:var(--unit-24);
+  --spacing-section-xs:var(--unit-16); --spacing-section-sm:var(--unit-20); --spacing-section-md:var(--unit-24);
+  --spacing-section-lg:var(--unit-32);
+  --spacing-layout-xs:var(--unit-16); --spacing-layout-sm:var(--unit-24);
+
+  /* §2.4 Size */
+  --size-stroke-thin:var(--unit-1); --size-stroke-default:var(--unit-1-5); --size-stroke-thick:var(--unit-2);
+  --size-radius-xs:var(--unit-2); --size-radius-sm:var(--unit-4); --size-radius-md:var(--unit-8);
+  --size-radius-lg:var(--unit-12); --size-radius-xl:var(--unit-16); --size-radius-2xl:var(--unit-24);
+  --size-radius-3xl:var(--unit-32); --size-radius-full:var(--unit-1024);
+  --size-icon-xs:var(--unit-12); --size-icon-sm:var(--unit-14); --size-icon-md:var(--unit-16);
+  --size-icon-lg:var(--unit-20); --size-icon-xl:var(--unit-24); --size-icon-2xl:var(--unit-32); --size-icon-3xl:var(--unit-40);
+  /* alias — mobile artboard cap so the prototype stays phone-shaped on wide windows */
+  --size-layout-mobile-max:var(--unit-480);
+  /* A.02.9 proposed — hover-lift offset */
+  --motion-lift-up:calc(-1 * var(--unit-1));
+  --size-control-sm:var(--unit-40); --size-control-md:var(--unit-44); --size-control-lg:var(--unit-48); --size-control-xl:var(--unit-56);
+
+  /* §2.5 Elevation · light */
+  --elevation-neutral-subtle:0 1px 2px var(--c-cn-black-04);
+  --elevation-neutral-raised:0 1px 3px var(--c-cn-black-08),0 1px 2px var(--c-cn-black-04);
+  --elevation-neutral-lifted:0 4px 12px var(--c-cn-black-08),0 2px 4px var(--c-cn-black-04);
+  --elevation-neutral-overlay:0 16px 36px -10px var(--c-cn-black-30),0 4px 10px -2px var(--c-cn-black-10);
+  --elevation-neutral-modal:0 24px 60px -12px var(--c-cn-black-20),0 6px 16px -6px var(--c-cn-black-10);
+  --elevation-brand-subtle:0 8px 24px -10px var(--c-brand-500-op18);
+  --elevation-brand-raised:0 6px 14px -4px var(--c-brand-500-op45);
+  --elevation-brand-lifted:0 16px 40px -12px var(--c-brand-500-op40);
+  --elevation-focus-default:0 0 0 4px var(--c-brand-500-op10);
+}
+/* COMPONENT · buttons v1.3.0 — verbatim copy of App-components/atoms/buttons/buttons.css */
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · BUTTONS  (app component · App-login · atoms/)          v1.3.0
+   Every button in the logged-in app: four types × two tones, four sizes, with an optional icon or icon only.
+   Built on design-system A.02 Button (component-system.md) and the buttons used on Home, My Jobs, Docket and
+   Profile (cards, sheets and the top app bar). "Brand" here is the app's black (A.02 Primary · Neutral) — brand
+   blue is the one exception tone, .btn--accent (A.02 Primary · Brand), and it belongs to Search Jobs alone.
+
+     type          brand (black, default)                    destructive (.btn--destructive)
+     ─────────────────────────────────────────────────────────────────────────────────────────────
+     Primary       [■ Apply now ]  black fill · white text    [■ Remove ]  red fill · white text
+     Secondary     [□ View      ]  warm white · grey edge     [□ Remove ]  warm white · red edge · red text
+     Muted         [▤ Filters   ]  grey fill · black text     [▤ Remove ]  pale red fill · red text
+     Link            Job details   text only · black            Remove      text only · red
+     exception     Primary + .btn--accent  [● Search Jobs ]  brand-blue fill + blue glow — search only (A.02 Primary · Brand)
+
+   Classes
+     .btn                                   base — always
+     .btn--primary | --secondary | --muted | --link            type (pick one)
+     .btn--destructive                      tone (default: brand = black)
+     .btn--accent                           Primary only: brand blue + glow — the top bar's Search Jobs, nothing else
+     .btn--sm 40 | --md 44 (default) | --lg 48 | --xl 56       size (A.02)
+     .btn--icon                             icon only: square, glyph only, aria-label required
+     .btn--icon-lg                          icon only, navigation glyph 20 at sm (menu, back) — action glyphs stay 16
+     .btn--block                            full width            .btn--fill  shares a row (flex 1, padding 12)
+     .btn--flush                            Link only: pulls the text / glyph onto the content edge (margin = −padding)
+     .btn--pill                             fully round — bar / navigation buttons only (README › Pill buttons)
+     .btn--on-dark                          Primary or Muted on a dark surface (white fill, black text)
+     [aria-pressed="true"]                  toggle on (bookmark saved): brand-subtle fill + brand glyph
+     [aria-haspopup] + [aria-expanded]      opens a sheet / menu (status, sort): trailing chevron, expanded while open
+     :disabled / [aria-disabled="true"]     disabled · [aria-busy="true"] + .btn-spinner  loading
+     [data-state="hover|pressed|focus"]     shows a state statically — guidelines and screenshots only
+   Anatomy: [leading svg] label [trailing svg | .badge] — gap spacing.inline.md 8 (badge 12); icons inherit the text
+   colour; icon-only glyphs are content.neutral.muted (A.02 Icon-only), except on Muted (it has a fill, so the
+   glyph keeps content.neutral.base). Hover exists only with a mouse or trackpad (@media (hover: hover)) — on a
+   phone a button shows rest, pressed, focus (keyboard / switch access), disabled and loading, so its REST look must
+   read as a button on its own. The edge is an inset shadow, never a border,
+   so 1.5 px renders as 1.5 px on Android too (Chromium floors border widths to whole pixels).
+
+   ▶ BEFORE CHANGING IT: read README.md here and component-system.md A.02. Semantic tokens only.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.btn {
+  /* COLOUR — DESIGN-SYSTEM.md §2.2 (light) */
+  --btn-inverse: #0D1117;                   /* surface.inverse.base — primary fill */
+  --btn-inverse-hover: #344054;             /* surface.inverse-state.hover */
+  --btn-inverse-pressed: #4A5260;           /* surface.inverse-state.pressed */
+  --btn-on-fill: #FFFFFF;                   /* primary text: content.on-fill-dark.base (light) → content.inverse.base (dark) */
+  --btn-on-intense: #FFFFFF;                /* content.on-fill-dark.base — text on red; the same in both themes */
+  --btn-ink: #0D1117;                       /* content.neutral.base */
+  --btn-ink-muted: #344054;                 /* content.neutral.muted — icon-only glyph (A.02 Icon-only) */
+  --btn-base: #FAF9F6;                      /* surface.neutral.base — secondary fill (warm white) */
+  --btn-muted: #EEF1F5;                     /* surface.neutral.muted — muted fill */
+  --btn-state-hover: #EEF1F5;               /* surface.neutral-state.hover */
+  --btn-state-pressed: #E4E7EC;             /* surface.neutral-state.pressed */
+  --btn-stroke: #E4E7EC;                    /* stroke.neutral.base — secondary edge */
+  --btn-neg: #B42318;                       /* surface.status.negative-intense (red/600 in both themes) */
+  --btn-neg-text: #B42318;                  /* content.status.negative */
+  --btn-neg-stroke: #B42318;                /* stroke.status.negative */
+  --btn-neg-hover: #8B1A14;                 /* surface.status.negative-intense-hover — hover and pressed (as the sheet) */
+  --btn-neg-subtle: #FEF2F2;                /* surface.status.negative-subtle */
+  --btn-neg-subtle-hover: #FEE4E4;          /* surface.status.negative-subtle-hover (PROPOSED · red/100) */
+  --btn-brand-subtle: #EBF0FF;              /* surface.brand.brand-subtle — toggle on */
+  --btn-brand: #0B3FCC;                     /* content.neutral.brand — toggle on glyph */
+  --btn-disabled-bg: rgba(13, 17, 23, .08); /* stroke.neutral.disabled (black-25) */
+  --btn-disabled-fg: rgba(13, 17, 23, .36); /* content.neutral.disabled (black-75) */
+  --btn-focus: #1A56FF;                     /* stroke.neutral.focus */
+  /* ELEVATION — §2.5 */
+  --btn-lifted: 0 4px 12px rgba(13, 17, 23, .08), 0 2px 4px rgba(13, 17, 23, .04);   /* elevation.neutral.lifted — filled · hover */
+  --btn-raised-sh: 0 1px 3px rgba(13, 17, 23, .08), 0 1px 2px rgba(13, 17, 23, .04); /* elevation.neutral.raised — filled · pressed */
+  --btn-ring: 0 0 0 4px rgba(26, 86, 255, .10);                                       /* elevation.focus.default */
+  /* ON A DARK SURFACE — the Profile hero is dark in both themes, so these never flip */
+  --btn-on-dark-bg: #FFFFFF;                /* cool-neutral/white */
+  --btn-on-dark-fg: #0D1117;                /* cool-neutral/black */
+  --btn-on-dark-hover: #EEF1F5;             /* cool-neutral/100 */
+  --btn-on-dark-pressed: #E4E7EC;           /* cool-neutral/200 */
+  --btn-on-dark-focus: #7EA3FF;             /* brand/300 — the focus outline that reads on dark */
+  /* EXCEPTION TONE · .btn--accent (A.02 Primary · Brand — search only); the same blue in both themes */
+  --btn-accent: #1A56FF;                    /* surface.brand.brand-intense · brand/500 */
+  --btn-accent-hover: #0B3FCC;              /* surface.brand.brand-intense-hover · brand/600 */
+  --btn-accent-pressed: #0A33A6;            /* surface.brand.brand-intense-pressed · brand/700 */
+  --btn-accent-raised: 0 6px 14px -4px rgba(26, 86, 255, .45);    /* elevation.brand.raised — at rest */
+  --btn-accent-lifted: 0 16px 40px -12px rgba(26, 86, 255, .40);  /* elevation.brand.lifted — hover */
+  --btn-accent-subtle: 0 8px 24px -10px rgba(26, 86, 255, .18);   /* elevation.brand.subtle — pressed */
+  --btn-none: 0 0 #0000;                    /* "no shadow" that can sit in a box-shadow list */
+  /* SHAPE · SPACE · TYPE — §2.1 / §2.3 / §2.4 */
+  --btn-radius: 12px;                       /* size.radius.lg — every action button */
+  --btn-stroke-w: 1.5px;                    /* size.stroke.default — outlined edge */
+  --btn-gap: 8px;                           /* spacing.inline.md — icon ↔ label */
+  --btn-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;   /* typeface.family.brand */
+  --btn-dur: 150ms;                         /* motion — proposed */
+
+  /* size md (default) — A.02 */
+  --_h: 44px;                               /* size.control.md */
+  --_px: 16px;                              /* spacing.inset.xl */
+  --_fs: 12px; --_lh: 12px;                 /* Label / md bold */
+  --_ic: 16px;                              /* size.icon.md */
+  --_ic-only: 20px;                         /* size.icon.lg — icon-only glyph */
+  /* type primary (default) */
+  --_bg: var(--btn-inverse); --_fg: var(--btn-on-fill); --_bd: transparent;
+  --_bg-h: var(--btn-inverse-hover); --_bg-p: var(--btn-inverse-pressed);
+  --_sh: var(--btn-none);                   /* rest elevation — none, except the accent's glow */
+  --_sh-h: var(--btn-lifted); --_sh-p: var(--btn-raised-sh); --_lift: translateY(-1px);
+  --_edge: inset 0 0 0 var(--btn-stroke-w) var(--_bd);   /* the edge: an inset shadow (size.stroke.default) */
+
+  position: relative; box-sizing: border-box;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--btn-gap);
+  height: var(--_h); min-width: var(--_h); margin: 0; padding: 0 var(--_px);
+  border: 0; border-radius: var(--btn-radius);
+  background: var(--_bg); color: var(--_fg); box-shadow: var(--_edge), var(--_sh);
+  font: 700 var(--_fs)/var(--_lh) var(--btn-font); letter-spacing: 0; text-align: center; text-decoration: none; white-space: nowrap;
+  cursor: pointer; -webkit-appearance: none; appearance: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none;
+  transition: background-color var(--btn-dur), color var(--btn-dur), box-shadow var(--btn-dur), transform var(--btn-dur);
+}
+/* icons bring their own drawing (the app's icon markup: stroke icons fill="none" stroke="currentColor"; solid icons
+   fill="currentColor"); the atom only sizes them, colours them through currentColor and sets the stroke weight */
+.btn > svg { display: block; flex: none; width: var(--_ic); height: var(--_ic); }
+.btn > svg:not([stroke-width]) { stroke-width: 2px; }   /* size.stroke.thick — an icon that sets its own weight keeps it */
+
+/* ── Sizes (A.02.4) ─────────────────────────────────────────────── */
+.btn--sm { --_h: 40px; --_px: 16px; --_fs: 12px; --_lh: 12px; --_ic: 14px; --_ic-only: 16px; }   /* size.control.sm · inset.xl · Label/md · icon.sm (icon only: icon.md) */
+.btn--md { --_h: 44px; --_px: 16px; --_fs: 12px; --_lh: 12px; --_ic: 16px; --_ic-only: 20px; }   /* size.control.md · inset.xl · Label/md · icon.md */
+.btn--lg { --_h: 48px; --_px: 22px; --_fs: 14px; --_lh: 14px; --_ic: 16px; --_ic-only: 20px; }   /* size.control.lg · inset.xxl · Label/lg · icon.md */
+.btn--xl { --_h: 56px; --_px: 22px; --_fs: 14px; --_lh: 14px; --_ic: 16px; --_ic-only: 20px; }   /* size.control.xl · inset.xxl · Label/lg · icon.md */
+
+/* ── Types × tones ──────────────────────────────────────────────── */
+/* 1 · Primary — the one main action of a region */
+.btn--primary { --_bg: var(--btn-inverse); --_fg: var(--btn-on-fill); --_bd: transparent;
+  --_bg-h: var(--btn-inverse-hover); --_bg-p: var(--btn-inverse-pressed); --_sh-h: var(--btn-lifted); --_sh-p: var(--btn-raised-sh); --_lift: translateY(-1px); }
+.btn--primary.btn--destructive { --_bg: var(--btn-neg); --_fg: var(--btn-on-intense);
+  --_bg-h: var(--btn-neg-hover); --_bg-p: var(--btn-neg-hover); }   /* pressed = hover colour + raised (bottom sheet today) */
+/* 1b · Primary · accent — THE EXCEPTION: brand blue with a blue glow at rest (A.02 Primary · Brand). Search only —
+   the top bar's Search Jobs; every other primary is black. It glows instead of moving: no lift on hover */
+.btn--primary.btn--accent { --_bg: var(--btn-accent); --_fg: var(--btn-on-intense);
+  --_bg-h: var(--btn-accent-hover); --_bg-p: var(--btn-accent-pressed);
+  --_sh: var(--btn-accent-raised); --_sh-h: var(--btn-accent-lifted); --_sh-p: var(--btn-accent-subtle); --_lift: none; }
+/* 2 · Secondary — outlined: the alternative next to a primary. Hover lifts and presses like Primary (A.02.5 — one
+   motion for Primary and Secondary; Muted and Link stay flat) */
+.btn--secondary { --_bg: var(--btn-base); --_fg: var(--btn-ink); --_bd: var(--btn-stroke);
+  --_bg-h: var(--btn-state-hover); --_bg-p: var(--btn-state-pressed); }
+.btn--secondary.btn--destructive { --_fg: var(--btn-neg-text); --_bd: var(--btn-neg-stroke);
+  --_bg-h: var(--btn-neg-subtle); --_bg-p: var(--btn-neg-subtle-hover); }
+/* 3 · Muted — tinted fill, no edge: quiet actions and the bar's pills (menu, back, status). Flat (v1.3.0): only the
+   fill changes on hover / press — it never lifts, so bar buttons don't jump under the finger */
+.btn--muted { --_bg: var(--btn-muted); --_fg: var(--btn-ink); --_bd: transparent;
+  --_bg-h: var(--btn-state-pressed); --_bg-p: var(--btn-state-pressed); --_sh-h: var(--btn-none); --_sh-p: var(--btn-none); --_lift: none; }
+.btn--muted.btn--destructive { --_bg: var(--btn-neg-subtle); --_fg: var(--btn-neg-text);
+  --_bg-h: var(--btn-neg-subtle-hover); --_bg-p: var(--btn-neg-subtle-hover); }
+/* 4 · Link — text only, the lowest weight; padding 12 so the tap area stays a button. Hover and pressed share one
+   tint (A.02 Ghost; the Profile icon buttons and the sheet's ghost button today) */
+.btn--link { --_bg: transparent; --_fg: var(--btn-ink); --_bd: transparent; --_px: 12px;   /* spacing.inset.lg (A.02 tertiary) */
+  --_bg-h: var(--btn-state-hover); --_bg-p: var(--btn-state-hover); --_sh-h: var(--btn-none); --_sh-p: var(--btn-none); --_lift: none; }
+.btn--link.btn--destructive { --_fg: var(--btn-neg-text);
+  --_bg-h: var(--btn-neg-subtle); --_bg-p: var(--btn-neg-subtle); }
+
+/* ── States (A.02.5) — hover on pointer devices only; data-state shows a state in the guidelines ── */
+@media (hover: hover) {
+  .btn:hover:not(:active):not(:disabled):not([aria-disabled="true"]):not([aria-busy="true"]) {
+    background: var(--_bg-h); box-shadow: var(--_edge), var(--_sh-h); transform: var(--_lift);
+  }
+}
+.btn[data-state="hover"] { background: var(--_bg-h); box-shadow: var(--_edge), var(--_sh-h); transform: var(--_lift); }
+.btn:active:not(:disabled):not([aria-disabled="true"]):not([aria-busy="true"]),
+.btn[data-state="pressed"] { background: var(--_bg-p); box-shadow: var(--_edge), var(--_sh-p); transform: none; }
+.btn:focus { outline: none; }
+.btn:focus-visible, .btn[data-state="focus"] {   /* stroke.neutral.focus outline + elevation.focus.default ring; the edge stays */
+  outline: 2px solid var(--btn-focus); outline-offset: 2px; box-shadow: var(--_edge), var(--btn-ring);
+}
+.btn:disabled, .btn[aria-disabled="true"] {
+  --_bd: transparent; background: var(--btn-disabled-bg); color: var(--btn-disabled-fg);
+  box-shadow: var(--_edge); transform: none; cursor: default; pointer-events: none;
+}
+.btn--secondary:disabled, .btn--secondary[aria-disabled="true"] { --_bd: var(--btn-disabled-bg); background: transparent; }
+.btn--link:disabled, .btn--link[aria-disabled="true"] { background: transparent; }
+
+/* loading — keep the label, add a spinner in front; the button stays its size */
+.btn[aria-busy="true"] { cursor: progress; pointer-events: none; }
+.btn-spinner {
+  flex: none; width: var(--_ic); height: var(--_ic); box-sizing: border-box; border-radius: 1024px;   /* size.radius.full */
+  border: 2px solid currentColor; border-right-color: transparent; animation: btn-spin 700ms linear infinite;
+}
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+
+/* ── Icon only — square, glyph only (aria-label required) ───────── */
+.btn--icon { width: var(--_h); padding: 0; }
+.btn--icon > svg { width: var(--_ic-only); height: var(--_ic-only); }
+/* A.02 Icon-only: the glyph is content.neutral.muted on Secondary and Link (share, save, edit, ⋮, +). Muted keeps
+   content.neutral.base — its fill already says "button", and menu / back are primary navigation */
+.btn--icon:not(.btn--primary):not(.btn--destructive):not(.btn--muted) { --_fg: var(--btn-ink-muted); }
+/* navigation glyph (menu, back): size.icon.lg 20 at every size — action glyphs (save, share, +) keep the size's own */
+.btn--icon.btn--icon-lg { --_ic-only: 20px; }
+.btn--icon[aria-busy="true"] svg { display: none; }                   /* loading: the spinner replaces the glyph */
+.btn--icon .btn-spinner { width: var(--_ic-only); height: var(--_ic-only); }
+
+/* toggle on (e.g. bookmark saved) — the app's "selected" pair, any type except primary */
+.btn[aria-pressed="true"]:not(.btn--primary) {
+  --_bg: var(--btn-brand-subtle); --_fg: var(--btn-brand); --_bd: var(--btn-brand-subtle);
+  --_bg-h: var(--btn-brand-subtle); --_bg-p: var(--btn-brand-subtle);
+}
+.btn[aria-pressed="true"]:not(.btn--primary) > svg { fill: currentColor; }
+
+/* ── Layout and shape ───────────────────────────────────────────── */
+.btn--block { display: flex; width: 100%; }
+.btn--fill { flex: 1 1 0; min-width: 0; --_px: 12px; }   /* shares a row with other buttons: label centred, padding spacing.inset.lg */
+@media (max-width: 359px) { .btn--fill.btn--lg, .btn--fill.btn--xl { --_px: 8px; --_fs: 12px; --_lh: 12px; } }   /* two labels fit on 320 phones */
+.btn--pill { border-radius: 1024px; }      /* size.radius.full — bar / navigation buttons only (README › Pill buttons) */
+/* Link only: the text (or glyph) lines up with the content edge — the button's padding hangs outside it */
+.btn--link.btn--flush { margin-inline: calc(var(--_px) * -1); }
+.btn--link.btn--icon.btn--flush { margin: calc((var(--_ic-only) - var(--_h)) / 2); }
+/* a trailing badge (A.04, e.g. +22 on Upload resume) sits 12 from the label (spacing.inline.lg) */
+.btn > .badge { margin-left: 4px; }
+
+/* on a permanently dark surface (the Profile hero, the dark top bar over it): white fill, black text — in both
+   themes. Primary (Upload resume) and Muted (the bar's status pill) take it; on Muted it is the resting fill that
+   reads on dark, so the role (quiet choice) stays the same while the surface changes */
+.btn--primary.btn--on-dark, .btn--muted.btn--on-dark { --_bg: var(--btn-on-dark-bg); --_fg: var(--btn-on-dark-fg); --_bg-h: var(--btn-on-dark-hover); --_bg-p: var(--btn-on-dark-pressed); --btn-focus: var(--btn-on-dark-focus); }
+
+/* ── Dark theme — the dark column of §2.2 (App-login pages are light-only today) ── */
+[data-theme="dark"] .btn {
+  --btn-inverse: #FAF9F6;                   /* surface.inverse.base · warm-100 */
+  --btn-inverse-hover: #EEF1F5;             /* surface.inverse-state.hover · cool-100 */
+  --btn-inverse-pressed: #E4E7EC;           /* surface.inverse-state.pressed · cool-200 */
+  --btn-on-fill: #0D1117;                   /* A.02: primary text in dark = content.inverse.base · black */
+  --btn-ink: #F7F9FB;                       /* content.neutral.base · cool-50 */
+  --btn-ink-muted: #C8CED7;                 /* content.neutral.muted · cool-300 */
+  --btn-base: #0D1117;                      /* surface.neutral.base · black */
+  --btn-muted: #161B22;                     /* surface.neutral.muted · cool-900 */
+  --btn-state-hover: #344054;               /* surface.neutral-state.hover · cool-700 */
+  --btn-state-pressed: #4A5260;             /* surface.neutral-state.pressed · cool-600 */
+  --btn-stroke: #4A5260;                    /* stroke.neutral.base · cool-600 */
+  --btn-neg-text: #FCA5A0;                  /* content.status.negative · red-300 */
+  --btn-neg-stroke: #F87171;                /* stroke.status.negative · red-400 */
+  --btn-neg-subtle: #1C0404;                /* surface.status.negative-subtle · red-950 */
+  --btn-neg-subtle-hover: #380808;          /* proposed · red-900 */
+  --btn-brand-subtle: #06184F;              /* surface.brand.brand-subtle · brand-900 */
+  --btn-brand: #7EA3FF;                     /* content.neutral.brand · brand-300 */
+  --btn-disabled-bg: rgba(255, 255, 255, .08); /* stroke.neutral.disabled · white-25 */
+  --btn-disabled-fg: rgba(255, 255, 255, .36); /* content.neutral.disabled · white-75 */
+  --btn-focus: #7EA3FF;                     /* stroke.neutral.focus · brand-300 */
+  --btn-lifted: 0 4px 12px rgba(13, 17, 23, .45), 0 2px 4px rgba(13, 17, 23, .30);   /* elevation.neutral.lifted (dark α) */
+  --btn-raised-sh: 0 1px 3px rgba(13, 17, 23, .40), 0 1px 2px rgba(13, 17, 23, .25); /* elevation.neutral.raised (dark α) */
+  --btn-ring: 0 0 0 4px rgba(26, 86, 255, .20);                                       /* elevation.focus.default (dark α) */
+  --btn-accent-raised: 0 6px 14px -4px rgba(26, 86, 255, .55);    /* elevation.brand.raised (dark α) */
+  --btn-accent-lifted: 0 16px 40px -12px rgba(26, 86, 255, .50);  /* elevation.brand.lifted (dark α) */
+  --btn-accent-subtle: 0 8px 24px -10px rgba(26, 86, 255, .30);   /* elevation.brand.subtle (dark α) */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+  .btn:hover, .btn[data-state="hover"] { transform: none !important; }
+  .btn-spinner { animation-duration: 1.6s; }
+}
+
+/* page */
+*, *::before, *::after { box-sizing: border-box; } * { margin: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { font-family: var(--typeface-family-brand); color: var(--content-neutral-base); background: var(--surface-neutral-base);
+  -webkit-font-smoothing: antialiased; min-height: 100vh; min-height: 100dvh; }
+img { display: block; } a { color: inherit; text-decoration: none; } button { font: inherit; }
+.ic svg { display: block; width: 100%; height: 100%; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* environment: [data-env] = safari | ios-other | android | desktop */
+html[data-env="safari"] [data-show]:not([data-show~="safari"], [data-show~="ios"], [data-show~="mobile"]) { display: none !important; }
+html[data-env="ios-other"] [data-show]:not([data-show~="ios-other"], [data-show~="ios"], [data-show~="mobile"], [data-show~="not-safari"]) { display: none !important; }
+html[data-env="android"] [data-show]:not([data-show~="android"], [data-show~="mobile"], [data-show~="not-safari"]) { display: none !important; }
+html[data-env="desktop"] [data-show]:not([data-show~="desktop"], [data-show~="not-safari"]) { display: none !important; }
+.toast { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); z-index: 50; transform: translate(-50%, 16px); opacity: 0;
+  padding: 10px 16px; border-radius: var(--size-radius-full); background: var(--surface-inverse-base); color: var(--content-on-fill-dark-base);
+  font-size: var(--type-body-md-size); line-height: var(--type-body-md-lh); font-weight: var(--typeface-weight-semibold);
+  box-shadow: var(--elevation-neutral-overlay); transition: opacity .2s, transform .2s; pointer-events: none; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+:root { --land-night: #0C1731; }   /* the splash's midnight navy (splash.html, launch images) — the app's documented splash exception */
+html, body { background: var(--land-night); }
+body { color: var(--content-on-fill-dark-base); overflow-x: hidden; }
+/* sky: the splash's sunrise glow + two shooting stars, once */
+.sky { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.sky::after { content: ""; position: absolute; left: 50%; bottom: -46vh; width: 170vw; height: 90vh; transform: translateX(-50%); border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--c-brand-300) 34%, transparent), color-mix(in srgb, var(--c-brand-500) 12%, transparent) 45%, transparent 72%);
+  animation: rise 2.4s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes rise { from { transform: translate(-50%, 30%); opacity: 0; } }
+.star { position: absolute; width: 140px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--c-cn-white)); opacity: 0; }
+.star--a { top: 12%; left: -30%; transform: rotate(18deg); animation: shoot 1.4s .3s ease-out both; }
+.star--b { top: 20%; right: -30%; transform: rotate(162deg); animation: shoot2 1.4s .5s ease-out both; }
+@keyframes shoot { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; left: 70%; } }
+@keyframes shoot2 { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; right: 70%; } }
+
+/* layout: hero fills the space above · steps · actions at the bottom (24 gutter) */
+.wrap { position: relative; max-width: 480px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+  padding: max(var(--spacing-section-lg), calc(env(safe-area-inset-top) + var(--spacing-section-md))) var(--spacing-layout-sm)
+           max(var(--spacing-section-md), calc(env(safe-area-inset-bottom) + var(--spacing-section-xs))); }
+.hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: var(--spacing-section-lg) 0 48px; }
+.halo { position: relative; }
+.halo::before { content: ""; position: absolute; inset: -32px; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--c-brand-400) 40%, transparent), transparent); }
+.app-ic { position: relative; width: 104px; height: 104px; border-radius: 24px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 24px 48px -16px rgba(0, 0, 0, .6);
+  animation: pop .7s .2s cubic-bezier(.32, 1.4, .5, 1) both; }
+@keyframes pop { from { transform: scale(.8); opacity: 0; } }
+h1 { margin-top: var(--spacing-section-lg); font-size: var(--type-display-md-size); line-height: var(--type-display-md-lh); letter-spacing: var(--type-display-md-ls); font-weight: var(--typeface-weight-extrabold); }
+.lede { margin-top: var(--spacing-stack-xs); font-size: var(--type-body-lg-size); line-height: var(--type-body-lg-lh); color: var(--content-on-fill-dark-muted); font-weight: var(--typeface-weight-medium); }
+
+/* steps: three glass circles joined by a hairline, label under each */
+.steps { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); }
+.step { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 var(--spacing-inline-sm); }
+.step + .step::before { content: ""; position: absolute; top: 26px; right: calc(50% + 34px); width: calc(100% - 68px); height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .28)); }
+.step .ic { position: relative; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; color: var(--content-on-fill-dark-base);
+  background: rgba(255, 255, 255, .08); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); }
+.step .ic svg { width: 22px; height: 22px; }
+.step .ic i { position: absolute; top: -2px; right: -2px; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; font-style: normal;
+  background: var(--c-cn-white); color: var(--land-night); font-size: var(--type-label-sm-size); font-weight: var(--typeface-weight-extrabold); }
+.step b { margin-top: var(--spacing-stack-md); font-size: var(--type-body-md-size); line-height: var(--type-body-md-lh); font-weight: var(--typeface-weight-semibold); }
+.hint { margin-top: var(--spacing-section-xs); text-align: center; font-size: var(--type-body-sm-size); line-height: var(--type-body-sm-lh); color: var(--content-on-fill-dark-muted); font-weight: var(--typeface-weight-medium); }
+.note { margin-top: var(--spacing-section-xs); padding: var(--spacing-inset-lg) var(--spacing-inset-xl); border-radius: var(--size-radius-lg); background: rgba(255, 255, 255, .08); text-align: center;
+  font-size: var(--type-body-md-size); line-height: var(--type-body-md-lh); color: var(--content-on-fill-dark-base); font-weight: var(--typeface-weight-medium); }
+.note b { font-weight: var(--typeface-weight-extrabold); }
+
+/* actions: one button group (8 apart), 32 below the steps */
+.actions { margin-top: var(--spacing-section-lg); display: grid; gap: var(--spacing-stack-xs); }
+.btn--link.alt { color: var(--content-on-fill-dark-base); }
 </style>
 </head>
 <body>
-<main>
-  <p class="eb">Shine · logged-out app</p>
-  <h1>Try the 3 homepages on your iPhone</h1>
-  <p class="lede">Each one installs as its own app, so you can keep all three on one phone.</p>
-  <nav class="apps">
-    <a class="app" href="preview/"><img src="preview/icons/icon-180.png" alt=""><div><b>Shine Preview</b><span>Option 1 · animated logos</span></div><i>Open</i></a>
-    <a class="app" href="folder/"><img src="folder/icons/icon-180.png" alt=""><div><b>Shine Folder</b><span>Option 2 · career folder</span></div><i>Open</i></a>
-    <a class="app" href="cards/"><img src="cards/icons/icon-180.png" alt=""><div><b>Shine Cards</b><span>Option 3 · job cards &amp; recruiters</span></div><i>Open</i></a>
-  </nav>
-  <h2>Add to your home screen</h2>
-  <ol>
-    <li>Open this page in <b>Safari</b>.</li>
-    <li>Tap an app above to open it.</li>
-    <li>Tap <b>Share</b>, then <b>Add to Home Screen</b>, then <b>Add</b>.</li>
-    <li>Come back here and repeat for the other two.</li>
-  </ol>
-  <p class="note">Open each app once while online. After that it also works offline.</p>
+<div class="sky" aria-hidden="true"><i class="star star--a"></i><i class="star star--b"></i></div>
+<main class="wrap">
+  <section class="hero"><div class="halo"><img class="app-ic" src="logout/icons/icon-180.png" width="104" height="104" alt=""></div>
+    <h1>Shine Logout</h1><p class="lede">Add it to your Home Screen in 3 taps.</p></section>
+  <section aria-label="Add to Home Screen">
+    <ol class="steps">
+      <li class="step"><span class="ic"><svg aria-hidden="true" focusable="false" data-icon="ic_arrow-up-right-outline" viewBox="0 0 20 20" fill="none"><path d="M17 3.77775V13.8886C17 14.0948 16.9181 14.2927 16.7722 14.4385C16.6264 14.5844 16.4285 14.6663 16.2222 14.6663C16.016 14.6663 15.8181 14.5844 15.6723 14.4385C15.5264 14.2927 15.4445 14.0948 15.4445 13.8886V5.65506L4.32845 16.7721C4.18251 16.918 3.98458 17 3.77819 17C3.57179 17 3.37386 16.918 3.22793 16.7721C3.08199 16.6261 3 16.4282 3 16.2218C3 16.0154 3.08199 15.8175 3.22793 15.6716L14.3449 4.55551H6.11145C5.90518 4.55551 5.70735 4.47356 5.56149 4.32771C5.41564 4.18185 5.33369 3.98403 5.33369 3.77775C5.33369 3.57148 5.41564 3.37366 5.56149 3.2278C5.70735 3.08194 5.90518 3 6.11145 3H16.2222C16.4285 3 16.6264 3.08194 16.7722 3.2278C16.9181 3.37366 17 3.57148 17 3.77775Z" fill="currentColor"/></svg><i>1</i></span><b>Tap Open</b></li>
+      <li class="step"><span class="ic"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.75v9.5"/><path d="M6.75 6 10 2.75 13.25 6"/><path d="M7.25 8.25H6a1.25 1.25 0 0 0-1.25 1.25v6.5A1.25 1.25 0 0 0 6 17.25h8a1.25 1.25 0 0 0 1.25-1.25V9.5A1.25 1.25 0 0 0 14 8.25h-1.25"/></svg><i>2</i></span><b>Tap Share</b></li>
+      <li class="step"><span class="ic"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3.25" y="3.25" width="13.5" height="13.5" rx="3.5"/><path d="M10 6.75v6.5M6.75 10h6.5"/></svg><i>3</i></span><b>Add to Home Screen</b></li>
+    </ol>
+    <p class="hint" data-show="safari">On iOS 26, Share is in the ••• menu.</p>
+    <p class="note" data-show="not-safari">Open this page in <b>Safari</b> to add it to your Home Screen.</p>
+  </section>
+  <div class="actions">
+    <a class="btn btn--primary btn--on-dark btn--lg btn--block" href="logout/">Open Shine Logout</a>
+    <button class="btn btn--link btn--lg btn--block alt" type="button" data-copy><svg aria-hidden="true" focusable="false" data-icon="ic_copy-outline" viewBox="0 0 20 20" fill="none"><path d="M15.8484 3C16.0277 3 16.1999 3.07106 16.3267 3.19787C16.4535 3.32469 16.5246 3.49688 16.5246 3.67623V14.0041C16.5246 14.1834 16.4535 14.3556 16.3267 14.4825C16.1999 14.6093 16.0277 14.6803 15.8484 14.6803H13.2049V17.3238C13.2049 17.5031 13.1339 17.6753 13.007 17.8021C12.8802 17.9289 12.708 18 12.5287 18H3.67623C3.49688 18 3.32469 17.9289 3.19787 17.8021C3.07106 17.6753 3 17.5031 3 17.3238V6.9959C3 6.81655 3.07106 6.64436 3.19787 6.51755C3.32469 6.39073 3.49688 6.31967 3.67623 6.31967H6.31967V3.67623C6.31967 3.49688 6.39073 3.32469 6.51755 3.19787C6.64436 3.07106 6.81655 3 6.9959 3H15.8484ZM4.35246 16.6475H11.8525V7.67213H4.35246V16.6475ZM7.67213 6.31967H12.5287C12.708 6.31967 12.8802 6.39073 13.007 6.51755C13.1339 6.64436 13.2049 6.81655 13.2049 6.9959V13.3279H15.1721V4.35246H7.67213V6.31967Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg> Copy link</button>
+  </div>
 </main>
+<div class="toast" role="status" aria-live="polite"></div>
+<script>
+(function () {
+  function toast(t) { var el = document.querySelector('.toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('on'); }, 1800); }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-copy]'); if (!b) return;
+    var url = 'https://rmallick89.github.io/ios-app-git/', done = function () { toast('Link copied'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, fallback); else fallback();
+    function fallback() { var t = document.createElement('textarea'); t.value = url; t.setAttribute('readonly', ''); t.style.position = 'fixed'; t.style.opacity = '0';
+      document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (x) { toast(url); } t.remove(); }
+  });
+})();
+</script>
 </body>
 </html>
