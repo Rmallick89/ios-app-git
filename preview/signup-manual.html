@@ -33,7 +33,7 @@
   Leave sign-up? (2026-11-11, user): × on Basic details (it replaced ←; shown before and after the account exists) — and the
   phone’s / browser’s Back from Basic details — opens
   “Recruiters are already looking.” with the sign-up screen’s 4 Why Shine reasons (2 × 2) · Continue setting up · Yes, exit
-  (→ the sign-up screen before the account exists, the welcome screen once it does).
+  (→ the sign-up screen, before or after the account exists — user 2026-11-12).
   Freshers (2026-11-11, user): Continue on Education asks “Have you worked as an intern or freelancer?” (bottom sheet ·
   display · Large · × · inline stacked buttons): Yes, I’ve worked → Employment as step 3, where Employment type (3rd field,
   a dropdown → bottom sheet) offers Internship · Freelance · No → Key skills. Experienced users go straight to Employment.
@@ -6646,7 +6646,7 @@ window.__MO_CFG = {
   /* Leave sign-up? (user 2026-11-11) — the sign-up screen's Why Shine reasons. A 'gate' history entry sits under Basic details, so
      the phone's / browser's Back from Basic details asks too. Yes, exit: no account yet → the sign-up screen; account made → welcome. */
   var XS = $('#exitSheet');
-  function exitYes() { after(XS, function () { if (st.created) toWelcome(); else leave(); }); }
+  function exitYes() { after(XS, function () { if (st.created) location.replace(CFG.entryUrl); else leave(); }); }   // the sign-up screen, account or not (user 2026-11-12)
   window.addEventListener('popstate', function (e) {
     var s = e.state && e.state.mo;
     if (!s) return;

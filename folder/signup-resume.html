@@ -26,8 +26,8 @@
   Components: Shine App/App-components, inlined verbatim (fields Small · bottom sheet incl. full-screen · alert · cards · top bar).
   Review: ?st=verify · ?st=prefs (+ &sim=partial for missing details) · ?st=exit (the leave sheet) · ?demo=0 hides the demo key.
   Leave sign-up? (user 2026-11-11): × on Almost there, × on Verify details, Back once the account exists → “Recruiters are already
-  looking.” with the sign-up screen’s 4 Why Shine reasons (2 × 2) · Continue setting up · Yes, exit (→ the sign-up screen from
-  Almost there — no account yet; → welcome once the account exists).
+  looking.” with the sign-up screen’s 4 Why Shine reasons (2 × 2) · Continue setting up (closes it) · Yes, exit (→ the sign-up
+  screen, from Almost there or Verify details — user 2026-11-12).
   Job preferences (user 2026-11-11): onboarding is done by then — no back arrow, and Back stays on the screen.
   Standard fields (2026-11-04, user — the same in App-login): current salary = the input fields atom's amount field (2026-11-05): Indian commas as you type, digits only, the amount in
   words in green ("Seventy-Eight Lakh Ninety Thousand Eight Hundred Ninety-Eight Rupees"), ₹1 lakh – ₹1 crore, errors
@@ -7087,7 +7087,7 @@ window.__MO_CFG = {
       case 'retry': st.leaving = true; S.closeAll('retry'); toStart(); break;
       case 'manual': e.preventDefault(); st.leaving = true; cancelParse(); location.replace(CFG.manualUrl); break;
       case 'exit': openSheet($('#exitSheet'), a); break;
-      case 'exit-yes': if (st.created) welcome(); else { st.leaving = true; toStart(); } break;   // no account yet (Almost there) → the sign-up screen
+      case 'exit-yes': st.leaving = true; toStart(); break;   // Yes, exit → the sign-up screen, from Almost there or Verify details (user 2026-11-12)
       case 'later': welcome(); break;
       case 'reupload': e.preventDefault(); say('Your details are saved. Upload a new resume from your profile anytime.'); break;
       case 'edit': edit(kind, i, a); break;
