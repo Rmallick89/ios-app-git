@@ -142,9 +142,9 @@
   --elevation-brand-lifted:0 16px 40px -12px var(--c-brand-500-op40);
   --elevation-focus-default:0 0 0 4px var(--c-brand-500-op10);
 }
-/* COMPONENT · buttons v1.3.0 — verbatim copy of App-components/atoms/buttons/buttons.css */
+/* COMPONENT · buttons — verbatim copy of App-components/atoms/buttons/buttons.css */
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · BUTTONS  (app component · App-login · atoms/)          v1.3.0
+   SHINE · BUTTONS  (app component · App-login · atoms/)          v1.4.0
    Every button in the logged-in app: four types × two tones, four sizes, with an optional icon or icon only.
    Built on design-system A.02 Button (component-system.md) and the buttons used on Home, My Jobs, Docket and
    Profile (cards, sheets and the top app bar). "Brand" here is the app's black (A.02 Primary · Neutral) — brand
@@ -169,7 +169,7 @@
      .btn--block                            full width            .btn--fill  shares a row (flex 1, padding 12)
      .btn--flush                            Link only: pulls the text / glyph onto the content edge (margin = −padding)
      .btn--pill                             fully round — bar / navigation buttons only (README › Pill buttons)
-     .btn--on-dark                          Primary or Muted on a dark surface (white fill, black text)
+     .btn--on-dark                          on a dark surface — Primary / Muted: white fill, black text · Secondary: clear, white edge + text
      [aria-pressed="true"]                  toggle on (bookmark saved): brand-subtle fill + brand glyph
      [aria-haspopup] + [aria-expanded]      opens a sheet / menu (status, sort): trailing chevron, expanded while open
      :disabled / [aria-disabled="true"]     disabled · [aria-busy="true"] + .btn-spinner  loading
@@ -219,6 +219,9 @@
   --btn-on-dark-hover: #EEF1F5;             /* cool-neutral/100 */
   --btn-on-dark-pressed: #E4E7EC;           /* cool-neutral/200 */
   --btn-on-dark-focus: #7EA3FF;             /* brand/300 — the focus outline that reads on dark */
+  --btn-on-dark-edge: rgba(255, 255, 255, .36);      /* cool-neutral/white 36 % — Secondary on dark: the edge (v1.4.0) */
+  --btn-on-dark-ghost-hover: rgba(255, 255, 255, .08);   /* cool-neutral/white 8 % — Secondary on dark: hover fill */
+  --btn-on-dark-ghost-pressed: rgba(255, 255, 255, .14); /* cool-neutral/white 14 % — Secondary on dark: pressed fill */
   /* EXCEPTION TONE · .btn--accent (A.02 Primary · Brand — search only); the same blue in both themes */
   --btn-accent: #1A56FF;                    /* surface.brand.brand-intense · brand/500 */
   --btn-accent-hover: #0B3FCC;              /* surface.brand.brand-intense-hover · brand/600 */
@@ -358,6 +361,9 @@
 /* on a permanently dark surface (the Profile hero, the dark top bar over it): white fill, black text — in both
    themes. Primary (Upload resume) and Muted (the bar's status pill) take it; on Muted it is the resting fill that
    reads on dark, so the role (quiet choice) stays the same while the surface changes */
+/* Secondary on dark (v1.4.0): the outlined alternative next to a white Primary — clear fill, white text, white 36 % edge;
+   hover / pressed tint the fill white 8 / 14 % (the install page's Copy link) */
+.btn--secondary.btn--on-dark { --_bg: transparent; --_fg: var(--btn-on-dark-bg); --_bd: var(--btn-on-dark-edge); --_bg-h: var(--btn-on-dark-ghost-hover); --_bg-p: var(--btn-on-dark-ghost-pressed); --btn-focus: var(--btn-on-dark-focus); }
 .btn--primary.btn--on-dark, .btn--muted.btn--on-dark { --_bg: var(--btn-on-dark-bg); --_fg: var(--btn-on-dark-fg); --_bg-h: var(--btn-on-dark-hover); --_bg-p: var(--btn-on-dark-pressed); --btn-focus: var(--btn-on-dark-focus); }
 
 /* ── Dark theme — the dark column of §2.2 (App-login pages are light-only today) ── */
@@ -455,14 +461,12 @@ h1 { margin-top: var(--spacing-section-lg); font-size: var(--type-display-md-siz
 .step .ic i { position: absolute; top: -2px; right: -2px; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; font-style: normal;
   background: var(--c-cn-white); color: var(--land-night); font-size: var(--type-label-sm-size); font-weight: var(--typeface-weight-extrabold); }
 .step b { margin-top: var(--spacing-stack-md); font-size: var(--type-body-md-size); line-height: var(--type-body-md-lh); font-weight: var(--typeface-weight-semibold); }
-.hint { margin-top: var(--spacing-section-xs); text-align: center; font-size: var(--type-body-sm-size); line-height: var(--type-body-sm-lh); color: var(--content-on-fill-dark-muted); font-weight: var(--typeface-weight-medium); }
 .note { margin-top: var(--spacing-section-xs); padding: var(--spacing-inset-lg) var(--spacing-inset-xl); border-radius: var(--size-radius-lg); background: rgba(255, 255, 255, .08); text-align: center;
   font-size: var(--type-body-md-size); line-height: var(--type-body-md-lh); color: var(--content-on-fill-dark-base); font-weight: var(--typeface-weight-medium); }
 .note b { font-weight: var(--typeface-weight-extrabold); }
 
 /* actions: one button group (8 apart), 32 below the steps */
 .actions { margin-top: var(--spacing-section-lg); display: grid; gap: var(--spacing-stack-xs); }
-.btn--link.alt { color: var(--content-on-fill-dark-base); }
 </style>
 </head>
 <body>
@@ -476,12 +480,11 @@ h1 { margin-top: var(--spacing-section-lg); font-size: var(--type-display-md-siz
       <li class="step"><span class="ic"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.75v9.5"/><path d="M6.75 6 10 2.75 13.25 6"/><path d="M7.25 8.25H6a1.25 1.25 0 0 0-1.25 1.25v6.5A1.25 1.25 0 0 0 6 17.25h8a1.25 1.25 0 0 0 1.25-1.25V9.5A1.25 1.25 0 0 0 14 8.25h-1.25"/></svg><i>2</i></span><b>Tap Share</b></li>
       <li class="step"><span class="ic"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3.25" y="3.25" width="13.5" height="13.5" rx="3.5"/><path d="M10 6.75v6.5M6.75 10h6.5"/></svg><i>3</i></span><b>Add to Home Screen</b></li>
     </ol>
-    <p class="hint" data-show="safari">On iOS 26, Share is in the ••• menu.</p>
     <p class="note" data-show="not-safari">Open this page in <b>Safari</b> to add it to your Home Screen.</p>
   </section>
   <div class="actions">
     <a class="btn btn--primary btn--on-dark btn--lg btn--block" href="logout/">Open Shine Logout</a>
-    <button class="btn btn--link btn--lg btn--block alt" type="button" data-copy><svg aria-hidden="true" focusable="false" data-icon="ic_copy-outline" viewBox="0 0 20 20" fill="none"><path d="M15.8484 3C16.0277 3 16.1999 3.07106 16.3267 3.19787C16.4535 3.32469 16.5246 3.49688 16.5246 3.67623V14.0041C16.5246 14.1834 16.4535 14.3556 16.3267 14.4825C16.1999 14.6093 16.0277 14.6803 15.8484 14.6803H13.2049V17.3238C13.2049 17.5031 13.1339 17.6753 13.007 17.8021C12.8802 17.9289 12.708 18 12.5287 18H3.67623C3.49688 18 3.32469 17.9289 3.19787 17.8021C3.07106 17.6753 3 17.5031 3 17.3238V6.9959C3 6.81655 3.07106 6.64436 3.19787 6.51755C3.32469 6.39073 3.49688 6.31967 3.67623 6.31967H6.31967V3.67623C6.31967 3.49688 6.39073 3.32469 6.51755 3.19787C6.64436 3.07106 6.81655 3 6.9959 3H15.8484ZM4.35246 16.6475H11.8525V7.67213H4.35246V16.6475ZM7.67213 6.31967H12.5287C12.708 6.31967 12.8802 6.39073 13.007 6.51755C13.1339 6.64436 13.2049 6.81655 13.2049 6.9959V13.3279H15.1721V4.35246H7.67213V6.31967Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg> Copy link</button>
+    <button class="btn btn--secondary btn--on-dark btn--lg btn--block" type="button" data-copy><svg aria-hidden="true" focusable="false" data-icon="ic_copy-outline" viewBox="0 0 20 20" fill="none"><path d="M15.8484 3C16.0277 3 16.1999 3.07106 16.3267 3.19787C16.4535 3.32469 16.5246 3.49688 16.5246 3.67623V14.0041C16.5246 14.1834 16.4535 14.3556 16.3267 14.4825C16.1999 14.6093 16.0277 14.6803 15.8484 14.6803H13.2049V17.3238C13.2049 17.5031 13.1339 17.6753 13.007 17.8021C12.8802 17.9289 12.708 18 12.5287 18H3.67623C3.49688 18 3.32469 17.9289 3.19787 17.8021C3.07106 17.6753 3 17.5031 3 17.3238V6.9959C3 6.81655 3.07106 6.64436 3.19787 6.51755C3.32469 6.39073 3.49688 6.31967 3.67623 6.31967H6.31967V3.67623C6.31967 3.49688 6.39073 3.32469 6.51755 3.19787C6.64436 3.07106 6.81655 3 6.9959 3H15.8484ZM4.35246 16.6475H11.8525V7.67213H4.35246V16.6475ZM7.67213 6.31967H12.5287C12.708 6.31967 12.8802 6.39073 13.007 6.51755C13.1339 6.64436 13.2049 6.81655 13.2049 6.9959V13.3279H15.1721V4.35246H7.67213V6.31967Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg> Copy link</button>
   </div>
 </main>
 <div class="toast" role="status" aria-live="polite"></div>
