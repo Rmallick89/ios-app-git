@@ -6921,11 +6921,10 @@ window.__MO_CFG = {
     var when = e.start ? ym(e.start) + ' – ' + (e.current ? 'Present' : e.end ? ym(e.end) : '…') : '';
     return { title: e.title || 'Job title missing', where: e.company || '', meta: [e.type, when].filter(Boolean) };
   }
-  function eduSum(e) {   // the education card, as in the manual flow (user 2026-11-16): education · institute · course type • Jul 2016 – May 2018 • marks
+  function eduSum(e) {   // the education card, as in the manual flow (user 2026-11-16): education · institute · course type • Jul 2016 – May 2018
     var my = function (iso) { var q = (iso || '').split('-'); return q[1] ? MON[+q[1] - 1] + ' ' + q[0] : q[0]; };
     var when = e.start ? my(e.start) + ' – ' + (e.end ? my(e.end) : '…') : '';
-    var g = e.grade && e.marks ? (/CGPA|GPA/.test(e.grade) ? e.marks + ' ' + e.grade.split(' ')[0] : /%/.test(e.grade) ? e.marks + '%' : /^Grade/.test(e.grade) ? 'Grade ' + e.marks : e.marks) : '';
-    return { title: EDU_L[e.level] || e.level || 'Course missing', where: e.inst || '', meta: [e.ctype, when, g].filter(Boolean) };
+    return { title: EDU_L[e.level] || e.level || 'Course missing', where: e.inst || '', meta: [e.ctype, when].filter(Boolean) };   // no marks on the card (user 2026-11-16)
   }
   /* missing — what a section still needs (plain labels) */
   function basicMissing() {

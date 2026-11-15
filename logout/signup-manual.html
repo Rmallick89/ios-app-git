@@ -7047,11 +7047,10 @@ window.__MO_CFG = {
       if (it.grade) { F(k(f, 'grade')).set(it.grade); show(k(f, 'marks'), true); F(k(f, 'marks')).set(it.marks); }
     },
     reset: function (f) { ['level', 'inst', 'start', 'end', 'grade', 'marks'].forEach(function (n) { F(k(f, n)).clear(); FLD.set(k(f, n), null); }); setChoice(edType, ''); msg(edType, ''); show(k(f, 'marks'), false); },
-    summary: function (it) {   // education · institute · course type • Jul 2016 – May 2018 • marks — as the resume flow (user 2026-11-16)
+    summary: function (it) {   // education · institute · course type • Jul 2016 – May 2018 — as the resume flow (user 2026-11-16)
       var my = function (iso) { var q = (iso || '').split('-'); return q[1] ? MON[+q[1] - 1] + ' ' + q[0] : q[0]; };
       var when = it.start ? my(it.start) + ' – ' + (it.end ? my(it.end) : '…') : '';
-      var g = it.grade && it.marks ? (/CGPA|GPA/.test(it.grade) ? it.marks + ' ' + it.grade.split(' ')[0] : /%/.test(it.grade) ? it.marks + '%' : /^Grade/.test(it.grade) ? 'Grade ' + it.marks : it.marks) : '';
-      return { title: it.levelLabel || it.level, where: it.inst, meta: [it.ctype, when, g].filter(Boolean) };
+      return { title: it.levelLabel || it.level, where: it.inst, meta: [it.ctype, when].filter(Boolean) };   // no marks on the card (user 2026-11-16)
     }
   });
 
