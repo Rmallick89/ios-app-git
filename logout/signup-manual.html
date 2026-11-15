@@ -850,13 +850,14 @@
 </style>
 <style data-component="work-education-card">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · WORK & EDUCATION CARD  (app component · App-login · cards/ · 6)   v1.1.1
+   SHINE · WORK & EDUCATION CARD  (app component · App-login · cards/ · 6)   v1.2.0
    Profile › Employment History · Education History — one card per job or degree, in a list.
 
      ┌──────────────────────────────────────┐
      │ Sr. Product Manager                 ⋮ │  title    Heading / sm bold · options = buttons atom Link · sm · icon · flush
      │ BharatPe                               │  where    Body / md · content.neutral.muted
-     │ Aug’ 2024 — Present · 2.5 Years        │  meta     Body / sm · content.neutral.faded · A.11 dot
+     │ Aug’ 2024 — Present · 2.5 Years        │  meta     Body / sm · content.neutral.faded · A.11 dot (v1.2.0:
+     │                                        │           .hcard-meta--wrap — a wrapped line never starts/ends with a dot)
      └──────────────────────────────────────┘
        12 between cards (spacing.stack.md) — .hcard-list
    Empty (nothing added yet): .card--empty + .hcard--empty — icon, one line, Primary · sm · block.
@@ -897,6 +898,10 @@
   font: var(--card-sub2-font); color: var(--card-sub2-color);   /* 4 Subtext 2 */
 }
 .hcard-dot { flex: none; width: var(--hc-dot); height: var(--hc-dot); border-radius: 1024px; background: currentColor; }
+/* v1.2.0 · a details line that wraps (.hcard-meta--wrap + .hcard-meta-item): every part carries its dot in front; the dot that
+   starts a line falls in an 11 strip (dot + gap) clipped off on the left — no line starts or ends with a dot. Same look on one line. */
+.hcard-meta--wrap { margin-left: calc(-1 * (var(--hc-dot) + var(--hc-inline-md))); clip-path: inset(0 0 0 calc(var(--hc-dot) + var(--hc-inline-md))); }
+.hcard-meta-item { display: inline-flex; align-items: center; gap: var(--hc-inline-md); min-width: 0; }
 
 /* empty — nothing added yet (container: .card--empty) */
 .hcard--empty { flex-direction: column; align-items: center; text-align: center; gap: 0; }
@@ -908,7 +913,7 @@
 </style>
 <style data-component="field-base">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · INPUT FIELDS · FIELD BASE  (app component · App-login · atoms/input-fields/)      v3.3.0
+   SHINE · INPUT FIELDS · FIELD BASE  (app component · App-login · atoms/input-fields/)      v3.4.0
    The shared layer under the five input field components — not a field on its own. Load it FIRST, then the
    component(s) the page uses:  normal-field · password-field · otp-field · combo-box · multi-input.
    Built on design-system A.01 Input (component-system.md), semantic tokens only, light and dark.
@@ -1134,10 +1139,21 @@ legend.field-label--hidden { float: none; width: 1px; }
   --fld-strong: #667085;                    /* stroke.neutral.strong — PROPOSED · cool-500 */
 }
 @media (prefers-reduced-motion: reduce) { .field-control, .field-trailing, .field-icon { transition: none; } }
+/* ── v3.4.0 · two fields in one row (user 2026-11-15: a start and an end date side by side) ─────────────────────────────
+   <div class="field-row"> › two .field — side by side, equal widths, 12 apart (spacing.inline.lg); a [hidden] one gives its
+   room to the other (Date of joining goes full width while "Do you work here now?" is Yes). Each keeps its own label, box and
+   message. In a narrow row (under 284 — a card on a 360 phone) a long label may wrap: then both labels take two lines, the
+   text sitting on the lower one, so the two boxes stay level. */
+.field-row { display: flex; align-items: flex-start; gap: var(--fld-row-gap, 12px); min-width: 0; container-type: inline-size; }
+.field-row > .field { flex: 1 1 0; min-width: 0; }
+.field-row > .field[hidden] { display: none; }
+@container (max-width: 283.98px) {
+  .field-row > .field > .field-label { display: flex; flex-direction: column; justify-content: flex-end; min-height: calc(2 * var(--fld-label-lh, 20px)); }
+}
 </style>
 <style data-component="combo-box">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.3.0
+   SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.5.0
    v4.3.0 · list bottom sheet: the search box is part of the sheet's heading (bottom-sheet v3.2.0 · .bs-search) — the
    shadow shows below it once the list scrolls (it was sticky at the top of the body).
    v4.2.0 · list bottom sheet: more room between the options — rows 56 tall, 16 above / below the text (were 48 / 12).
@@ -1254,6 +1270,40 @@ legend.field-label--hidden { float: none; width: 1px; }
   --fld-row-line: #344054;                  /* stroke.neutral.muted · cool-700 */
 }
 @media (prefers-reduced-motion: reduce) { .field-trailing[data-combo-btn="caret"] svg { transition: none; } .field-spin { animation-duration: 2s; } }
+/* ── v4.4.0 · radio list sheet (data-combo-list="radio") · option groups — user 2026-11-15 (Department / Industry) ────────
+   Rows: a radio (20, cool-300 ring · picked: brand ring + dot), Body / md medium, 12 between radio and text, 52 tall
+   (grouped: 34) — no separators, no tint on the chosen row (the radio says it). Groups: an eyebrow over its rows (Eyebrow / sm,
+   uppercase, faded) and a soft divider (stroke.neutral.base, fading at both ends) between two groups. Title: "Select" + the
+   name in brand (data-combo-title-lead). The search box's placeholder: a quieter grey (cool-400). */
+.field-sheet--radio { --fld-radio-edge: #C8CED7; --fld-radio-on: #1A56FF; --fld-ph-quiet: #98A2B3; --fld-group-line: #E4E7EC; }   /* cool-neutral/300 · brand-500 · cool-neutral/400 · stroke.neutral.base */
+.field-sheet--radio .field-sheet-search .field-input::placeholder { color: var(--fld-ph-quiet); opacity: 1; }
+.field-listbox--radio .field-option { gap: 12px; min-height: 0; padding: 16px 8px; margin: 0 -8px; border-radius: var(--fld-opt-radius); font-weight: 500; }
+.field-listbox--radio.field-listbox--grouped .field-option { padding-top: 7px; padding-bottom: 7px; }
+.field-listbox--radio .field-option::before { content: none !important; }
+.field-listbox--radio .field-option[aria-selected="true"] { background: none; font-weight: 500; }
+.field-listbox--radio .field-option.is-active { background: none; }   /* the radio shows the pick — no grey row on open or while searching */
+@media (hover: hover) { .field-listbox--radio .field-option:hover { background: var(--fld-opt-active); } }
+.field-listbox--radio .field-option-check { display: none; }
+.field-option-radio {
+  flex: none; width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--fld-radio-edge);
+  transition: box-shadow var(--fld-dur), background var(--fld-dur);
+}
+.field-option[aria-selected="true"] .field-option-radio { box-shadow: inset 0 0 0 1.5px var(--fld-radio-on); background: radial-gradient(circle, var(--fld-radio-on) 0 5px, transparent 5.5px); }
+.field-list-group {                                                             /* a group's heading — Eyebrow / sm */
+  position: relative; padding: 12px 0 10px; list-style: none; cursor: default;
+  font: 700 10px/12px var(--fld-font); letter-spacing: 1px; text-transform: uppercase; color: var(--fld-faded);
+}
+.field-list-group:not(:first-child) { margin-top: 22px; padding-top: 34px; }
+.field-list-group:not(:first-child)::before {                                   /* the soft divider between two groups */
+  content: ""; position: absolute; top: 0; left: 4%; right: 4%; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--fld-group-line, #E4E7EC) 18%, var(--fld-group-line, #E4E7EC) 82%, transparent);
+}
+[data-theme="dark"] .field-sheet--radio { --fld-radio-edge: #4A5260; --fld-radio-on: #7EA3FF; --fld-ph-quiet: #667085; --fld-group-line: #344054; }
+@media (prefers-reduced-motion: reduce) { .field-option-radio { transition: none; } }
+/* ── v4.5.0 · a row's own words (option `row`) · radio rows with a second line — user 2026-11-15 (Education / University) ──
+   A row with a hint (a university's city: Body / sm, faded) keeps its radio level with the first line; 14 above / below. */
+.field-listbox--radio .field-option:has(.field-option-hint) { align-items: flex-start; padding-top: 14px; padding-bottom: 14px; }
+.field-listbox--radio .field-option-hint { margin-top: 2px; line-height: 16px; }
 </style>
 <style data-component="inline-dropdown">
 /* ═══════════════════════════════════════════════════════════════════════
@@ -1406,7 +1456,7 @@ legend.field-label--hidden { float: none; width: 1px; }
 </style>
 <style data-component="multi-input">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · INPUT FIELDS · MULTI INPUT  (atoms/input-fields/multi-input/)      v3.3.0
+   SHINE · INPUT FIELDS · MULTI INPUT  (atoms/input-fields/multi-input/)      v3.6.0
    One answer typed into 2 or 3 boxes in a row: a DATE (day · month · year, or month · year) or WORK EXPERIENCE
    (years · months). Needs field-base.css first — every box is a field-base box. Behaviour: multi-input.js.
 
@@ -1467,7 +1517,10 @@ legend.field-label--hidden { float: none; width: 1px; }
 /* the picker sheet's grid — the bottom-sheet component draws the sheet; this is its body */
 .field-pick {
   /* COLOUR — DESIGN-SYSTEM.md §2.2 (light) */
-  --fld-pick-bg: #EEF1F5;                   /* surface.neutral.muted — a value */
+  --fld-pick-rest: #FFFFFF;                 /* surface.neutral.raised — a value at rest (v3.5.0: outlined) */
+  --fld-pick-edge: #E4E7EC;                 /* stroke.neutral.base — its edge, as the field boxes */
+  --fld-pick-bg: #EEF1F5;                   /* surface.neutral.muted — a value that can't be picked (v3.5.0; was the rest fill) */
+  --fld-pick-dis-text: #98A2B3;             /* cool-neutral/400 — its text: quiet, still readable on the muted fill */
   --fld-pick-hover: #E4E7EC;                /* surface.neutral-state.pressed — under the pointer / finger */
   --fld-pick-on: #1A56FF;                   /* surface.brand.brand-intense — the picked value */
   --fld-pick-on-text: #FFFFFF;              /* content.neutral.on-fill-dark */
@@ -1483,7 +1536,8 @@ legend.field-label--hidden { float: none; width: 1px; }
 .field-pick-grid[data-part="y"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .field-pick-chip {
   display: grid; place-items: center; min-width: 0; height: var(--fld-pick-h); margin: 0; padding: 0;
-  border: 0; border-radius: var(--fld-pick-radius); background: var(--fld-pick-bg); color: var(--fld-text);
+  border: 0; border-radius: var(--fld-pick-radius); background: var(--fld-pick-rest); color: var(--fld-text);
+  box-shadow: inset 0 0 0 1px var(--fld-pick-edge);                            /* v3.5.0: outlined — the edge is an inset shadow (field-base rule) */
   font: 600 var(--fld-fs)/var(--fld-lh) var(--fld-font); font-variant-numeric: tabular-nums; letter-spacing: 0;  /* Body / md semibold */
   cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
   transition: background-color var(--fld-dur), color var(--fld-dur), transform var(--fld-dur);
@@ -1491,9 +1545,9 @@ legend.field-label--hidden { float: none; width: 1px; }
 .field-pick-grid[data-part="y"] .field-pick-chip { height: var(--fld-pick-h-year); font-size: 12px; }   /* Body / sm — 4-digit years, 4 a row */
 @media (hover: hover) { .field-pick-chip:not([aria-disabled="true"]):not([aria-selected="true"]):hover { background: var(--fld-pick-hover); } }
 .field-pick-chip:active { transform: scale(.97); background: var(--fld-pick-hover); }
-.field-pick-chip[aria-selected="true"] { background: var(--fld-pick-on); color: var(--fld-pick-on-text); }
+.field-pick-chip[aria-selected="true"] { background: var(--fld-pick-on); color: var(--fld-pick-on-text); box-shadow: none; }
 /* can't be picked — outside the range, or a day the month hasn't got: kept in place so the grid stays a calendar */
-.field-pick-chip[aria-disabled="true"] { background: transparent; color: var(--fld-faded); opacity: .45; cursor: not-allowed; pointer-events: none; }   /* the reference: content.neutral.faded at 45 % */
+.field-pick-chip[aria-disabled="true"] { background: var(--fld-pick-bg); box-shadow: none; color: var(--fld-pick-dis-text); cursor: not-allowed; pointer-events: none; }   /* v3.5.0: muted fill, no edge, quiet text */   /* the reference: content.neutral.faded at 45 % */
 .field-pick-chip[aria-disabled="true"][aria-selected="true"] { background: var(--fld-dis-bg); box-shadow: inset 0 0 0 1px var(--fld-dis-edge); }   /* a stored date now out of range */
 .field-pick-chip:focus { outline: none; }
 .field-pick-chip:focus-visible { outline: 2px solid var(--fld-focus); outline-offset: 2px; }
@@ -1505,12 +1559,43 @@ legend.field-label--hidden { float: none; width: 1px; }
 }
 .field-pick-decade:first-child { padding-top: 0; }
 [data-theme="dark"] .field-pick {
+  --fld-pick-rest: #232A38;                 /* surface.neutral.raised · cool-800 */
+  --fld-pick-edge: #4A5260;                 /* stroke.neutral.base · cool-600 */
   --fld-pick-bg: #161B22;                   /* surface.neutral.muted · cool-900 */
+  --fld-pick-dis-text: #667085;             /* cool-neutral/500 */
   --fld-pick-hover: #4A5260;                /* surface.neutral-state.pressed · cool-600 */
   --fld-pick-on: #1A56FF;                   /* surface.brand.brand-intense · brand-500 */
   --fld-pick-on-text: #FFFFFF;              /* content.neutral.on-fill-dark */
 }
 @media (prefers-reduced-motion: reduce) { .field-pick-chip, .field-multi--pick .field-trailing--icon svg { transition: none; } }
+
+/* ── v3.5.0 · month & year in one box (data-pick-my="merged", picker mode) — user 2026-11-15 ─────────────────────────
+   [ Day ⌄ ] [ Month & year ⌄ ]  ·  [ Month & year ⌄ ]  — the box shows "May 2026". Its sheet: the year between two arrows
+   (‹ 2026 ›: the arrows step a year; a tap on the year — plain text — opens the years sheet ABOVE it: the year grid, decade headings),
+   then Jan … Dec, 4 a row. The day box and its sheet are unchanged. */
+.field-pick-grid[data-part="my"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.field-pick-box--my .field-input { text-overflow: ellipsis; }   /* v3.6.0: a narrow box (two dates in a row) — “Septemb…” never spills */
+.field-pick-years { display: flex; align-items: center; justify-content: center; gap: 0; margin: 0 0 20px; }   /* ◂ 2026 ▸ — the triangles ~20 from the year (their 44 touch areas) · stack.xl to the months */
+.field-pick-years[hidden] { display: none; }
+.field-pick-step {                                                              /* ◂ ▸ — a small solid triangle in a 44 round touch area (user 2026-11-15 reference) */
+  flex: none; display: grid; place-items: center; width: var(--fld-pick-h); height: var(--fld-pick-h); margin: 0; padding: 0;
+  border: 0; border-radius: 50%; background: transparent; color: var(--fld-text); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: background-color var(--fld-dur), opacity var(--fld-dur), transform var(--fld-dur);
+}
+.field-pick-step svg { display: block; width: 8px; height: 12px; overflow: visible; }   /* the reference: 8 × 12 */
+.field-pick-step:active { transform: scale(.94); background: var(--fld-pick-hover); }
+.field-pick-step:disabled { background: transparent; color: var(--fld-pick-dis-text); cursor: not-allowed; transform: none; }   /* the range's first / last year — the arrow goes quiet */
+.field-pick-year {                                                              /* the year — plain text, Display / md (no chip, no caret · user 2026-11-15); a tap opens the years sheet */
+  display: inline-flex; align-items: center; justify-content: center; height: var(--fld-pick-h); margin: 0; padding: 0 2px;
+  border: 0; border-radius: var(--fld-pick-radius); background: transparent; color: var(--fld-text);
+  font: 800 32px/36px var(--fld-font); letter-spacing: -.4px; font-variant-numeric: tabular-nums; cursor: pointer;   /* Display / md extrabold — the reference */
+  -webkit-tap-highlight-color: transparent; transition: background-color var(--fld-dur);
+}
+.field-pick-year:active { background: var(--fld-pick-hover); }
+@media (hover: hover) { .field-pick-year:hover, .field-pick-step:not(:disabled):hover { background: var(--fld-pick-hover); } }
+.field-pick-step:focus { outline: none; } .field-pick-year:focus { outline: none; }
+.field-pick-step:focus-visible, .field-pick-year:focus-visible { outline: 2px solid var(--fld-focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .field-pick-step, .field-pick-year { transition: none; } }
 </style>
 <style data-component="otp-field">
 /* ═══════════════════════════════════════════════════════════════════════
@@ -3250,7 +3335,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
               <label class="field-label" for="moNotice">Notice period</label>
               <div class="field-control"><input class="field-input" id="moNotice" placeholder="Select notice period" required></div>
             </div>
-            <fieldset class="field field--sm field-multi" data-field="date" data-parts="dmy" data-pick="sheet" data-min="today" data-max="today+6m" data-pick-conflict="error" data-required data-error-empty="Select your last working day" data-error-min="Last working day can’t be in the past" data-error-max="Last working day must be within 6 months" data-k="lwd" hidden><legend class="field-label">Last working day</legend></fieldset>
+            <fieldset class="field field--sm field-multi" data-field="date" data-parts="dmy" data-pick="sheet" data-pick-my="merged" data-min="today" data-max="today+6m" data-pick-conflict="error" data-required data-error-empty="Select your last working day" data-error-min="Last working day can’t be in the past" data-error-max="Last working day must be within 6 months" data-k="lwd" hidden><legend class="field-label">Last working day</legend></fieldset>
           </div>
           <div class="field field--sm" data-field="combo" data-combo="inline" data-combo-free data-k="loc" data-error-empty="Enter your current location">
             <label class="field-label" for="moLoc">Current location</label>
@@ -3260,7 +3345,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
           <!-- optional details: the card component, grey fill (user's pick 2026-11-02 · optional-card-2-grey) -->
           <section class="card mo-opt" aria-labelledby="moOptH">
             <div class="mo-opt-h"><h2 class="mo-opt-t" id="moOptH">More about you</h2><span class="badge badge--sm badge--neutral mo-opt-badge">Optional</span></div>
-            <fieldset class="field field--sm field-multi" data-field="date" data-parts="dmy" data-pick="sheet" data-pick-order="desc" data-min="1950-01-01" data-max="today-15y" data-error-max="You need to be at least 15 years old" data-k="dob"><legend class="field-label">Date of birth</legend></fieldset>
+            <fieldset class="field field--sm field-multi" data-field="date" data-parts="myd" data-pick="sheet" data-pick-my="merged" data-pick-order="desc" data-min="1950-01-01" data-max="today-15y" data-error-max="You need to be at least 15 years old" data-k="dob"><legend class="field-label">Date of birth</legend></fieldset>
             <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Disability" data-k="disability">
               <label class="field-label" for="moDis">Disability</label>
               <div class="field-control"><input class="field-input" id="moDis" placeholder="Select (if any)"></div>
@@ -3277,17 +3362,19 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
           <div class="card mo-entry" id="eduCard">
             <div class="mo-entry-head"><p class="mo-eyebrow" data-k="eduNo">Education 1</p></div>
             <div class="pf-form" id="fEdu">
-              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Education" data-k="level" data-error-empty="Select your education">
+              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-list="radio" data-combo-title="Education" data-combo-title-lead="Select" data-combo-placeholder="Search e.g. B.Tech" data-k="level" data-error-empty="Select your education">
                 <label class="field-label" for="moEdLevel">Education</label>
                 <div class="field-control"><input class="field-input" id="moEdLevel" placeholder="Select your education" required></div>
               </div>
               <fieldset class="field field--sm pf-choice" data-choice="ctype" data-error-empty="Choose a course type"><legend class="field-label">Course type</legend><div class="chips pf-chips" role="radiogroup" aria-label="Course type"></div></fieldset>
-              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-free data-combo-title="University / Institute / Board" data-k="inst" data-error-empty="Select your university or institute">
+              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-free data-combo-list="radio" data-combo-title="University / College" data-combo-title-lead="Select" data-combo-placeholder="Search e.g. IIT delhi" data-k="inst" data-error-empty="Select your university or institute">
                 <label class="field-label" for="moEdInst">University / Institute / Board</label>
                 <div class="field-control"><input class="field-input" id="moEdInst" placeholder="Select your university or institute" required></div>
               </div>
-              <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-order="desc" data-min="1970-01-01" data-max="today" data-required data-k="start" data-error-empty="Enter the start date"><legend class="field-label">Start date</legend></fieldset>
-              <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-order="desc" data-min="1970-01-01" data-max="today+6y" data-required data-k="end" data-error-empty="Enter the end date" data-error-min="The end date can’t be before the start date"><legend class="field-label">End date <span class="optional">(or expected)</span></legend></fieldset>
+              <div class="field-row">   <!-- start · end side by side (2026-11-15); a hidden end gives the start the full width -->
+                <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-my="merged" data-pick-order="desc" data-min="1970-01-01" data-max="today" data-required data-k="start" data-error-empty="Enter the start date"><legend class="field-label">Start date</legend></fieldset>
+                <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-my="merged" data-pick-order="desc" data-min="1970-01-01" data-max="today+6y" data-required data-k="end" data-error-empty="Enter the end date" data-error-min="The end date can’t be before the start date"><legend class="field-label">End date <span class="optional">(or expected)</span></legend></fieldset>
+              </div>
               <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Grading system" data-k="grade">
                 <label class="field-label" for="moEdGrade">Grading system <span class="optional">(optional)</span></label>
                 <div class="field-control"><input class="field-input" id="moEdGrade" placeholder="Select grading system"></div>
@@ -3322,21 +3409,23 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
                 <label class="field-label" for="moEmCompany">Company name</label>
                 <div class="field-control"><input class="field-input" id="moEmCompany" placeholder="e.g. XYZ Technologies Pvt. Ltd." autocomplete="organization" required></div>
               </div>
-              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Employment type" data-k="etype" data-error-empty="Choose the employment type" hidden>   <!-- a fresher only: Internship · Freelance (user 2026-11-11) -->
+              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-list="radio" data-combo-title="Employment type" data-combo-title-lead="Select" data-k="etype" data-error-empty="Choose the employment type">   <!-- a dropdown → bottom sheet for everyone (user 2026-11-15): fresher Internship · Freelance · experienced Full time · Part time · Internship · Contractual · Freelance -->
                 <label class="field-label" for="moEmType">Employment type</label>
-                <div class="field-control"><input class="field-input" id="moEmType" placeholder="Select employment type" required disabled></div>
+                <div class="field-control"><input class="field-input" id="moEmType" placeholder="Select employment type" required></div>
               </div>
-              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Department" data-k="dept" data-error-empty="Select a department">
+              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-list="radio" data-combo-title="Department" data-combo-title-lead="Select" data-combo-placeholder="Search e.g. product management" data-k="dept" data-error-empty="Select a department">
                 <label class="field-label" for="moEmDept">Department</label>
                 <div class="field-control"><input class="field-input" id="moEmDept" placeholder="Select a department" required></div>
               </div>
-              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-title="Industry" data-k="ind" data-error-empty="Select an industry">
+              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-list="radio" data-combo-title="Industry" data-combo-title-lead="Select" data-combo-placeholder="Search e.g. Manufacturing" data-k="ind" data-error-empty="Select an industry">
                 <label class="field-label" for="moEmInd">Industry</label>
                 <div class="field-control"><input class="field-input" id="moEmInd" placeholder="Select an industry" required></div>
               </div>
               <fieldset class="field field--sm pf-choice" data-choice="current" data-error-empty="Tell us if you work here now"><legend class="field-label">Do you work here now?</legend><div class="chips pf-chips" role="radiogroup" aria-label="Do you work here now?"></div></fieldset>
-              <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-order="desc" data-min="1970-01-01" data-max="today" data-required data-k="start" data-error-empty="Enter the date you joined"><legend class="field-label">Date of joining</legend></fieldset>
-              <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-order="desc" data-min="1970-01-01" data-max="today" data-required data-k="end" data-error-empty="Enter your last working day" data-error-min="The last working day can’t be before the date of joining" hidden><legend class="field-label">Last working day</legend></fieldset>
+              <div class="field-row">   <!-- start · end side by side (2026-11-15); a hidden end gives the start the full width -->
+                <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-my="merged" data-pick-order="desc" data-min="1970-01-01" data-max="today" data-required data-k="start" data-error-empty="Enter the date you joined"><legend class="field-label">Date of joining</legend></fieldset>
+                <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-my="merged" data-pick-order="desc" data-min="1970-01-01" data-max="today" data-required data-k="end" data-error-empty="Enter your last working day" data-error-min="The last working day can’t be before the date of joining" hidden><legend class="field-label">Last working day</legend></fieldset>
+              </div>
             </div>
             <div class="mo-entry-acts" data-k="empActs" hidden>   <!-- editing a saved entry / adding another (user 2026-11-03: Save + Cancel) -->
               <button class="btn btn--secondary btn--md btn--fill" type="button" data-act="emp-cancel">Cancel</button>
@@ -5420,7 +5509,14 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 })(window.ShineField);
 </script>
 <script data-component="combo-box">
-/* SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.3.0
+/* SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.5.0
+   v4.5.0 · an option's `row` ({ value, label, row, group } · <li data-row>): the words shown in the sheet's row when its group
+   already says the rest (group "Class XII" · row "Science"); the box, the search and the value still use the label. Radio rows
+   with a hint (a second line) keep the radio level with the first line.
+   v4.4.0 · radio list sheet + groups (user 2026-11-15 · Department / Industry): data-combo-list="radio" — the sheet's rows
+   carry a radio on the left (no separators, no tint on the chosen row), the search placeholder is quieter; data-combo-title-lead
+   ("Select") puts the title in the bottom sheet's accent: "Select Department". Options take a `group` ({ value, label, group } ·
+   <li data-group>): an eyebrow heading over its rows, a soft divider between groups, groups in their first-seen order.
    v4.3.0 · the list sheet builds its search box in the sheet's heading (bottom-sheet v3.2.0 · .bs-search)
    Needs field-base.css + field-base.js and combo-box.css. The sheet mode also needs the bottom-sheet component
    (app-components/bottom-sheet: bottom-sheet.css + bottom-sheet.js); without it the list opens inline.
@@ -5472,7 +5568,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
   function toOpt(o) {
     if (o == null) return null;
     if (typeof o !== 'object') return { value: String(o), label: String(o), hint: '' };
-    var l = o.label != null ? o.label : o.value; return { value: String(o.value != null ? o.value : l), label: String(l), hint: o.hint || '' };
+    var l = o.label != null ? o.label : o.value; return { value: String(o.value != null ? o.value : l), label: String(l), hint: o.hint || '', group: o.group || '', row: o.row || '' };
   }
   function score(o, q) {
     var l = low(o.label), i = l.indexOf(q);
@@ -5490,10 +5586,11 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     var input = el.querySelector('.field-input'), ctl = el.querySelector('.field-control'); if (!input || !ctl) return null;
     var n = ++uid, name = _.nameOf(el), title = el.getAttribute('data-combo-title') || (name.charAt(0).toUpperCase() + name.slice(1));
     var src = el.querySelector('.field-options'), options = [];
-    if (src) { options = [].map.call(src.querySelectorAll('li'), function (li) { var t = li.textContent.replace(/\s+/g, ' ').trim(); return { value: li.getAttribute('data-value') || t, label: t, hint: li.getAttribute('data-hint') || '' }; }); src.hidden = true; }
+    if (src) { options = [].map.call(src.querySelectorAll('li'), function (li) { var t = li.textContent.replace(/\s+/g, ' ').trim(); return { value: li.getAttribute('data-value') || t, label: t, hint: li.getAttribute('data-hint') || '', group: li.getAttribute('data-group') || '', row: li.getAttribute('data-row') || '' }; }); src.hidden = true; }
     var free = el.hasAttribute('data-combo-free'), remote = null, minQ = +(el.getAttribute('data-combo-min') || 2), token = 0, tm = 0;
     var sel = null, isOpen = false, active = -1, shown = [], mode = 'inline', sheet = null, sIn = null, sLb = null, sLive = null;
     var heading = el.getAttribute('data-combo-heading') || '';
+    var radio = el.getAttribute('data-combo-list') === 'radio', lead = el.getAttribute('data-combo-title-lead') || '';   // v4.4.0
     var dd = null;                                        // v4.0.0: the inline dropdown component, when loaded
     function useDD() { return !!dd && mode === 'inline'; }
 
@@ -5548,14 +5645,20 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
       else if (state === 'short') h += '<li class="field-list-note" role="presentation">Type ' + minQ + ' letters to search</li>';
       else if (state === 'error') h += '<li class="field-list-note" role="presentation">Couldn’t load the list — try again</li>';
       if (!q && heading && list.length) h += '<li class="field-list-note field-list-note--head" role="presentation">' + esc(heading) + '</li>';
+      var grp = list.some(function (o) { return o.group; }), last = null;   // v4.4.0: groups, in their first-seen order
+      if (grp) { var order = [], by = {}; list.forEach(function (o) { var g = o.group || ''; if (!by[g]) { by[g] = []; order.push(g); } by[g].push(o); });
+        list = [].concat.apply([], order.map(function (g) { return by[g]; })); }
+      box.classList.toggle('field-listbox--grouped', grp);
       list.forEach(function (o) {
         var on = !!sel && !sel.free && sel.value === o.value;
-        h += '<li class="field-option" role="option" id="' + box.id + '-' + k + '" data-k="' + k + '" aria-selected="' + on + '"><span class="field-option-text"><span>' + mark(o.label, q) + '</span>' +
+        if (grp && o.group !== last) { last = o.group; if (o.group) h += '<li class="field-list-group" role="presentation">' + esc(o.group) + '</li>'; }
+        h += '<li class="field-option" role="option" id="' + box.id + '-' + k + '" data-k="' + k + '" aria-selected="' + on + '">' + (radio ? '<span class="field-option-radio" aria-hidden="true"></span>' : '') + '<span class="field-option-text"><span>' + mark(o.row || o.label, q) + '</span>' +   // v4.5.0: the row's own words
+            ''+
              (o.hint ? '<span class="field-option-hint">' + esc(o.hint) + '</span>' : '') + '</span><span class="field-option-check" aria-hidden="true">' + IC['ic_check-outline'] + '</span></li>';
         shown.push(o); k++;
       });
       if (free && q && !state && !exact(raw)) {
-        var t = raw.trim(); h += '<li class="field-option field-option--free" role="option" id="' + box.id + '-' + k + '" data-k="' + k + '" aria-selected="false"><span class="field-option-text"><span>Use “' + esc(t) + '”</span></span></li>';
+        var t = raw.trim(); h += '<li class="field-option field-option--free" role="option" id="' + box.id + '-' + k + '" data-k="' + k + '" aria-selected="false">' + (radio ? '<span class="field-option-radio" aria-hidden="true"></span>' : '') + '<span class="field-option-text"><span>Use “' + esc(t) + '”</span></span></li>';
         shown.push({ value: t, label: t, hint: '', free: true }); k++;
       }
       if (!list.length && !state && q && !(free && !exact(raw))) h += '<li class="field-list-note" role="presentation">No matches for “' + esc(raw.trim()) + '”</li>';
@@ -5663,13 +5766,14 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     function buildSheet() {
       if (sheet) return;
       var sid = 'fld-combo-' + n + '-search', lid = 'fld-combo-' + n + '-sheet', sz = (el.className.match(/\bfield--(sm|md|lg|xl)\b/) || [])[1] || 'md';
-      sheet = doc.createElement('div'); sheet.className = 'bs bs--pad-bottom field-sheet'; sheet.hidden = true;
-      sheet.innerHTML = '<div class="bs-top"><div class="bs-handle" aria-hidden="true"></div><div class="bs-head bs-head--md"><div class="bs-heading"><h2 class="bs-title">' + esc(title) + '</h2></div>' +
+      sheet = doc.createElement('div'); sheet.className = 'bs bs--pad-bottom field-sheet' + (radio ? ' field-sheet--radio' : ''); sheet.hidden = true;
+      var tHtml = lead ? esc(lead) + ' <span class="accent">' + esc(title) + '</span>' : esc(title);   // v4.4.0: "Select Department"
+      sheet.innerHTML = '<div class="bs-top"><div class="bs-handle" aria-hidden="true"></div><div class="bs-head bs-head--md"><div class="bs-heading"><h2 class="bs-title">' + tHtml + '</h2></div>' +
         '<button class="bs-close" type="button" data-bs-close aria-label="Close">' + IC['ic_close-outline'] + '</button></div>' +
         '<div class="bs-search"><div class="field field--' + sz + ' field-sheet-search"><label class="field-label field-label--hidden" for="' + sid + '">Search ' + esc(name) + '</label>' +
         '<div class="field-control"><span class="field-icon" aria-hidden="true">' + IC['ic_search-outline'] + '</span><input class="field-input" id="' + sid + '" type="text" role="combobox" aria-autocomplete="list" aria-expanded="true" aria-controls="' + lid + '" autocomplete="off" spellcheck="false" enterkeyhint="search" data-bs-autofocus placeholder="' + esc(el.getAttribute('data-combo-placeholder') || 'Search') + '">' +
         '<button class="field-trailing" type="button" data-combo-btn="clear" aria-label="Clear search" hidden>' + IC['ic_close-outline'] + '</button></div></div></div></div>' +
-        '<div class="bs-body bs-body--gutter"><div class="field field--' + sz + ' field-combo-sheet"><ul class="field-listbox field-listbox--sheet" role="listbox" id="' + lid + '" aria-label="' + esc(title) + '"></ul><span class="sr-only" aria-live="polite"></span></div></div>';
+        '<div class="bs-body bs-body--gutter"><div class="field field--' + sz + ' field-combo-sheet"><ul class="field-listbox field-listbox--sheet' + (radio ? ' field-listbox--radio' : '') + '" role="listbox" id="' + lid + '" aria-label="' + esc(title) + '"></ul><span class="sr-only" aria-live="polite"></span></div></div>';
       doc.body.appendChild(sheet);
       sIn = sheet.querySelector('.field-input'); sLb = sheet.querySelector('.field-listbox'); sLive = sheet.querySelector('[aria-live]');
       var sClear = sheet.querySelector('[data-combo-btn]');
@@ -5800,7 +5904,16 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 })(window.ShineField);
 </script>
 <script data-component="multi-input">
-/* SHINE · INPUT FIELDS · MULTI INPUT  (atoms/input-fields/multi-input/)      v3.4.0
+/* SHINE · INPUT FIELDS · MULTI INPUT  (atoms/input-fields/multi-input/)      v3.6.0
+   v3.6.0 · month & year first (user 2026-11-15) — data-parts="myd": [ Month & year ⌄ ] [ Day ⌄ ] (date of birth) — the month
+   and the year are picked first, so the day sheet then fades the days that month hasn't got. The sheet still moves on to the
+   next empty part. ← → between the boxes skip the year's hidden input. A pick too long for a narrow box ends in "…".
+   v3.5.0 · month & year in one box (user 2026-11-15) — data-pick-my="merged" with data-pick="sheet": the month and the year
+   are ONE box ("Month & year" · a pick shows "May 2026") and ONE sheet: ‹ 2026 › over Jan … Dec (4 a row) — the arrows
+   step a year (stopping at the range's ends), a tap on the year opens the years sheet ABOVE it (the year grid with decade
+   headings, newest first with data-pick-order="desc"); picking a year there shows its months. A tap on a month picks the
+   month AND the year shown. dmy: [ Day ⌄ ] [ Month & year ⌄ ] — the day box ("Day") and its sheet are unchanged; the sheet
+   still moves on to the next empty part and closes when the date is complete. The value and every rule stay as before.
    v3.4.0 · the last working day (user 2026-11-06): data-min / data-max take months (today+6m); data-pick-conflict="error"
    keeps a day the newly picked month / year hasn't got and says so ("April has only 30 days" · "February 2027 has only 28
    days") with the day box marked, instead of clearing it; the error for a date out of range marks the box at fault.
@@ -5881,7 +5994,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
   };
   var MON = MONTHS.map(function (m) { return m.slice(0, 3); });
   var DMAX = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];       // the most days a month can have (29 Feb: leap years)
-  var COLS = { d: 7, m: 3, y: 4 };                                    // the picker grid: a week of days · a quarter of months · 4 years
+  var COLS = { d: 7, m: 3, y: 4, my: 4 };                                    // the picker grid: a week of days · a quarter of months · 4 years
   function pad(v) { return v.length === 1 ? '0' + v : v; }
   function daysIn(m, y) { return new Date(y, m, 0).getDate(); }
   function list(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
@@ -5897,10 +6010,12 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 
   function setup(el) {
     var kind = (el.getAttribute('data-field') || '').trim(), n = ++uid;
-    var keys = kind === 'experience' ? ['yrs', 'mos'] : (el.getAttribute('data-parts') || 'dmy') === 'my' ? ['m', 'y'] : ['d', 'm', 'y'];
+    var dp = el.getAttribute('data-parts') || 'dmy';   // v3.6.0: myd — month & year first, then the day (date of birth)
+    var keys = kind === 'experience' ? ['yrs', 'mos'] : dp === 'my' ? ['m', 'y'] : dp === 'myd' ? ['m', 'y', 'd'] : ['d', 'm', 'y'];
     var wrap = el.querySelector('.field-multi-boxes'), bday = el.getAttribute('data-autocomplete') === 'bday';
     el.classList.add('field-multi');
     var pick = kind === 'date' && el.getAttribute('data-pick') === 'sheet';   // v3.2.0: the boxes are picked from a sheet
+    var merged = pick && el.getAttribute('data-pick-my') === 'merged' && keys.indexOf('m') > -1;   // v3.5.0: month + year = one box, one sheet
     var tName = el.getAttribute('data-trailing'), tEach = el.getAttribute('data-trailing-at') === 'each', tLabel = el.getAttribute('data-trailing-label');
     if (pick) { if (!tName) { tName = 'ic_caret-down-outline'; tEach = true; } tLabel = null; el.classList.add('field-multi--pick'); }   // the whole box is the button: the caret is a sign
     var tSvg = tName ? (F.icons[tName] || IC[tName]) : null;
@@ -5919,6 +6034,10 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
       wrap = doc.createElement('div'); wrap.className = 'field-multi-boxes';
       wrap.innerHTML = keys.map(function (k, i) {
         var p = PART[k];
+        if (merged && k === 'y') return '<input type="hidden" class="field-input field-pick-y" id="fld-multi-' + n + '-y" data-part="y">';   // v3.5.0: the year lives in the month's box
+        if (merged && k === 'm') return '<div class="field-control field-pick-box field-pick-box--my"><input class="field-input" id="fld-multi-' + n + '-m" type="text" readonly inputmode="none" placeholder="Month &amp; year"' +
+               ' aria-label="Month and year" aria-haspopup="dialog" autocomplete="off" data-part="m">' + trailing(k, true, i) + '</div>';
+        if (merged && k === 'd') p = { label: 'Day', ph: 'Day' };
         if (pick) return '<div class="field-control field-pick-box"><input class="field-input" id="fld-multi-' + n + '-' + k + '" type="text" readonly inputmode="none" placeholder="' + p.ph +
                '" aria-label="' + p.label + '" aria-haspopup="dialog" autocomplete="off" data-part="' + k + '">' + trailing(k, i === keys.length - 1, i) + '</div>';
         return '<div class="field-control"><input class="field-input" id="fld-multi-' + n + '-' + k + '" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="' + p.len +
@@ -5928,6 +6047,14 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
       el.appendChild(wrap);
     }
     var ins = [].slice.call(wrap.querySelectorAll('.field-input')), part = function (i) { return PART[ins[i].getAttribute('data-part') || keys[i]]; };
+    var iM = keys.indexOf('m'), iY = keys.indexOf('y');
+    function ui(i) { return merged && i === iY ? iM : i; }                // v3.5.0: the year's box is the month's
+    function box(i) { return ins[ui(i)].closest('.field-control'); }
+    function showMY() {                                   // "May 2026" in the one box
+      var m = ins[iM].getAttribute('data-v'), y = ins[iY].getAttribute('data-v');
+      ins[iM].value = m ? MON[+m - 1] + (y ? ' ' + y : '') : (y || '');
+      ins[iM].setAttribute('aria-label', 'Month and year' + (m || y ? ', ' + (m ? MONTHS[+m - 1] + ' ' : '') + (y || '') : ', not picked'));
+    }
     var hidden = null;
     if (el.getAttribute('data-name')) { hidden = doc.createElement('input'); hidden.type = 'hidden'; hidden.name = el.getAttribute('data-name'); el.appendChild(hidden); }
 
@@ -5938,8 +6065,9 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
       if (v) ins[i].setAttribute('data-v', v); else ins[i].removeAttribute('data-v');
       ins[i].value = v;                                   // 15 · 12 · 2026 — the boxes' own DD · MM · YYYY (v3.3.0)
       ins[i].setAttribute('aria-label', PART[k].label + (v ? ', ' + (k === 'm' ? MONTHS[+v - 1] : +v) : ', not picked'));
+      if (merged && (k === 'm' || k === 'y')) showMY();
     }
-    function mark(idx) { ins.forEach(function (inp, i) { inp.closest('.field-control').classList.toggle('is-invalid', idx.indexOf(i) > -1); }); }
+    function mark(idx) { var bad = idx.map(ui); ins.forEach(function (inp, i) { if (!(merged && i === iY)) box(i).classList.toggle('is-invalid', bad.indexOf(i) > -1); }); }
     function units() { ins.forEach(function (inp, i) { var p = part(i), u = inp.parentNode.querySelector('.field-suffix'); if (p.unit && u) u.textContent = inp.value === '1' || inp.value === '01' ? p.unit[0] : p.unit[1]; }); }
 
     /* what is wrong, and which boxes — { text, at: [box indexes] } or null */
@@ -6027,6 +6155,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     });
     /* ── picker mode (v3.2.0 · v3.3.0: the App-logout sign-up's last working day) — a bottom sheet, one part at a time ── */
     var sheet = null, grid = null, word = null, live = null, at = -1, closing = false;
+    var vy = 0, ybar = null, ysheet = null, ygrid = null;   // v3.5.0: the year shown over the months · the years sheet
     function bounds() {                                   // the range as keys (yyyymmdd) + its years
       var lo = when(el.getAttribute('data-min')), hi = when(el.getAttribute('data-max')), ty = new Date().getFullYear();
       var k = function (w) { return w.y * 10000 + w.m * 100 + w.d; };
@@ -6054,17 +6183,27 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
       if (k === 'y') { if (!keep) t.m = null; t.d = null; } else if (k === 'm') t.d = null;   // keep mode: a year is judged with its month too
       return !possible(b, t);
     }
+    function ico(k) { return F.icons[k] || IC[k] || ''; }
+    // v3.5.0 · the year row's arrows: small solid triangles (user 2026-11-15 reference) — drawn here, not icons-atom glyphs
+    var TRI_L = '<svg aria-hidden="true" focusable="false" viewBox="0 0 8 12"><path d="M6.6 1.4 1.6 6l5 4.6z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+    var TRI_R = '<svg aria-hidden="true" focusable="false" viewBox="0 0 8 12"><path d="M1.4 1.4 6.4 6l-5 4.6z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
     function buildSheet() {
       if (sheet) return;
       var tid = 'fld-multi-' + n + '-pick';
       sheet = doc.createElement('div'); sheet.className = 'bs bs--pad-bottom field-sheet field-pick-sheet'; sheet.hidden = true;
       sheet.setAttribute('aria-labelledby', tid);
       sheet.innerHTML = '<div class="bs-top"><div class="bs-handle" aria-hidden="true"></div><div class="bs-head bs-head--md"><div class="bs-heading"><h2 class="bs-title" id="' + tid + '">Select <span class="accent"></span></h2></div>' +
-        '<button class="bs-close" type="button" data-bs-close aria-label="Close">' + (F.icons['ic_close-outline'] || IC['ic_close-outline']) + '</button></div></div>' +
+        '<button class="bs-close" type="button" data-bs-close aria-label="Close">' + ico('ic_close-outline') + '</button></div></div>' +
         '<div class="bs-body bs-body--gutter"><div class="field field--' + ((el.className.match(/\bfield--(sm|md|lg|xl)\b/) || [])[1] || 'md') + ' field-pick">' +
-        '<p class="field-pick-note" hidden></p><div class="field-pick-grid" role="listbox" aria-labelledby="' + tid + '"></div><span class="sr-only" aria-live="polite"></span></div></div>';
+        '<p class="field-pick-note" hidden></p>' + (merged ? '<div class="field-pick-years" hidden><button class="field-pick-step" type="button" data-step="-1" aria-label="Previous year">' + TRI_L +
+        '</button><button class="field-pick-year" type="button" aria-haspopup="dialog"><span></span></button><button class="field-pick-step" type="button" data-step="1" aria-label="Next year">' +
+        TRI_R + '</button></div>' : '') + '<div class="field-pick-grid" role="listbox" aria-labelledby="' + tid + '"></div><span class="sr-only" aria-live="polite"></span></div></div>';
       doc.body.appendChild(sheet);
       grid = sheet.querySelector('.field-pick-grid'); word = sheet.querySelector('.bs-title .accent'); live = sheet.querySelector('[aria-live]');
+      if (merged) { ybar = sheet.querySelector('.field-pick-years'); ybar.addEventListener('click', function (e) {   // v3.5.0: ‹ › step a year · the year opens the years sheet
+        var st = e.target.closest('.field-pick-step'); if (st) { if (!st.disabled) { vy += +st.getAttribute('data-step'); drawMY(); live.textContent = String(vy); } return; }
+        if (e.target.closest('.field-pick-year')) openYears();
+      }); }
       grid.addEventListener('click', function (e) { var c = e.target.closest('.field-pick-chip'); if (c) choose(c); });
       grid.addEventListener('keydown', function (e) {     // ← → one value · ↑ ↓ one row · Home / End — faded values are skipped
         var c = e.target.closest('.field-pick-chip'); if (!c) return;
@@ -6076,7 +6215,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
         if (j < 0 || j >= all.length || j === i) return;
         all[i].tabIndex = -1; all[j].tabIndex = 0; all[j].focus();
       });
-      sheet.addEventListener('shine:sheet-close', function () { if (at > -1) ins[at].closest('.field-control').classList.remove('is-open'); at = -1; el.classList.remove('field--open'); });
+      sheet.addEventListener('shine:sheet-close', function () { if (at > -1) box(at).classList.remove('is-open'); at = -1; el.classList.remove('field--open'); });
       sheet.addEventListener('shine:sheet-closed', function () {
         var done = closing; closing = false;
         // v3.4.0 · keep mode (the last working day): closed before the date is complete → say what's missing at once —
@@ -6086,6 +6225,8 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
       });
     }
     function draw(i) {                                    // the grid for box i's part
+      if (merged && (i === iM || i === iY)) { drawMY(); return; }   // v3.5.0
+      if (ybar) ybar.hidden = true;
       var k = ins[i].getAttribute('data-part') || keys[i], b = bounds(), q = picked(), h = '', first = null, items = [], x;
       if (k === 'd') for (x = 1; x <= 31; x++) items.push({ v: x, t: String(x), say: String(x) });                 // 1 … 31 (the reference: no leading zero)
       if (k === 'm') for (x = 1; x <= 12; x++) items.push({ v: x, t: MON[x - 1], say: MONTHS[x - 1] });
@@ -6111,24 +6252,78 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
       var body = sheet.querySelector('.bs-body'); if (body) body.scrollTop = 0;
       var s = grid.querySelector('.field-pick-chip[aria-selected="true"]'); if (s && s.scrollIntoView) try { s.scrollIntoView({ block: 'nearest' }); } catch (e) {}
     }
+    function drawMY() {                                   // v3.5.0 · ‹ year › over Jan … Dec (4 a row)
+      var b = bounds(), q = picked(), h = '', first = null, x;
+      if (!vy) vy = q.y != null ? q.y : new Date().getFullYear();   // the picked year, or this year …
+      vy = Math.min(Math.max(vy, b.y0), b.y1);                       // … kept inside the range (date of birth: its newest year)
+      for (x = 1; x <= 12; x++) {
+        var on = q.m === x && q.y === vy, no = off(b, 'm', x, { y: vy, m: q.m, d: q.d });
+        if (!no && first === null) first = x;
+        h += '<button class="field-pick-chip" type="button" role="option" data-v="' + x + '" aria-selected="' + on + '"' + (no ? ' aria-disabled="true"' : '') +
+             ' aria-label="' + MONTHS[x - 1] + ' ' + vy + '" tabindex="-1">' + MON[x - 1] + '</button>';
+      }
+      grid.setAttribute('data-part', 'my'); grid.setAttribute('aria-label', 'Month, ' + vy); grid.innerHTML = h;
+      var start = grid.querySelector('.field-pick-chip[aria-selected="true"]:not([aria-disabled])') || grid.querySelector('.field-pick-chip[data-v="' + first + '"]');
+      if (start) { start.tabIndex = 0; start.setAttribute('data-bs-autofocus', ''); }
+      ybar.hidden = false; ybar.querySelector('.field-pick-year span').textContent = vy;
+      ybar.querySelector('.field-pick-year').setAttribute('aria-label', vy + ', pick another year');
+      ybar.querySelector('[data-step="-1"]').disabled = vy <= b.y0; ybar.querySelector('[data-step="1"]').disabled = vy >= b.y1;
+      word.textContent = (el.getAttribute('data-pick-title') || '').split('|')[ui(at)] || 'month & year';
+      var note = sheet.querySelector('.field-pick-note'); note.hidden = true; note.textContent = '';
+    }
+    function openYears() {                                // v3.5.0 · the years sheet, over the month & year sheet
+      var b = bounds(), h = '', dec = null, x, items = [];
+      if (!ysheet) {
+        var tid = 'fld-multi-' + n + '-years';
+        ysheet = doc.createElement('div'); ysheet.className = 'bs bs--pad-bottom field-sheet field-pick-sheet field-pick-sheet--years'; ysheet.hidden = true;
+        ysheet.setAttribute('aria-labelledby', tid);
+        ysheet.innerHTML = '<div class="bs-top"><div class="bs-handle" aria-hidden="true"></div><div class="bs-head bs-head--md"><div class="bs-heading"><h2 class="bs-title" id="' + tid + '">Select <span class="accent">year</span></h2></div>' +
+          '<button class="bs-close" type="button" data-bs-close aria-label="Close">' + ico('ic_close-outline') + '</button></div></div>' +
+          '<div class="bs-body bs-body--gutter"><div class="field field--' + ((el.className.match(/\bfield--(sm|md|lg|xl)\b/) || [])[1] || 'md') + ' field-pick">' +
+          '<div class="field-pick-grid" data-part="y" role="listbox" aria-labelledby="' + tid + '"></div></div></div>';
+        doc.body.appendChild(ysheet); ygrid = ysheet.querySelector('.field-pick-grid');
+        ygrid.addEventListener('click', function (e) {
+          var c = e.target.closest('.field-pick-chip'); if (!c || c.getAttribute('aria-disabled') === 'true') return;
+          vy = +c.getAttribute('data-v'); [].forEach.call(ygrid.querySelectorAll('.field-pick-chip'), function (o) { o.setAttribute('aria-selected', o === c ? 'true' : 'false'); });
+          if (at > -1) drawMY(); live.textContent = vy + ' picked';
+          setTimeout(function () { if (ShineSheet.isOpen(ysheet)) ShineSheet.close(ysheet); }, 140);   // back to its months
+        });
+        ygrid.addEventListener('keydown', function (e) {   // ← → ↑ ↓ (4 a row) · Home / End
+          var c = e.target.closest('.field-pick-chip'); if (!c) return;
+          var all = [].slice.call(ygrid.querySelectorAll('.field-pick-chip')), i = all.indexOf(c), j, st = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -4, ArrowDown: 4 }[e.key];
+          if (e.key === 'Home') j = 0; else if (e.key === 'End') j = all.length - 1; else if (st) j = i + st; else return;
+          e.preventDefault(); if (j < 0 || j >= all.length || j === i) return; all[i].tabIndex = -1; all[j].tabIndex = 0; all[j].focus();
+        });
+      }
+      for (x = b.y0; x <= b.y1; x++) items.push(x);
+      if (el.getAttribute('data-pick-order') === 'desc') items.reverse();
+      items.forEach(function (y) {
+        var dc = y - y % 10; if (b.y1 - b.y0 >= 10 && dc !== dec) { dec = dc; h += '<span class="field-pick-decade" role="presentation">' + dc + 's</span>'; }
+        var no = !possible(b, { y: y, m: null, d: null });
+        h += '<button class="field-pick-chip" type="button" role="option" data-v="' + y + '" aria-selected="' + (y === vy) + '"' + (no ? ' aria-disabled="true"' : '') + ' aria-label="' + y + '" tabindex="' + (y === vy ? 0 : -1) + '"' + (y === vy ? ' data-bs-autofocus' : '') + '>' + y + '</button>';
+      });
+      ygrid.innerHTML = h;
+      ShineSheet.open(ysheet, { trigger: ybar.querySelector('.field-pick-year') });
+      var sel = ygrid.querySelector('[aria-selected="true"]'); if (sel && sel.scrollIntoView) setTimeout(function () { try { sel.scrollIntoView({ block: 'center' }); } catch (e) {} }, 30);
+    }
     function openPick(i) {
       if (at > -1 || el.classList.contains('field--disabled') || ins[i].disabled) return;
       if (!window.ShineSheet) { console.warn('multi-input.js: data-pick="sheet" needs the bottom-sheet component'); return; }
-      buildSheet(); at = i; closing = false; draw(i);
-      ins[i].closest('.field-control').classList.add('is-open'); el.classList.add('field--open');
-      if (!ShineSheet.open(sheet, { trigger: ins[i] })) { ins[i].closest('.field-control').classList.remove('is-open'); el.classList.remove('field--open'); at = -1; return; }
+      buildSheet(); at = i; closing = false; vy = 0; draw(i);
+      box(i).classList.add('is-open'); el.classList.add('field--open');
+      if (!ShineSheet.open(sheet, { trigger: ins[ui(i)] })) { box(i).classList.remove('is-open'); el.classList.remove('field--open'); at = -1; return; }
       var s = grid.querySelector('.field-pick-chip[aria-selected="true"]'); if (s && s.scrollIntoView) try { s.scrollIntoView({ block: 'nearest' }); } catch (e) {}
     }
     function moveTo(i) {                                  // the sheet stays up and shows the next part
-      ins[at].closest('.field-control').classList.remove('is-open'); at = i;
-      ins[i].closest('.field-control').classList.add('is-open'); draw(i);
+      box(at).classList.remove('is-open'); at = i;
+      box(i).classList.add('is-open'); vy = 0; draw(i);
       var f = grid.querySelector('.field-pick-chip[tabindex="0"]'); if (f && sheet.contains(doc.activeElement)) try { f.focus({ preventScroll: true }); } catch (e) {}
     }
     function choose(c) {
       if (at < 0 || closing || c.getAttribute('aria-disabled') === 'true') return;
       var i = at, k = keys[i], b = bounds(), v = +c.getAttribute('data-v');
       [].forEach.call(grid.querySelectorAll('.field-pick-chip'), function (x) { x.setAttribute('aria-selected', x === c ? 'true' : 'false'); });
-      put(i, v); live.textContent = c.getAttribute('aria-label') + ' picked';
+      put(i, v); if (merged && i === iM) put(iY, vy); live.textContent = c.getAttribute('aria-label') + ' picked';   // v3.5.0: the month AND the year shown
       var q = picked(), back = null, im = keys.indexOf('m'), id = keys.indexOf('d');
       // a higher part picked: drop what it rules out below it, and go back to it (the reference's rule)
       if (!keep) {
@@ -6139,18 +6334,21 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
       if (keep) { var cp = problem(); if (cp && cp.conflict) show(cp); }   // v3.4.0: the day the month / year hasn't got — said at once
       var to = back;
       if (to === null) for (var j = 1; j < keys.length; j++) { var p = (i + j) % keys.length; if (q[keys[p]] == null) { to = p; break; } }   // the next empty part, round
-      if (to !== null) { setTimeout(function () { if (at === i && sheet && ShineSheet.isOpen(sheet)) moveTo(to); }, 140); return; }
+      if (to !== null) { setTimeout(function () { if (at === i && sheet && ShineSheet.isOpen(sheet)) moveTo(ui(to)); }, 140); return; }
       closing = true;
       var pr = problem(); if (pr) show(pr); else if (F.isInvalid(el)) show(null);
       setTimeout(function () { if (sheet && ShineSheet.isOpen(sheet)) ShineSheet.close(sheet); }, 160);   // complete: the pick shows, then the sheet goes
     }
     if (pick) ins.forEach(function (inp, i) {
+      if (merged && i === iY) return;                    // v3.5.0: no box of its own
       inp.closest('.field-control').addEventListener('click', function () { openPick(i); });
       inp.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'F4') { e.preventDefault(); openPick(i); }
-        else if ((e.key === 'Backspace' || e.key === 'Delete') && vals()[i]) { e.preventDefault(); put(i, ''); recheck(); changed(); }
-        else if (e.key === 'ArrowLeft' && i > 0) { e.preventDefault(); ins[i - 1].focus(); }
-        else if (e.key === 'ArrowRight' && i < ins.length - 1) { e.preventDefault(); ins[i + 1].focus(); }
+        else if ((e.key === 'Backspace' || e.key === 'Delete') && (vals()[i] || (merged && i === iM && vals()[iY]))) { e.preventDefault(); put(i, ''); if (merged && i === iM) put(iY, ''); recheck(); changed(); }
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {   // v3.6.0: the next box, skipping the year's hidden input
+          var j = i + (e.key === 'ArrowLeft' ? -1 : 1); if (merged && j === iY) j += e.key === 'ArrowLeft' ? -1 : 1;
+          if (j >= 0 && j < ins.length) { e.preventDefault(); ins[j].focus(); }
+        }
       });
     });
     function fill(from, g) {
@@ -6182,13 +6380,13 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
       show(null); changed();
     };
     api.clear = function () { ins.forEach(function (inp, i) { if (pick) put(i, ''); else inp.value = ''; }); show(null); changed(); };
-    if (pick) { api.open = function (part) { var i = keys.indexOf(part || 'd'); openPick(i < 0 ? 0 : i); }; api.close = function () { if (sheet && ShineSheet.isOpen(sheet)) ShineSheet.close(sheet); }; }
+    if (pick) { api.open = function (part) { var i = keys.indexOf(part || 'd'); openPick(ui(i < 0 ? 0 : i)); }; api.close = function () { if (sheet && ShineSheet.isOpen(sheet)) ShineSheet.close(sheet); }; }
     api.check = function (submit) {
       if (!vals().some(Boolean)) return submit && _.required(el) ? _.emptyText(el) : '';
       var p = problem(); return p ? p.text : '';
     };
     api.showError = function (text) { var p = problem(); show(p || { text: text, at: [] }); };
-    api.focusTarget = function () { var p = problem(); return ins[p && p.at.length ? p.at[0] : 0]; };
+    api.focusTarget = function () { var p = problem(); return ins[ui(p && p.at.length ? p.at[0] : 0)]; };
     if (pick) ins.forEach(function (inp, i) { put(i, ''); });
     units();
     return api;
@@ -6347,11 +6545,13 @@ window.__MO_DATA = {
     'Java', 'SQL', 'Tableau', 'Power BI', 'Mixpanel', 'Amplitude', 'Google Analytics', 'Excel', 'Leadership', 'Communication', 'Negotiation',
     'Strategic Planning', 'OKRs', 'A/B Testing', 'Customer Discovery', 'Market Research', 'Competitive Analysis', 'Business Development',
     'Sales Strategy', 'SEO', 'Content Strategy', 'Copywriting', 'Public Speaking', 'Mentoring', 'Coaching'],
-  DEPTS: [['Engineering', 'Engineering'], ['Product Management', 'Product Management'], ['Design', 'Design (UX / UI / Visual)'], ['Data Science', 'Data Science & Analytics'],
-    ['Quality Assurance', 'Quality Assurance'], ['DevOps', 'DevOps & Infrastructure'], ['Marketing', 'Marketing'], ['Sales', 'Sales & Business Development'],
-    ['Customer Success', 'Customer Success / Support'], ['Human Resources', 'Human Resources'], ['Finance', 'Finance & Accounts'], ['Operations', 'Operations'],
-    ['Legal', 'Legal & Compliance'], ['Content', 'Content & Communication'], ['Project Management', 'Project Management'], ['Research', 'Research'],
-    ['Training', 'Training & Development'], ['Procurement', 'Procurement / Supply Chain']],
+  DEPTS: [   // [value, label, group] — 5 groups for the Department sheet (2026-11-15; values unchanged)
+    ['Engineering', 'Engineering', 'Engineering / IT'], ['Quality Assurance', 'Quality Assurance', 'Engineering / IT'], ['DevOps', 'DevOps & Infrastructure', 'Engineering / IT'],
+    ['Product Management', 'Product Management', 'Product / Design / Data'], ['Design', 'Design (UX / UI / Visual)', 'Product / Design / Data'], ['Data Science', 'Data Science & Analytics', 'Product / Design / Data'],
+    ['Research', 'Research', 'Product / Design / Data'], ['Marketing', 'Marketing', 'Sales / Marketing / Content'], ['Sales', 'Sales & Business Development', 'Sales / Marketing / Content'],
+    ['Content', 'Content & Communication', 'Sales / Marketing / Content'], ['Customer Success', 'Customer Success / Support', 'Customer Service / Operations'], ['Operations', 'Operations', 'Customer Service / Operations'],
+    ['Project Management', 'Project Management', 'Customer Service / Operations'], ['Procurement', 'Procurement / Supply Chain', 'Customer Service / Operations'], ['Finance', 'Finance & Accounts', 'Finance / HR / Legal'],
+    ['Human Resources', 'Human Resources', 'Finance / HR / Legal'], ['Legal', 'Legal & Compliance', 'Finance / HR / Legal'], ['Training', 'Training & Development', 'Finance / HR / Legal']],
   INDS: [['IT - Software', 'IT - Software / Services'], ['IT - Hardware', 'IT - Hardware & Networking'], ['Internet / E-commerce', 'Internet / E-commerce'],
     ['FinTech', 'FinTech'], ['Banking', 'Banking & Financial Services'], ['Insurance', 'Insurance'], ['Consulting', 'Consulting & Strategy'], ['EdTech', 'EdTech'],
     ['Education', 'Education / Training'], ['Healthcare', 'Healthcare & Hospitals'], ['Pharmaceuticals', 'Pharmaceuticals'], ['Manufacturing', 'Manufacturing'],
@@ -6569,7 +6769,8 @@ window.__MO_CFG = {
     { value: 'Visual Impairment', label: 'Visual Impairment', hint: 'Low vision, Blindness' },
     { value: 'Hearing Impairment', label: 'Hearing Impairment', hint: 'Partial/Complete hearing loss' },
     { value: 'Other', label: 'Other' }];
-  var EDU_OPTS = []; D.EDU.forEach(function (g) { g[1].forEach(function (o) { EDU_OPTS.push({ value: o[0], label: o[1], hint: g[0] }); }); });
+  var EDU_OPTS = []; D.EDU.forEach(function (g) { g[1].forEach(function (o) {   // the Education sheet: degree groups (2026-11-15)
+    var p = o[1].split(' — '); EDU_OPTS.push(p.length > 1 ? { value: o[0], label: o[1], group: p[0], row: p.slice(1).join(' — ') } : { value: o[0], label: o[1], group: g[0] }); }); });
   var DB = { emails: { 'ramaraj.lingam@gmail.com': 1 }, phones: { '9876543210': 1 }, otp: '1234' };
 
   /* ═══ state + routing ═════════════════════════════════════════════════════════════════════════════════ */
@@ -6749,12 +6950,12 @@ window.__MO_CFG = {
   }
 
   /* ═══ 2 · 3 · Education and Employment: saved cards (work & education card) + one open form ═══════════════════ */
-  function ym(iso) { if (!iso) return ''; var p = iso.split('-'); return MON[+p[1] - 1] + '’ ' + p[0]; }
+  function ym(iso) { if (!iso) return ''; var p = iso.split('-'); return MON[+p[1] - 1] + ' ' + p[0]; }   // Mar 2022 (as the resume flow)
   function months(a, b) { if (!a) return 0; var x = a.split('-'), y = b ? b.split('-') : [new Date().getFullYear(), new Date().getMonth() + 1]; return (+y[0] - +x[0]) * 12 + (+y[1] - +x[1]); }
   function dur(m) { if (m <= 0) return ''; var y = Math.floor(m / 12), mo = m % 12; return [y ? y + (y > 1 ? ' yrs' : ' yr') : '', mo ? mo + (mo > 1 ? ' mos' : ' mo') : ''].filter(Boolean).join(' '); }
   function hcard(item, i, kind) {
     return '<div class="card hcard"><div class="hcard-body"><p class="hcard-title">' + esc(item.title) + '</p><p class="hcard-where">' + esc(item.where) + '</p>' +
-      '<p class="hcard-meta">' + item.meta.filter(Boolean).map(function (m) { return '<span>' + esc(m) + '</span>'; }).join('<span class="hcard-dot" aria-hidden="true"></span>') + '</p></div>' +
+      '<p class="hcard-meta hcard-meta--wrap">' + item.meta.filter(Boolean).map(function (m) { return '<span class="hcard-meta-item"><span class="hcard-dot" aria-hidden="true"></span><span>' + esc(m) + '</span></span>'; }).join('') + '</p></div>' +
       '<button type="button" class="btn btn--link btn--sm btn--icon btn--flush" data-act="item-menu" data-kind="' + kind + '" data-i="' + i + '" aria-label="Options for ' + esc(item.title) + ', ' + esc(item.where) + '">' + IC['ic_option-outline'] + '</button></div>';
   }
   /* one step = a list + a form card. cfg: { kind, list, card, form, noun, read(form) → item|null, write(form, item), reset(form), check(form) → ok, empty(form) } */
@@ -6846,25 +7047,29 @@ window.__MO_CFG = {
       if (it.grade) { F(k(f, 'grade')).set(it.grade); show(k(f, 'marks'), true); F(k(f, 'marks')).set(it.marks); }
     },
     reset: function (f) { ['level', 'inst', 'start', 'end', 'grade', 'marks'].forEach(function (n) { F(k(f, n)).clear(); FLD.set(k(f, n), null); }); setChoice(edType, ''); msg(edType, ''); show(k(f, 'marks'), false); },
-    summary: function (it) {
-      var y = function (iso) { return iso ? iso.split('-')[0] : ''; };
-      var g = it.grade && it.marks ? (/CGPA|GPA/.test(it.grade) ? it.marks + ' ' + it.grade.split(' ')[0] : /%/.test(it.grade) ? it.marks + '%' : it.marks) : '';
-      return { title: it.levelLabel || it.level, where: it.inst, meta: [it.ctype, y(it.start) + ' — ' + y(it.end), g] };
+    summary: function (it) {   // education · institute · course type • Jul 2016 – May 2018 • marks — as the resume flow (user 2026-11-16)
+      var my = function (iso) { var q = (iso || '').split('-'); return q[1] ? MON[+q[1] - 1] + ' ' + q[0] : q[0]; };
+      var when = it.start ? my(it.start) + ' – ' + (it.end ? my(it.end) : '…') : '';
+      var g = it.grade && it.marks ? (/CGPA|GPA/.test(it.grade) ? it.marks + ' ' + it.grade.split(' ')[0] : /%/.test(it.grade) ? it.marks + '%' : /^Grade/.test(it.grade) ? 'Grade ' + it.marks : it.marks) : '';
+      return { title: it.levelLabel || it.level, where: it.inst, meta: [it.ctype, when, g].filter(Boolean) };
     }
   });
 
   /* Employment */
   var MF = $('#fEmp'), emCur = choice('current', MF), emType = k(MF, 'etype');
-  /* Employment type (user 2026-11-11) — a fresher only, 3rd (after Job title · Company name): a dropdown → bottom sheet with
-     Internship · Freelance. Hidden (and not asked) for experienced users. */
-  F(emType).options([{ value: 'Internship', label: 'Internship' }, { value: 'Freelance', label: 'Freelance' }]);
-  function askType() { return st.fresher === true; }
-  function empType() { show(emType, askType()); if (!askType()) F(emType).clear(); }
-  function etSet(v) { if (v && askType() && F(emType).options().some(function (o) { return o.value === v; })) F(emType).set(v); else F(emType).clear(); FLD.set(emType, null); }
+  /* Employment type (user 2026-11-15) — a dropdown → bottom sheet (combo box radio list) for everyone, 3rd (after Job title · Company name):
+     a fresher (step 1) picks from Internship · Freelance, an experienced user from Full time · Part time · Internship · Contractual · Freelance.
+     A saved type the list hasn't got is cleared; "Permanent" from before reads as Full time. */
+  var ET = { fresher: ['Internship', 'Freelance'], exp: ['Full time', 'Part time', 'Internship', 'Contractual', 'Freelance'] };
+  function etList() { return st.fresher === true ? ET.fresher : ET.exp; }
+  function askType() { return true; }
+  function empType() { var keep = F(emType).value(); F(emType).options(etList().map(function (t) { return { value: t, label: t }; })); if (keep && etList().indexOf(keep) > -1) F(emType).set(keep); else F(emType).clear(); }   // the list for step 1's answer
+  function etSet(v) { if (v === 'Permanent') v = 'Full time'; if (v && etList().indexOf(v) > -1) F(emType).set(v); else F(emType).clear(); FLD.set(emType, null); }
+  empType();
   linkDates(MF);
   chips(emCur, [['yes', 'Yes'], ['no', 'No']]);
   F(k(MF, 'title')).options(D.ROLES);
-  F(k(MF, 'dept')).options(D.DEPTS.map(function (d) { return { value: d[0], label: d[1] }; }));
+  F(k(MF, 'dept')).options(D.DEPTS.map(function (d) { return { value: d[0], label: d[1], group: d[2] }; }));   // grouped (combo box v4.4.0)
   F(k(MF, 'ind')).options(D.INDS.map(function (d) { return { value: d[0], label: d[1] }; }));
   show(k(MF, 'end'), false);
   emCur.addEventListener('pf:choice', function (e) { show(k(MF, 'end'), e.detail.value === 'no'); });
@@ -6890,7 +7095,7 @@ window.__MO_CFG = {
       setChoice(emCur, it.current ? 'yes' : 'no'); F(k(f, 'start')).set(it.start); if (!it.current) F(k(f, 'end')).set(it.end);
     },
     reset: function (f) { ['title', 'company', 'dept', 'ind', 'start', 'end'].forEach(function (n) { F(k(f, n)).clear(); FLD.set(k(f, n), null); }); etSet(''); setChoice(emCur, ''); msg(emCur, ''); show(k(f, 'end'), false); },
-    summary: function (it) { return { title: it.title, where: it.company, meta: [ym(it.start) + ' — ' + (it.current ? 'Present' : ym(it.end)), dur(months(it.start, it.current ? '' : it.end))] }; }   // no type on the card (it is in Edit)
+    summary: function (e) { return { title: e.title, where: e.company, meta: [e.type, e.start ? ym(e.start) + ' – ' + (e.current ? 'Present' : e.end ? ym(e.end) : '…') : ''] }; }   // job title · company name · type • "Mar 2022 – Present" — as the resume flow (user 2026-11-16)
   });
 
   /* item menu (⋮ → Edit · Delete) and the delete confirmation — as Profile */
@@ -7209,8 +7414,8 @@ window.__MO_CFG = {
     exp: {
       basic: { name: 'Ramalingam Narayan Murthy', email: 'nm.ramalingam@gmail.com', phone: '7996835849', exp: 'exp', years: { years: 7, months: 3 }, salary: 1450000, notice: '1 month', loc: 'Gurugram, Haryana', gender: 'Male', dob: '1995-10-18', dis: 'None' },
       edu: [{ level: 'B.E./B.Tech. - Computer Science', levelLabel: 'B.E./B.Tech. — Computer Science', ctype: 'Full time', inst: 'IIT Delhi', start: '2012-07', end: '2016-05', grade: 'CGPA out of 10', marks: '8.5' }],
-      emp: [{ title: 'Product Manager', company: 'XYZ Technologies Pvt. Ltd.', dept: 'Product Management', deptLabel: 'Product Management', ind: 'FinTech', indLabel: 'FinTech', current: true, start: '2022-03', end: '' },
-            { title: 'Associate Product Manager', company: 'Blinkit', dept: 'Product Management', deptLabel: 'Product Management', ind: 'Internet / E-commerce', indLabel: 'Internet / E-commerce', current: false, start: '2018-07', end: '2022-02' }],
+      emp: [{ title: 'Product Manager', company: 'XYZ Technologies Pvt. Ltd.', type: 'Full time', dept: 'Product Management', deptLabel: 'Product Management', ind: 'FinTech', indLabel: 'FinTech', current: true, start: '2022-03', end: '' },
+            { title: 'Associate Product Manager', company: 'Blinkit', type: 'Full time', dept: 'Product Management', deptLabel: 'Product Management', ind: 'Internet / E-commerce', indLabel: 'Internet / E-commerce', current: false, start: '2018-07', end: '2022-02' }],
       skills: ['Product Management', 'User Research', 'Stakeholder Management', 'SQL', 'A/B Testing'],
       prefs: { roles: ['Sr. Product Manager', 'Group Product Manager'], locs: ['Gurugram', 'Bengaluru'], salary: 2400000, types: ['Full Time'], modes: ['In Office', 'Hybrid'] }
     },
