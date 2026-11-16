@@ -1153,7 +1153,7 @@ legend.field-label--hidden { float: none; width: 1px; }
 </style>
 <style data-component="combo-box">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.5.0
+   SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.6.0
    v4.3.0 · list bottom sheet: the search box is part of the sheet's heading (bottom-sheet v3.2.0 · .bs-search) — the
    shadow shows below it once the list scrolls (it was sticky at the top of the body).
    v4.2.0 · list bottom sheet: more room between the options — rows 56 tall, 16 above / below the text (were 48 / 12).
@@ -1304,6 +1304,15 @@ legend.field-label--hidden { float: none; width: 1px; }
    A row with a hint (a university's city: Body / sm, faded) keeps its radio level with the first line; 14 above / below. */
 .field-listbox--radio .field-option:has(.field-option-hint) { align-items: flex-start; padding-top: 14px; padding-bottom: 14px; }
 .field-listbox--radio .field-option-hint { margin-top: 2px; line-height: 16px; }
+/* ── v4.6.0 · a soft line between the rows (data-combo-divided) — user 2026-11-16 (Employment type · Notice period · Grading system ·
+   Disability): the group divider's line (1, stroke.neutral.base, fading at both ends, 4% in from each side) between every two rows,
+   and more room in each row — 24 above / below (a row with a hint: 22), so a row is 68 tall. */
+.field-listbox--radio.field-listbox--divided .field-option { padding-top: 24px; padding-bottom: 24px; }
+.field-listbox--radio.field-listbox--divided .field-option:has(.field-option-hint) { padding-top: 22px; padding-bottom: 22px; }
+.field-listbox--divided .field-option + .field-option::after {
+  content: ""; position: absolute; top: 0; left: 4%; right: 4%; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--fld-group-line, #E4E7EC) 18%, var(--fld-group-line, #E4E7EC) 82%, transparent);
+}
 </style>
 <style data-component="inline-dropdown">
 /* ═══════════════════════════════════════════════════════════════════════
@@ -3331,7 +3340,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
               <label class="field-label" for="moSalary">Current annual salary</label>
               <div class="field-control"><span class="field-prefix" aria-hidden="true">₹</span><input class="field-input" id="moSalary" inputmode="numeric" autocomplete="off" placeholder="14,50,000" required></div>
             </div>
-            <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-list="radio" data-combo-title="Notice period" data-combo-title-lead="Select" data-k="notice" data-error-empty="Choose your notice period">
+            <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-list="radio" data-combo-title="Notice period" data-combo-title-lead="Select" data-combo-divided data-k="notice" data-error-empty="Choose your notice period">
               <label class="field-label" for="moNotice">Notice period</label>
               <div class="field-control"><input class="field-input" id="moNotice" placeholder="Select notice period" required></div>
             </div>
@@ -3346,7 +3355,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
           <section class="card mo-opt" aria-labelledby="moOptH">
             <div class="mo-opt-h"><h2 class="mo-opt-t" id="moOptH">More about you</h2><span class="badge badge--sm badge--neutral mo-opt-badge">Optional</span></div>
             <fieldset class="field field--sm field-multi" data-field="date" data-parts="myd" data-pick="sheet" data-pick-my="merged" data-pick-order="desc" data-min="1950-01-01" data-max="today-15y" data-error-max="You need to be at least 15 years old" data-k="dob"><legend class="field-label">Date of birth</legend></fieldset>
-            <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-list="radio" data-combo-title="Disability" data-combo-title-lead="Select" data-k="disability">
+            <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-list="radio" data-combo-title="Disability" data-combo-title-lead="Select" data-combo-divided data-k="disability">
               <label class="field-label" for="moDis">Disability</label>
               <div class="field-control"><input class="field-input" id="moDis" placeholder="Select (if any)"></div>
             </div>
@@ -3375,7 +3384,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
                 <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-my="merged" data-pick-order="desc" data-min="1970-01-01" data-max="today" data-required data-k="start" data-error-empty="Enter the start date"><legend class="field-label">Start date</legend></fieldset>
                 <fieldset class="field field--sm field-multi" data-field="date" data-parts="my" data-pick="sheet" data-pick-my="merged" data-pick-order="desc" data-min="1970-01-01" data-max="today+6y" data-required data-k="end" data-error-empty="Enter the end date" data-error-min="The end date can’t be before the start date"><legend class="field-label">End date <span class="optional">(or expected)</span></legend></fieldset>
               </div>
-              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-list="radio" data-combo-title="Grading system" data-combo-title-lead="Select" data-k="grade">
+              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-list="radio" data-combo-title="Grading system" data-combo-title-lead="Select" data-combo-divided data-k="grade">
                 <label class="field-label" for="moEdGrade">Grading system <span class="optional">(optional)</span></label>
                 <div class="field-control"><input class="field-input" id="moEdGrade" placeholder="Select grading system"></div>
               </div>
@@ -3409,7 +3418,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
                 <label class="field-label" for="moEmCompany">Company name</label>
                 <div class="field-control"><input class="field-input" id="moEmCompany" placeholder="e.g. XYZ Technologies Pvt. Ltd." autocomplete="organization" required></div>
               </div>
-              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-list="radio" data-combo-title="Employment type" data-combo-title-lead="Select" data-k="etype" data-error-empty="Choose the employment type">   <!-- a dropdown → bottom sheet for everyone (user 2026-11-15): fresher Internship · Freelance · experienced Full time · Part time · Internship · Contractual · Freelance -->
+              <div class="field field--sm" data-field="combo" data-combo="sheet" data-combo-list="radio" data-combo-title="Employment type" data-combo-title-lead="Select" data-combo-divided data-k="etype" data-error-empty="Choose the employment type">   <!-- a dropdown → bottom sheet for everyone (user 2026-11-15): fresher Internship · Freelance · experienced Full time · Part time · Internship · Contractual · Freelance -->
                 <label class="field-label" for="moEmType">Employment type</label>
                 <div class="field-control"><input class="field-input" id="moEmType" placeholder="Select employment type" required></div>
               </div>
@@ -5509,7 +5518,9 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
 })(window.ShineField);
 </script>
 <script data-component="combo-box">
-/* SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.5.0
+/* SHINE · INPUT FIELDS · COMBO BOX  (atoms/input-fields/combo-box/)      v4.6.0
+   v4.6.0 · data-combo-divided (user 2026-11-16 · Employment type, Notice period, Grading system, Disability): a soft line between
+   the sheet's rows — the same fading line as between groups — and more room in each row (24 above / below; with a hint 22).
    v4.5.0 · an option's `row` ({ value, label, row, group } · <li data-row>): the words shown in the sheet's row when its group
    already says the rest (group "Class XII" · row "Science"); the box, the search and the value still use the label. Radio rows
    with a hint (a second line) keep the radio level with the first line.
@@ -5591,6 +5602,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
     var sel = null, isOpen = false, active = -1, shown = [], mode = 'inline', sheet = null, sIn = null, sLb = null, sLive = null;
     var heading = el.getAttribute('data-combo-heading') || '';
     var radio = el.getAttribute('data-combo-list') === 'radio', lead = el.getAttribute('data-combo-title-lead') || '';   // v4.4.0
+    var divided = el.hasAttribute('data-combo-divided');   // v4.6.0: a soft line between the rows
     var dd = null;                                        // v4.0.0: the inline dropdown component, when loaded
     function useDD() { return !!dd && mode === 'inline'; }
 
@@ -5773,7 +5785,7 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
         '<div class="bs-search"><div class="field field--' + sz + ' field-sheet-search"><label class="field-label field-label--hidden" for="' + sid + '">Search ' + esc(name) + '</label>' +
         '<div class="field-control"><span class="field-icon" aria-hidden="true">' + IC['ic_search-outline'] + '</span><input class="field-input" id="' + sid + '" type="text" role="combobox" aria-autocomplete="list" aria-expanded="true" aria-controls="' + lid + '" autocomplete="off" spellcheck="false" enterkeyhint="search" data-bs-autofocus placeholder="' + esc(el.getAttribute('data-combo-placeholder') || 'Search') + '">' +
         '<button class="field-trailing" type="button" data-combo-btn="clear" aria-label="Clear search" hidden>' + IC['ic_close-outline'] + '</button></div></div></div></div>' +
-        '<div class="bs-body bs-body--gutter"><div class="field field--' + sz + ' field-combo-sheet"><ul class="field-listbox field-listbox--sheet' + (radio ? ' field-listbox--radio' : '') + '" role="listbox" id="' + lid + '" aria-label="' + esc(title) + '"></ul><span class="sr-only" aria-live="polite"></span></div></div>';
+        '<div class="bs-body bs-body--gutter"><div class="field field--' + sz + ' field-combo-sheet"><ul class="field-listbox field-listbox--sheet' + (radio ? ' field-listbox--radio' : '') + (divided ? ' field-listbox--divided' : '') + '" role="listbox" id="' + lid + '" aria-label="' + esc(title) + '"></ul><span class="sr-only" aria-live="polite"></span></div></div>';
       doc.body.appendChild(sheet);
       sIn = sheet.querySelector('.field-input'); sLb = sheet.querySelector('.field-listbox'); sLive = sheet.querySelector('[aria-live]');
       var sClear = sheet.querySelector('[data-combo-btn]');
