@@ -3029,6 +3029,13 @@ html.mo-no-demo .mo-key, .mo-key[hidden] { display: none !important; }
 .pf-tags:empty { display: none; }
 .pf-count { margin: 0; font: var(--weight-semibold) var(--type-body-sm-size)/var(--type-body-sm-line) var(--font-brand); color: var(--content-neutral-muted); }
 .pf-count:focus { outline: none; }
+/* Your skills sheet (user 2026-11-16): field → 20 → Added (count + tags) · 24 · Suggested — one heading style, 12 to the content;
+   suggestions as xs chips, the scale of the added tags */
+.sk-sheet { display: flex; flex-direction: column; gap: var(--spacing-stack-xxl); }
+.sk-sheet .pf-tagfield { gap: var(--spacing-stack-xl); }
+.sk-added { display: flex; flex-direction: column; gap: var(--spacing-stack-md); }
+.sk-sheet .mo-suggest { gap: var(--spacing-stack-md); }
+.sk-sheet .mo-suggest-h { font-weight: var(--weight-semibold); }
 
 /* entries (education, employment): saved cards = work & education card; the open form sits in a card container */
 .mo-entries { display: flex; flex-direction: column; gap: var(--spacing-stack-md); }
@@ -3322,8 +3329,6 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
 .rs-main { flex: 1 0 auto; padding: var(--spacing-stack-xs) var(--spacing-layout-sm) var(--spacing-section-lg); }
 .rs-foot { gap: var(--spacing-stack-xs); }
 .rs-lead { font: var(--weight-medium) var(--type-body-md-size)/var(--type-body-md-line) var(--font-brand); color: var(--content-neutral-muted); }
-.rs-alt { text-align: center; font: var(--weight-medium) var(--type-body-sm-size)/var(--type-body-sm-line) var(--font-brand); color: var(--content-neutral-faded); }
-.rs-alt a { color: var(--content-neutral-brand); font-weight: var(--weight-bold); text-decoration: none; }
 .stp-title:focus { outline: none; }
 
 /* section cards — the card container + the card text levels */
@@ -3428,7 +3433,6 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
     </main>
     <footer class="mo-foot rs-foot">
       <button class="btn btn--primary btn--lg btn--block" type="button" data-act="verify-done">Complete your profile</button>
-      <p class="rs-alt">Uploaded the wrong resume? <a href="#" data-act="reupload">Upload new</a></p>
 
     </footer>
   </div>
@@ -3633,6 +3637,15 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
         <label class="field-label" for="eName">Full name</label>
         <div class="field-control"><input class="field-input" id="eName" autocomplete="name" minlength="2" required></div>
       </div>
+      <!-- Email and mobile can't be changed during sign-up (user 2026-11-15): input fields, disabled (input-fields atom · .field--disabled) — right after Full name (user 2026-11-16) -->
+      <div class="field field--sm field--disabled" data-field="email" data-k="lockEmail">
+        <label class="field-label" for="eEmail">Email</label>
+        <div class="field-control"><input class="field-input" id="eEmail" disabled></div>
+      </div>
+      <div class="field field--sm field--disabled" data-field="phone" data-k="lockPhone">
+        <label class="field-label" for="ePhone">Mobile number</label>
+        <div class="field-control"><input class="field-input" id="ePhone" disabled></div>
+      </div>
       <div class="field field--sm" data-field="combo" data-combo="inline" data-combo-free data-k="loc" data-error-empty="Enter your current location">
         <label class="field-label" for="eLoc">Current location</label>
         <div class="field-control"><input class="field-input" id="eLoc" placeholder="City, State" autocomplete="off" required></div>
@@ -3651,15 +3664,6 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
         <fieldset class="field field--sm field-multi" data-field="date" data-parts="dmy" data-pick="sheet" data-pick-my="merged" data-min="today" data-max="today+6m" data-pick-conflict="error" data-required data-error-empty="Select your last working day" data-error-min="Last working day can’t be in the past" data-error-max="Last working day must be within 6 months" data-k="lwd" hidden><legend class="field-label">Last working day</legend></fieldset>
       </div>
       <fieldset class="field field--sm pf-choice" data-choice="gender"><legend class="field-label">Gender <span class="optional">(optional)</span></legend><div class="chips pf-chips" role="radiogroup" aria-label="Gender"></div></fieldset>
-      <!-- Email and mobile can't be changed during sign-up (user 2026-11-15): input fields, disabled (input-fields atom · .field--disabled) -->
-      <div class="field field--sm field--disabled" data-field="email" data-k="lockEmail">
-        <label class="field-label" for="eEmail">Email</label>
-        <div class="field-control"><input class="field-input" id="eEmail" disabled></div>
-      </div>
-      <div class="field field--sm field--disabled" data-field="phone" data-k="lockPhone">
-        <label class="field-label" for="ePhone">Mobile number</label>
-        <div class="field-control"><input class="field-input" id="ePhone" disabled></div>
-      </div>
     </div>
   </div>
   <div class="bs-bottom"><div class="bs-actions"><button class="btn btn--primary btn--lg btn--block" type="button" data-act="save-basic">Save changes</button></div></div>
@@ -3737,17 +3741,17 @@ html.rs-dark, html.rs-dark body { background: #0C1731; }   /* reading your resum
   <div class="bs-top"><div class="bs-head bs-head--display bs-head--lg">
     <div class="bs-heading"><h2 class="bs-title">Your <span class="accent">skills.</span></h2></div>
     <button class="bs-close" type="button" data-bs-close aria-label="Close"><svg aria-hidden="true" focusable="false" data-icon="ic_close-outline" viewBox="0 0 20 20" fill="none"><path d="M16.2528 3.00257L16.3599 3.01371L16.3814 3.01543L16.4028 3.02228L16.5056 3.05313L16.5253 3.05999L16.5433 3.06942L16.6582 3.12941L16.6753 3.14398L16.7584 3.21254L16.7747 3.22625L16.7884 3.24253L16.857 3.32566L16.8716 3.3428L16.9316 3.45764L16.941 3.47564L16.947 3.49535L16.9787 3.59819L16.9855 3.61876L16.9873 3.64104L16.9984 3.74816L17.0001 3.76959L16.9984 3.79101L16.9873 3.89814L16.9855 3.92042L16.9787 3.94099L16.947 4.04383L16.941 4.06354L16.9316 4.08154L16.8716 4.19638L16.857 4.21352L16.7884 4.29665L16.7816 4.30522L11.0859 10L16.7816 15.6956L16.7884 15.7042L16.857 15.7873L16.8716 15.8045L16.9316 15.9193L16.941 15.9373L16.947 15.957L16.9787 16.0599L16.9855 16.0804L16.9873 16.1027L16.9984 16.2098L17.0001 16.2313L16.9984 16.2527L16.9873 16.3598L16.9855 16.3812L16.9787 16.4027L16.947 16.5055L16.941 16.5252L16.9316 16.5432L16.8716 16.6581L16.857 16.6752L16.7884 16.7583L16.7747 16.7746L16.7584 16.7883L16.6753 16.8569L16.6582 16.8714L16.5433 16.9314L16.5253 16.9409L16.5056 16.9469L16.4028 16.9786L16.3814 16.9854L16.3599 16.9871L16.2528 16.9983L16.2314 17L16.21 16.9983L16.1028 16.9871L16.0806 16.9854L16.06 16.9786L15.9571 16.9469L15.9374 16.9409L15.9194 16.9314L15.8046 16.8714L15.7875 16.8569L15.7043 16.7883L15.6958 16.7815L10.0001 11.0858L4.30534 16.7815L4.29676 16.7883L4.21364 16.8569L4.1965 16.8714L4.08166 16.9314L4.06366 16.9409L4.04395 16.9469L3.94111 16.9786L3.92054 16.9854L3.89826 16.9871L3.79113 16.9983L3.76971 17L3.74828 16.9983L3.64116 16.9871L3.61888 16.9854L3.59831 16.9786L3.49547 16.9469L3.47576 16.9409L3.45776 16.9314L3.34292 16.8714L3.32578 16.8569L3.24265 16.7883L3.22637 16.7746L3.21266 16.7583L3.1441 16.6752L3.12953 16.6581L3.06954 16.5432L3.06011 16.5252L3.05325 16.5055L3.0224 16.4027L3.01555 16.3812L3.01383 16.3598L3.00269 16.2527L3.00098 16.2313L3.00269 16.2098L3.01383 16.1027L3.01555 16.0804L3.0224 16.0599L3.05325 15.957L3.06011 15.9373L3.06954 15.9193L3.12953 15.8045L3.1441 15.7873L3.21266 15.7042L3.21951 15.6956L3.22637 15.6879L8.91344 10L3.21866 4.30522L3.21266 4.29665L3.1441 4.21352L3.12953 4.19638L3.06954 4.08154L3.06011 4.06354L3.05325 4.04383L3.0224 3.94099L3.01555 3.92042L3.01383 3.89814L3.00269 3.79101L3.00098 3.76959L3.00269 3.74816L3.01383 3.64104L3.01555 3.61876L3.0224 3.59819L3.05325 3.49535L3.06011 3.47564L3.06954 3.45764L3.12953 3.3428L3.1441 3.32566L3.21266 3.24253L3.22637 3.22625L3.24265 3.21254L3.32578 3.14398L3.34292 3.12941L3.45776 3.06942L3.47576 3.05999L3.49547 3.05313L3.59831 3.02228L3.61888 3.01543L3.64116 3.01371L3.74828 3.00257L3.76971 3L3.79113 3.00257L3.89826 3.01371L3.92054 3.01543L3.94111 3.02228L4.04395 3.05313L4.06366 3.05999L4.08166 3.06942L4.1965 3.12941L4.21364 3.14398L4.29676 3.21254L4.30534 3.21854L10.0001 8.91332L15.688 3.22625L15.6958 3.21939L15.7043 3.21254L15.7875 3.14398L15.8046 3.12941L15.9194 3.06942L15.9374 3.05999L15.9571 3.05313L16.06 3.02228L16.0806 3.01543L16.1028 3.01371L16.21 3.00257L16.2314 3L16.2528 3.00257Z" fill="currentColor"/></svg></button></div></div>
-  <div class="bs-body bs-body--gutter">
+  <div class="bs-body bs-body--gutter"><div class="sk-sheet">   <!-- refined look & spacing (user 2026-11-16) -->
     <div class="pf-tagfield" id="skHost">
       <div class="field field--sm" data-field="combo" data-combo="inline" data-combo-free>
         <label class="field-label" for="skIn">Skills <span class="optional">(3 to 15)</span></label>
         <div class="field-control"><input class="field-input" id="skIn" placeholder="Search &amp; add skills" autocomplete="off"></div>
       </div>
-      <p class="pf-count" id="skCount" aria-live="polite">0 skills added</p>
-      <div class="pf-tags" aria-label="Skills added"></div>
+      <div class="sk-added"><p class="pf-count" id="skCount" aria-live="polite">0 skills added</p>
+      <div class="pf-tags" aria-label="Skills added"></div></div>
     </div>
     <div class="mo-suggest"><p class="mo-suggest-h">Suggested for you</p><div class="chips pf-chips" id="skSuggest" aria-label="Suggested skills"></div></div>
-  </div>
+  </div></div>
   <div class="bs-bottom"><div class="bs-actions"><button class="btn btn--primary btn--lg btn--block" type="button" data-act="save-skills">Save</button></div></div>
 </div>
 
@@ -6825,7 +6829,7 @@ window.__MO_CFG = {
       if (list.length) msg(combo, '');
       if (sug) {
         var s = (opts.suggestions ? opts.suggestions() : []).filter(function (x) { return !has(list, x); }).slice(0, opts.suggestMax || 8);
-        sug.innerHTML = list.length >= opts.max ? '' : s.map(function (x) { return '<button class="chip chip--sm pf-chip" type="button" data-add="' + esc(x) + '">' + IC['ic_plus-outline'] + '<span class="chip-label">' + esc(x) + '</span></button>'; }).join('');
+        sug.innerHTML = list.length >= opts.max ? '' : s.map(function (x) { return '<button class="chip chip--' + (opts.chip || 'sm') + ' pf-chip" type="button" data-add="' + esc(x) + '">' + IC['ic_plus-outline'] + '<span class="chip-label">' + esc(x) + '</span></button>'; }).join('');
       }
     }
     function add(t) {
@@ -7189,7 +7193,7 @@ window.__MO_CFG = {
   /* skills */
   var ES = $('#edSkills');
   var SK_SUG = ['Product Management', 'Product Strategy', 'Product Roadmap', 'User Research', 'Stakeholder Management', 'A/B Testing', 'SQL', 'Agile Scrum Master', 'Product Analytics', 'Team Management'];
-  var skills = TagField($('#skHost'), { options: D.SKILLS, max: 15, maxText: 'You can add up to 15 skills', suggest: '#skSuggest', suggestions: function () { return SK_SUG; },
+  var skills = TagField($('#skHost'), { options: D.SKILLS, max: 15, maxText: 'You can add up to 15 skills', suggest: '#skSuggest', chip: 'xs', suggestions: function () { return SK_SUG; },
     count: function (n) { $('#skCount').textContent = n + (n === 1 ? ' skill' : ' skills') + ' added' + (n < 3 ? ' · add at least ' + (3 - n) + ' more' : ''); } });
   function editSkills(t) { skills.set(PF.skills); F(skills.combo).clear(); FLD.set(skills.combo, null); openSheet(ES, t); }
   function saveSkills() { var l = skills.list(); if (l.length < 3) { skills.error('Add at least 3 skills'); return; } PF.skills = l; after(ES, function () { changed('Skills saved'); }); }
@@ -7304,7 +7308,6 @@ window.__MO_CFG = {
       case 'exit': openSheet($('#exitSheet'), a); break;
       case 'exit-yes': st.leaving = true; toStart(); break;   // Yes, exit → the sign-up screen, from Almost there or Verify details (user 2026-11-12)
       case 'later': welcome(); break;
-      case 'reupload': e.preventDefault(); say('Your details are saved. Upload a new resume from your profile anytime.'); break;
       case 'edit': edit(kind, i, a); break;
       case 'add': if (kind === 'emp') editEmp(-1, a); else if (kind === 'edu') editEdu(-1, a); else edit(kind, -1, a); break;
       case 'item-menu': itemMenu(kind, i, a); break;
