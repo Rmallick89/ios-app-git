@@ -1,0 +1,81 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · ALERT  (app component · App-login)                     v1.2.0
+   Design-system A.07 Alert: an inline, persistent message that sits in the page flow next to what it is
+   about. Five intents (neutral · info · positive · notice · negative), one size, optional title, optional
+   close column. Not a toast (floats, auto-dismisses) and not a badge (card status).
+
+     ┌────────────────────────────────────────────────┬────┐
+     │ [icon]  Title in the intent colour             │  × │   container · 1 px intent border · radius.lg 12
+     │         Body text, always neutral muted        │    │   main column · inset.lg 12 · inset.xl 16
+     └────────────────────────────────────────────────┴────┘   close column 44 · neutral divider
+
+   Pair with alert.js (ShineAlert.html). ▶ BEFORE CHANGING IT: read README.md here and component-system.md A.07.
+   Semantic tokens only; the dark values follow DESIGN-SYSTEM.md §2.2.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.alert {
+  /* COLOUR — DESIGN-SYSTEM.md §2.2 (light) */
+  --al-neutral-bg: #EEF1F5;        /* surface.neutral.muted */
+  --al-neutral-line: #E4E7EC;      /* stroke.neutral.base */
+  --al-neutral-tone: #0D1117;      /* content.neutral.base */
+  --al-info-bg: #EBF0FF;           /* surface.brand.brand-subtle */
+  --al-info-tone: #0B3FCC;         /* content.neutral.brand (border + title; no status stroke for brand) */
+  --al-positive-bg: #EAFAF0;       /* surface.status.positive-subtle */
+  --al-positive-line: #0E9A5A;     /* stroke.status.positive */
+  --al-positive-tone: #027A48;     /* content.status.positive */
+  --al-notice-bg: #FFF4ED;         /* surface.status.notice-subtle */
+  --al-notice-line: #D97706;       /* stroke.status.notice */
+  --al-notice-tone: #A35A04;       /* content.status.notice */
+  --al-negative-bg: #FEF2F2;       /* surface.status.negative-subtle */
+  --al-negative-line: #B42318;     /* stroke.status.negative */
+  --al-negative-tone: #B42318;     /* content.status.negative */
+  --al-text: #344054;              /* content.neutral.muted — body, every intent */
+  --al-faded: #667085;             /* content.neutral.faded — close glyph */
+  --al-ink: #0D1117;               /* content.neutral.base — close glyph on hover */
+  --al-divider: #E4E7EC;           /* stroke.neutral.base — close-column divider, every intent */
+  --al-hover: #EEF1F5;             /* surface.neutral-state.hover */
+  --al-focus: #1A56FF;             /* stroke.neutral.focus */
+  --al-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;   /* typeface.family.brand */
+
+  position: relative; box-sizing: border-box; display: flex; align-items: stretch; margin: 0; padding: 0; overflow: hidden;
+  border: 1px solid var(--al-neutral-line); border-radius: 12px;                     /* size.stroke.thin · size.radius.lg */
+  background: var(--al-neutral-bg); color: var(--al-neutral-tone); font-family: var(--al-font); -webkit-font-smoothing: antialiased;
+}
+.alert *, .alert *::before, .alert *::after { box-sizing: border-box; }
+.alert-main { flex: 1 1 0; min-width: 0; display: flex; align-items: flex-start; gap: 8px; padding: 12px 16px; }   /* inline.md · inset.lg · inset.xl */
+.alert-icon { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; margin-top: 2px; color: currentColor; }   /* size.icon.lg box · A.07 optical offset */
+.alert-icon svg { display: block; width: 16px; height: 16px; fill: currentColor; stroke: none; }   /* size.icon.md · icons atom (solid by default) */
+.alert--text-only .alert-icon { margin-top: -1px; }      /* no title: centre the 20 box on the first 18 body line */
+.alert--title-only .alert-title { margin: 0; }           /* v1.2.0 — title only (no body): one line in the intent colour */
+.alert--title-only .alert-icon { margin-top: 0; }        /*          the 20 icon box sits on the 20 title line */
+.alert-body { flex: 1 1 0; min-width: 0; }
+.alert-title { margin: 0 0 4px; font: 700 14px/20px var(--al-font); color: currentColor; }   /* Body / md bold · stack.xxs */
+.alert-text { margin: 0; font: 500 12px/18px var(--al-font); color: var(--al-text); }        /* Body / sm medium · always neutral */
+.alert-close-col {
+  flex: none; display: flex; align-items: center; justify-content: center; width: 44px; align-self: stretch; padding: 0; margin: 0;
+  border: 0; border-left: 1px solid var(--al-divider); background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background-color 150ms ease;
+}
+.alert-close-col svg { width: 16px; height: 16px; color: var(--al-faded); transition: color 150ms ease; }   /* icons atom ic_close-outline — the colour is set here (v1.1.0) */
+@media (hover: hover) { .alert-close-col:hover { background: var(--al-hover); } .alert-close-col:hover svg { color: var(--al-ink); } }
+.alert-close-col:active { background: var(--al-hover); }
+.alert-close-col:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--al-focus); }
+
+/* intents — the outer border, icon and title carry the colour; the body and the divider never do */
+.alert--neutral  { background: var(--al-neutral-bg);  border-color: var(--al-neutral-line);  color: var(--al-neutral-tone); }
+.alert--info     { background: var(--al-info-bg);     border-color: var(--al-info-tone);     color: var(--al-info-tone); }
+.alert--positive { background: var(--al-positive-bg); border-color: var(--al-positive-line); color: var(--al-positive-tone); }
+.alert--notice   { background: var(--al-notice-bg);   border-color: var(--al-notice-line);   color: var(--al-notice-tone); }
+.alert--negative { background: var(--al-negative-bg); border-color: var(--al-negative-line); color: var(--al-negative-tone); }
+
+/* dark — DESIGN-SYSTEM.md §2.2 dark column (the app pages are light-only; used by previews and future dark mode) */
+[data-theme="dark"] .alert {
+  --al-neutral-bg: #161B22; --al-neutral-line: #4A5260; --al-neutral-tone: #F7F9FB;
+  --al-info-bg: #06184F; --al-info-tone: #7EA3FF;
+  --al-positive-bg: #011A10; --al-positive-line: #34D77F; --al-positive-tone: #34D77F;
+  --al-notice-bg: #211100; --al-notice-line: #FAB663; --al-notice-tone: #FAB663;
+  --al-negative-bg: #1C0404; --al-negative-line: #F87171; --al-negative-tone: #FCA5A0;
+  --al-text: #C8CED7; --al-faded: #98A2B3; --al-ink: #F7F9FB; --al-divider: #4A5260; --al-hover: #344054; --al-focus: #7EA3FF;
+}
+
+@media (prefers-reduced-motion: reduce) { .alert-close-col, .alert-close-col svg { transition: none; } }

@@ -3619,119 +3619,295 @@ html, body, .view-jsrp-m { overflow-x: clip !important; }   /* was hidden — th
 @media (prefers-reduced-motion: reduce) { .shs-link { transition: none; } }
 </style>
 <!-- ▲ PAGE · share-sheet -->
-<!-- ▼ COMPONENT · search-modal v1.3.2 · verbatim copy of App-components/Modals/search-modal/search-modal.css — do not edit here -->
-<style data-component="search-modal">
+<!-- ▼ COMPONENT · inline-dropdown v1.6.0 · verbatim copy of App-components/Modals/inline-dropdown/inline-dropdown.css — do not edit here -->
+<style data-component="inline-dropdown">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · SEARCH MODAL  (app component)                       v1.3.2
-   "What's next for you?" — keyword · location · experience → Search Jobs
-   ───────────────────────────────────────────────────────────────────────
-   Ported from the JSRP "Edit search" overlay (jsrp/JSRP-Index.html,
-   .li-search-*) and rebuilt as a reusable, page-agnostic component.
+   SHINE · INLINE DROPDOWN  (app component · App-login · app-components/inline-dropdown/)      v1.6.0
+   The list that opens right under a field, inside the page or sheet — for the combo input (type to narrow, then
+   pick) and the dropdown input (pick only). One look, one behaviour, everywhere a field shows options inline.
+   Built on design-system tokens only (DESIGN-SYSTEM.md §2), light and dark. Pair with inline-dropdown.js.
 
-   • Every class is prefixed `ssm-` so it can drop into any page (homepage,
-     JSRP, JD, profile…) without colliding with that page's own classes.
-   • The component carries its OWN scoped token layer (below) so it renders
-     identically whatever token vocabulary the host page uses (JSRP uses
-     shorthand names like --content-base; the homepage uses canonical ones).
-     Values mirror design-system/DESIGN-SYSTEM.md — light theme, mobile
-     column of §2.1 / §2.3 (app-only component).
-   • Anatomy maps 1:1 to DS atoms: field = A.01 Input (search + select
-     variants) · CTA = A.02 Button (Primary · Brand — search is the one
-     place brand blue is allowed) · error = A.07 Alert (negative) ·
-     toast = A.09 Toast.
-   • v1.1.0 — fields use the same A.01 Input spec as the login flow
-     (md 44 · white fill · 12px inset · medium-weight placeholder ·
-     brand-600 border + 3px brand ring on focus).
-   • v1.2.0 — the validation alert sits OUTSIDE the card, 12px below it,
-     as a solid floating alert (readable on the scrim); shorter copy.
-   • v1.3.0 — toasts go through ShineNotify (app-components/notify) when the
-     page has it; .ssm-toast below is only the stand-alone fallback.
+     [ Current location                       ⌄ ]   the field (input fields · field-base) — not part of this component
+     ┌──────────────────────────────────────────┐   .dropdown           the panel: 4 under the field, its width
+     │ POPULAR CITIES                           │   .dropdown-head      an optional heading (a group's name)
+     │ ◎ Gurugram, Haryana                   ✓  │   .dropdown-option    a row: lead icon · label (+ hint) · tick
+     │ ◎ Bengaluru, Karnataka         (Added)   │                       [aria-selected] chosen · .is-active under the finger / keys
+     │   Delhi NCR                              │   .dropdown-badge     “Added” — already added, can't be picked (the BADGES ATOM · Small · neutral, v1.6.0)
+     │   Delhi · Gurugram · Noida               │   .dropdown-hint      the second line
+     │ ＋ Use “Gurgaon”                          │   .dropdown-option--free   keep what you typed
+     └──────────────────────────────────────────┘   .dropdown-note      searching · no matches · type more · couldn’t load
+   Small shows 3½ rows, Medium 4½, then the list scrolls (the half row says there is more). Its size is its own — by device,
+   never the field's: .dropdown--sm phone & mobile view (default: rows 38, text 12, icons 14) · --md tablet & computer (44 · 14 · 16). It opens above the field when
+   there is no room below (the keyboard), and inside a scrolling sheet it scrolls the field up first so it fits.
+
+   ▶ BEFORE BUILDING WITH IT: read README.md and inline-dropdown-spec.html (the guideline) in this folder.
+   ▶ Pages never restyle it. Icons in rows come from atoms/icons (passed in by the page) — never drawn here.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ── Scoped tokens ─────────────────────────────────────────────────── */
-.ssm, .ssm-toast {
+.dropdown {
+  /* COLOUR — §2.2 (light) */
+  --dd-bg: #FFFFFF;                          /* surface.neutral.raised — the panel */
+  --dd-edge: #E4E7EC;                        /* stroke.neutral.base */
+  --dd-sh: 0 16px 36px -10px rgba(13, 17, 23, .30), 0 4px 10px -2px rgba(13, 17, 23, .10);   /* elevation.neutral.overlay — "dropdowns, popovers" */
+  --dd-text: #0D1117;                        /* content.neutral.base — a row */
+  --dd-muted: #344054;                       /* content.neutral.muted — a row's icon */
+  --dd-faded: #667085;                       /* content.neutral.faded — hint · heading · notes */
+  --dd-dis: rgba(13, 17, 23, .36);           /* content.neutral.disabled — a row that can't be picked */
+  --dd-active: #EEF1F5;                      /* surface.neutral-state.hover — under the finger / arrow keys */
+  --dd-pressed: #E4E7EC;                     /* surface.neutral-state.pressed — finger down */
+  --dd-selected: #F0F5FF;                    /* surface.neutral-state.selected — the chosen row */
+  --dd-check: #0B3FCC;                       /* content.neutral.brand — its tick · the free row's plus */
+  --dd-line: #EEF1F5;                        /* stroke.neutral.muted — between groups */
+  --dd-neg: #B42318;                         /* content.status.negative — couldn’t load */
+  /* SIZE · SPACE · TYPE — §2.1 / §2.3 / §2.4 */
+  --dd-gap: 4px;                             /* spacing.stack.xxs — field → panel */
+  --dd-pad: 4px;                             /* spacing.inset.xs — panel padding */
+  --dd-radius: 12px;                         /* size.radius.lg — "modals, popovers" (= the field's corners) */
+  --dd-row: 44px;                            /* size.control.md — a row (a finger-size target) */
+  --dd-show: 4.5;                            /* rows that show before it scrolls: Medium 4½ · Small 3½ */
+  --dd-max: calc(var(--dd-pad) + (var(--dd-row) + var(--dd-gap-rows, 4px)) * var(--dd-show));   /* the script sets it from the real rows (halfway down the 4th / 5th) */
+  --dd-row-px: 8px;                          /* spacing.inset.md — row text lines up with the field's text (4 + 8 = 12) */
+  --dd-row-py: 8px;                          /* spacing.inset.md */
+  --dd-row-radius: 8px;                      /* size.radius.md */
+  --dd-row-gap: 8px;                         /* spacing.inline.md — icon · text · tick */
+  --dd-gap-rows: 4px;                        /* spacing.stack.xxs — between two rows (every size) */
+  --dd-ic: 16px;                             /* size.icon.md — lead icon · tick */
+  --dd-fs: 14px; --dd-lh: 20px;              /* Body / md — a row */
+  --dd-sm-fs: 12px; --dd-sm-lh: 18px;        /* Body / sm — hint · heading · notes */
+  --dd-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;   /* typeface.family.brand */
+  --dd-head-pt: 10px;                        /* room above a heading */
+  --dd-dur: 120ms;                           /* motion — PROPOSED (motion.popover.in) */
+
+  position: absolute; z-index: 60; left: 0; top: 100%;   /* top / bottom / left / width: set by the script from the anchor */
+  box-sizing: border-box; padding: var(--dd-pad);
+  border: 1px solid var(--dd-edge); border-radius: var(--dd-radius); background: var(--dd-bg); box-shadow: var(--dd-sh);
+  max-height: var(--dd-room, var(--dd-max)); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin; scroll-padding: var(--dd-pad);
+  color: var(--dd-text); font-family: var(--dd-font); -webkit-font-smoothing: antialiased; text-align: left;
+  opacity: 1; transform: none; transition: opacity var(--dd-dur) ease, transform var(--dd-dur) ease;
+}
+.dropdown[hidden] { display: none !important; }
+.dropdown.is-entering { opacity: 0; transform: translateY(-4px); }
+.dropdown.dropdown--up.is-entering { transform: translateY(4px); }
+.dropdown *, .dropdown *::before, .dropdown *::after { box-sizing: border-box; }
+
+.dropdown-list { margin: 0; padding: 0; list-style: none; outline: none; }
+.dropdown-option {
+  display: flex; align-items: center; gap: var(--dd-row-gap); min-height: var(--dd-row); padding: var(--dd-row-py) var(--dd-row-px);
+  border-radius: var(--dd-row-radius); color: var(--dd-text); cursor: pointer;
+  font: 500 var(--dd-fs)/var(--dd-lh) var(--dd-font);                         /* Body / md */
+  -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+}
+.dropdown-lead { flex: none; display: grid; place-items: center; width: var(--dd-ic); height: var(--dd-ic); color: var(--dd-muted); }
+.dropdown-lead svg { display: block; width: var(--dd-ic); height: var(--dd-ic); }
+.dropdown-text { flex: 1; min-width: 0; display: grid; overflow-wrap: anywhere; }
+.dropdown-text mark { background: none; color: inherit; font-weight: 700; }   /* the letters that match what was typed */
+.dropdown-hint { color: var(--dd-faded); font: 500 var(--dd-sm-fs)/var(--dd-sm-lh) var(--dd-font); }   /* Body / sm */
+/* already added (v1.6.0): the badges atom — badge badge--sm badge--neutral (atoms/badges/badges.css, loaded before this file);
+   the list only keeps it on the right */
+.dropdown-badge { flex: none; }
+.dropdown-check { flex: none; display: grid; place-items: center; width: var(--dd-ic); height: var(--dd-ic); color: var(--dd-check); visibility: hidden; }
+.dropdown-check svg { display: block; width: var(--dd-ic); height: var(--dd-ic); }
+
+.dropdown-option + .dropdown-option { margin-top: var(--dd-gap-rows); }   /* a little air between rows, so two tinted rows never touch */
+.dropdown-option.is-active { background: var(--dd-active); }
+@media (hover: hover) { .dropdown-option:not([aria-disabled="true"]):hover { background: var(--dd-active); } }
+.dropdown-option:not([aria-disabled="true"]):active { background: var(--dd-pressed); }
+.dropdown-option[aria-selected="true"] { background: var(--dd-selected); font-weight: 600; }
+.dropdown-option[aria-selected="true"] .dropdown-check { visibility: visible; }
+.dropdown-option[aria-selected="true"].is-active { background: var(--dd-active); }
+.dropdown-option[aria-disabled="true"] { color: var(--dd-dis); cursor: default; }
+.dropdown-option[aria-disabled="true"] .dropdown-lead, .dropdown-option[aria-disabled="true"] .dropdown-hint { color: var(--dd-dis); }   /* the badge keeps its colours */
+.dropdown-option--free { font-weight: 600; }
+.dropdown-option--free .dropdown-lead { color: var(--dd-check); }
+
+.dropdown-head {
+  padding: var(--dd-head-pt) var(--dd-row-px) 4px; color: var(--dd-faded); cursor: default;
+  font: 600 var(--dd-sm-fs)/var(--dd-sm-lh) var(--dd-font);                  /* Body / sm semibold */
+}
+.dropdown-sep { height: 1px; margin: 4px var(--dd-row-px); background: var(--dd-line); }   /* A.11 separator between groups */
+.dropdown-note {
+  display: flex; align-items: center; gap: var(--dd-row-gap); padding: 12px var(--dd-row-px);
+  color: var(--dd-faded); cursor: default; font: 500 var(--dd-sm-fs)/var(--dd-sm-lh) var(--dd-font);
+}
+.dropdown-note--error { color: var(--dd-neg); }
+.dropdown-retry { margin-left: auto; padding: 0; border: 0; background: none; color: var(--dd-check); font: 600 var(--dd-sm-fs)/var(--dd-sm-lh) var(--dd-font); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.dropdown-spin { flex: none; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 1024px; animation: ddSpin .7s linear infinite; }   /* size.icon.sm */
+@keyframes ddSpin { to { transform: rotate(360deg); } }
+.dropdown-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* SIZE — the list's own, by the device it shows on (never the field's): create({ size }) · data-dropdown-size */
+.dropdown--sm {                                                                     /* phone & mobile view — the default (v1.4.0): everything a step smaller */
+  --dd-row: 38px; --dd-row-py: 10px;                                                 /* row 38 · padding 10 × 8 (v1.4.1: more room for a finger; the text stays 12) */
+  --dd-fs: 12px; --dd-lh: 18px;                                                      /* Body / sm — row text */
+  --dd-ic: 14px; --dd-row-gap: 6px;                                                  /* size.icon.sm · spacing.inline.sm (desktop) */
+  --dd-head-pt: 8px;
+  --dd-show: 3.5;                                                                    /* 3½ rows, then it scrolls (v1.5.0) */
+}
+.dropdown--md { --dd-row: 44px; --dd-show: 4.5; }                                    /* tablet & computer: size.control.md · 4½ rows */
+
+/* dark column of §2.2 — set data-theme="dark" on any ancestor (the input fields do the same) */
+[data-theme="dark"] .dropdown {
+  --dd-bg: #232A38;                          /* surface.neutral.raised · cool-800 */
+  --dd-edge: #4A5260;                        /* stroke.neutral.base · cool-600 */
+  --dd-sh: 0 16px 36px -10px rgba(13, 17, 23, .70), 0 4px 10px -2px rgba(13, 17, 23, .40);   /* elevation.neutral.overlay (dark α) */
+  --dd-text: #F7F9FB;                        /* content.neutral.base · cool-50 */
+  --dd-muted: #C8CED7;                       /* content.neutral.muted · cool-300 */
+  --dd-faded: #98A2B3;                       /* content.neutral.faded · cool-400 */
+  --dd-dis: rgba(255, 255, 255, .36);        /* content.neutral.disabled · white-75 */
+  --dd-active: #344054;                      /* surface.neutral-state.hover · cool-700 */
+  --dd-pressed: #4A5260;                     /* surface.neutral-state.pressed · cool-600 */
+  --dd-selected: #082478;                    /* surface.neutral-state.selected · brand-800 */
+  --dd-check: #7EA3FF;                       /* content.neutral.brand · brand-300 */
+  --dd-line: #344054;                        /* stroke.neutral.muted · cool-700 */
+  --dd-neg: #FCA5A0;                         /* content.status.negative (dark) */
+}
+@media (prefers-reduced-motion: reduce) { .dropdown { transition: none; } .dropdown.is-entering { transform: none; } .dropdown-spin { animation-duration: 2s; } }
+</style>
+<!-- ▲ COMPONENT · inline-dropdown -->
+<!-- ▼ COMPONENT · alert v1.2.0 · verbatim copy of App-components/alert/alert.css — do not edit here -->
+<style data-component="alert">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · ALERT  (app component · App-login)                     v1.2.0
+   Design-system A.07 Alert: an inline, persistent message that sits in the page flow next to what it is
+   about. Five intents (neutral · info · positive · notice · negative), one size, optional title, optional
+   close column. Not a toast (floats, auto-dismisses) and not a badge (card status).
+
+     ┌────────────────────────────────────────────────┬────┐
+     │ [icon]  Title in the intent colour             │  × │   container · 1 px intent border · radius.lg 12
+     │         Body text, always neutral muted        │    │   main column · inset.lg 12 · inset.xl 16
+     └────────────────────────────────────────────────┴────┘   close column 44 · neutral divider
+
+   Pair with alert.js (ShineAlert.html). ▶ BEFORE CHANGING IT: read README.md here and component-system.md A.07.
+   Semantic tokens only; the dark values follow DESIGN-SYSTEM.md §2.2.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.alert {
+  /* COLOUR — DESIGN-SYSTEM.md §2.2 (light) */
+  --al-neutral-bg: #EEF1F5;        /* surface.neutral.muted */
+  --al-neutral-line: #E4E7EC;      /* stroke.neutral.base */
+  --al-neutral-tone: #0D1117;      /* content.neutral.base */
+  --al-info-bg: #EBF0FF;           /* surface.brand.brand-subtle */
+  --al-info-tone: #0B3FCC;         /* content.neutral.brand (border + title; no status stroke for brand) */
+  --al-positive-bg: #EAFAF0;       /* surface.status.positive-subtle */
+  --al-positive-line: #0E9A5A;     /* stroke.status.positive */
+  --al-positive-tone: #027A48;     /* content.status.positive */
+  --al-notice-bg: #FFF4ED;         /* surface.status.notice-subtle */
+  --al-notice-line: #D97706;       /* stroke.status.notice */
+  --al-notice-tone: #A35A04;       /* content.status.notice */
+  --al-negative-bg: #FEF2F2;       /* surface.status.negative-subtle */
+  --al-negative-line: #B42318;     /* stroke.status.negative */
+  --al-negative-tone: #B42318;     /* content.status.negative */
+  --al-text: #344054;              /* content.neutral.muted — body, every intent */
+  --al-faded: #667085;             /* content.neutral.faded — close glyph */
+  --al-ink: #0D1117;               /* content.neutral.base — close glyph on hover */
+  --al-divider: #E4E7EC;           /* stroke.neutral.base — close-column divider, every intent */
+  --al-hover: #EEF1F5;             /* surface.neutral-state.hover */
+  --al-focus: #1A56FF;             /* stroke.neutral.focus */
+  --al-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;   /* typeface.family.brand */
+
+  position: relative; box-sizing: border-box; display: flex; align-items: stretch; margin: 0; padding: 0; overflow: hidden;
+  border: 1px solid var(--al-neutral-line); border-radius: 12px;                     /* size.stroke.thin · size.radius.lg */
+  background: var(--al-neutral-bg); color: var(--al-neutral-tone); font-family: var(--al-font); -webkit-font-smoothing: antialiased;
+}
+.alert *, .alert *::before, .alert *::after { box-sizing: border-box; }
+.alert-main { flex: 1 1 0; min-width: 0; display: flex; align-items: flex-start; gap: 8px; padding: 12px 16px; }   /* inline.md · inset.lg · inset.xl */
+.alert-icon { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; margin-top: 2px; color: currentColor; }   /* size.icon.lg box · A.07 optical offset */
+.alert-icon svg { display: block; width: 16px; height: 16px; fill: currentColor; stroke: none; }   /* size.icon.md · icons atom (solid by default) */
+.alert--text-only .alert-icon { margin-top: -1px; }      /* no title: centre the 20 box on the first 18 body line */
+.alert--title-only .alert-title { margin: 0; }           /* v1.2.0 — title only (no body): one line in the intent colour */
+.alert--title-only .alert-icon { margin-top: 0; }        /*          the 20 icon box sits on the 20 title line */
+.alert-body { flex: 1 1 0; min-width: 0; }
+.alert-title { margin: 0 0 4px; font: 700 14px/20px var(--al-font); color: currentColor; }   /* Body / md bold · stack.xxs */
+.alert-text { margin: 0; font: 500 12px/18px var(--al-font); color: var(--al-text); }        /* Body / sm medium · always neutral */
+.alert-close-col {
+  flex: none; display: flex; align-items: center; justify-content: center; width: 44px; align-self: stretch; padding: 0; margin: 0;
+  border: 0; border-left: 1px solid var(--al-divider); background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background-color 150ms ease;
+}
+.alert-close-col svg { width: 16px; height: 16px; color: var(--al-faded); transition: color 150ms ease; }   /* icons atom ic_close-outline — the colour is set here (v1.1.0) */
+@media (hover: hover) { .alert-close-col:hover { background: var(--al-hover); } .alert-close-col:hover svg { color: var(--al-ink); } }
+.alert-close-col:active { background: var(--al-hover); }
+.alert-close-col:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--al-focus); }
+
+/* intents — the outer border, icon and title carry the colour; the body and the divider never do */
+.alert--neutral  { background: var(--al-neutral-bg);  border-color: var(--al-neutral-line);  color: var(--al-neutral-tone); }
+.alert--info     { background: var(--al-info-bg);     border-color: var(--al-info-tone);     color: var(--al-info-tone); }
+.alert--positive { background: var(--al-positive-bg); border-color: var(--al-positive-line); color: var(--al-positive-tone); }
+.alert--notice   { background: var(--al-notice-bg);   border-color: var(--al-notice-line);   color: var(--al-notice-tone); }
+.alert--negative { background: var(--al-negative-bg); border-color: var(--al-negative-line); color: var(--al-negative-tone); }
+
+/* dark — DESIGN-SYSTEM.md §2.2 dark column (the app pages are light-only; used by previews and future dark mode) */
+[data-theme="dark"] .alert {
+  --al-neutral-bg: #161B22; --al-neutral-line: #4A5260; --al-neutral-tone: #F7F9FB;
+  --al-info-bg: #06184F; --al-info-tone: #7EA3FF;
+  --al-positive-bg: #011A10; --al-positive-line: #34D77F; --al-positive-tone: #34D77F;
+  --al-notice-bg: #211100; --al-notice-line: #FAB663; --al-notice-tone: #FAB663;
+  --al-negative-bg: #1C0404; --al-negative-line: #F87171; --al-negative-tone: #FCA5A0;
+  --al-text: #C8CED7; --al-faded: #98A2B3; --al-ink: #F7F9FB; --al-divider: #4A5260; --al-hover: #344054; --al-focus: #7EA3FF;
+}
+
+@media (prefers-reduced-motion: reduce) { .alert-close-col, .alert-close-col svg { transition: none; } }
+</style>
+<!-- ▲ COMPONENT · alert -->
+<!-- ▼ COMPONENT · search-modal v2.0.0 · verbatim copy of App-components/Modals/search-modal/search-modal.css — do not edit here -->
+<style data-component="search-modal">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · SEARCH MODAL  (app component · App-components/Modals/)    v2.0.0
+   "What's next for you?" — keyword · location · experience → Search Jobs
+   ───────────────────────────────────────────────────────────────────────
+   v2.0.0 (user 2026-11-19: "use only reusable components"): this file now
+   draws ONLY the modal itself — scrim, the top-anchored card, its glow,
+   motion, the shake — and places the pieces. Everything inside the card is
+   an App-components atom, loaded by the page BEFORE this file:
+
+     close ✕          buttons atom   Muted · sm · icon · pill (the top bar's back / menu disc)
+     eyebrow          badges atom    Small · brand + dot ("Find your next role")
+     3 fields         input fields   field-base · Small (40) · leading icon (icons atom)
+     suggestions      inline dropdown  search mode (role · city, free row "Use “…”") · select mode (experience)
+     validation       alert          A.07 · negative · inline above Search Jobs
+     Search Jobs      buttons atom   Primary · accent · lg · block — the atom's search-only blue
+     toast            notify         ShineNotify.toast (the page's)
+
+   Load order on a page: buttons.css · badges.css · field-base.css · inline-dropdown.css · alert.css · search-modal.css ·
+   (notify.css) — scripts: field-base.js · inline-dropdown.js · alert.js · search-modal.js · (notify.js).
+   Every class here is prefixed `ssm-`; values mirror DESIGN-SYSTEM.md (light, mobile column).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Scoped tokens (only what the modal itself draws) ──────────────── */
+.ssm {
   /* primitives (definitions only) */
-  --ssm-c-brand-500: #1A56FF; --ssm-c-brand-600: #0B3FCC; --ssm-c-brand-700: #0A33A6; --ssm-c-brand-100: #EBF0FF;
-  --ssm-c-brand-500-op10: rgba(26,86,255,.10); --ssm-c-brand-500-op12: rgba(26,86,255,.12);
-  --ssm-c-brand-500-op18: rgba(26,86,255,.18); --ssm-c-brand-500-op40: rgba(26,86,255,.40); --ssm-c-brand-500-op45: rgba(26,86,255,.45);
-  --ssm-c-cn-black: #0D1117; --ssm-c-cn-white: #FFFFFF; --ssm-c-cn-50: #F7F9FB; --ssm-c-cn-100: #EEF1F5; --ssm-c-cn-200: #E4E7EC;
-  --ssm-c-cn-300: #C8CED7; --ssm-c-cn-500: #667085; --ssm-c-cn-700: #344054;
-  --ssm-c-black-04: rgba(13,17,23,.04); --ssm-c-black-08: rgba(13,17,23,.08); --ssm-c-black-10: rgba(13,17,23,.10);
-  --ssm-c-black-20: rgba(13,17,23,.20); --ssm-c-black-30: rgba(13,17,23,.30);
-  /* scrim — JSRP's 55% black + 8px blur; deeper than surface.neutral-state.overlay (24%)
-     because the modal sits over busy content (logo walls, job cards) */
-  --ssm-c-black-55: rgba(13,17,23,.55);
-  --ssm-c-wn-50: #FFFDF8; --ssm-c-wn-100: #FAF9F6;
-  --ssm-c-red-50: #FEF2F2; --ssm-c-red-200: #FECDCA; --ssm-c-red-600: #B42318; --ssm-c-green-300: #5DD4A1;
-
-  /* semantic (DESIGN-SYSTEM.md §2.2) */
+  --ssm-c-brand-500-op12: rgba(26,86,255,.12);
+  --ssm-c-cn-black: #0D1117; --ssm-c-cn-white: #FFFFFF;
+  --ssm-c-black-10: rgba(13,17,23,.10); --ssm-c-black-20: rgba(13,17,23,.20);
+  --ssm-c-black-55: rgba(13,17,23,.55);   /* JSRP's scrim: 55 % + 8 px blur — the modal sits over busy content */
+  --ssm-c-brand-600: #0B3FCC;
+  /* semantic (§2.2) */
   --ssm-content-base: var(--ssm-c-cn-black);
-  --ssm-content-muted: var(--ssm-c-cn-700);
-  --ssm-content-faded: var(--ssm-c-cn-500);
   --ssm-content-brand: var(--ssm-c-brand-600);
-  --ssm-content-on-fill-dark: var(--ssm-c-cn-white);
-  --ssm-content-negative: var(--ssm-c-red-600);
-  --ssm-surface-base: var(--ssm-c-wn-100);           /* surface.neutral.base — search-field fill */
-  --ssm-surface-raised: var(--ssm-c-cn-white);       /* surface.neutral.raised — card / dropdown */
-  --ssm-surface-hover: var(--ssm-c-wn-50);           /* field hover — warm-neutral/50 */
-  --ssm-surface-brand: var(--ssm-c-brand-500);
-  --ssm-surface-brand-hover: var(--ssm-c-brand-600);
-  --ssm-surface-brand-pressed: var(--ssm-c-brand-700);
-  --ssm-surface-inverse: var(--ssm-c-cn-black);
-  --ssm-surface-negative-subtle: var(--ssm-c-red-50);
+  --ssm-surface-raised: var(--ssm-c-cn-white);
   --ssm-surface-scrim: var(--ssm-c-black-55);
-  --ssm-stroke-base: var(--ssm-c-cn-200);
-  --ssm-stroke-muted: var(--ssm-c-cn-100);
-  --ssm-stroke-strong: var(--ssm-c-cn-300);
-  --ssm-stroke-focus: var(--ssm-c-brand-500);
-  --ssm-stroke-negative: var(--ssm-c-red-200);
-
-  /* typography (§2.1 · mobile) */
+  /* typography (§2.1 · mobile) — Heading / lg */
   --ssm-font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-  --ssm-w-regular: 400; --ssm-w-medium: 500; --ssm-w-semibold: 600; --ssm-w-bold: 700; --ssm-w-extrabold: 800;
   --ssm-heading-lg-size: 22px; --ssm-heading-lg-lh: 26px; --ssm-heading-lg-ls: -0.3px;
-  --ssm-body-md-size: 14px; --ssm-body-md-lh: 20px;
-  --ssm-body-sm-size: 12px; --ssm-body-sm-lh: 18px;
-  --ssm-label-lg-size: 14px; --ssm-label-lg-lh: 14px;
-  --ssm-eyebrow-sm-size: 10px; --ssm-eyebrow-sm-lh: 10px; --ssm-eyebrow-sm-ls: 1.5px;
-
-  /* spacing (§2.3 · mobile) */
-  --ssm-inset-xs: 4px; --ssm-inset-sm: 6px; --ssm-inset-md: 8px; --ssm-inset-lg: 12px; --ssm-inset-xl: 16px;
-  --ssm-inline-sm: 4px; --ssm-inline-md: 8px; --ssm-inline-lg: 12px;
-  --ssm-stack-xxs: 4px; --ssm-stack-xs: 8px; --ssm-stack-md: 12px; --ssm-stack-lg: 14px; --ssm-stack-xl: 20px;
-  --ssm-section-sm: 20px; --ssm-section-md: 24px; --ssm-section-lg: 32px;
-  --ssm-layout-xs: 24px;           /* screen gutter = JSRP page (spacing.layout.sm) */
-
-  /* size (§2.4) */
-  --ssm-stroke-thin: 1px; --ssm-stroke-default: 1.5px;
-  --ssm-radius-xs: 2px; --ssm-radius-md: 8px; --ssm-radius-lg: 12px; --ssm-radius-2xl: 24px; --ssm-radius-full: 1024px;
-  --ssm-icon-xs: 12px; --ssm-icon-sm: 14px; --ssm-icon-md: 16px;
-  --ssm-control-close: 32px;                       /* close disc — matches JSRP mobile */
-  --ssm-control-sm: 40px; --ssm-control-md: 44px; --ssm-control-lg: 48px;
-  --ssm-dropdown-max: 260px;                       /* keeps the list clear of the on-screen keyboard */
-
-  /* elevation (§2.5 · light) */
-  --ssm-elev-subtle: 0 1px 2px var(--ssm-c-black-04);
-  --ssm-elev-overlay: 0 16px 36px -10px var(--ssm-c-black-30), 0 4px 10px -2px var(--ssm-c-black-10);
+  /* spacing (§2.3) */
+  --ssm-inset-md: 8px; --ssm-inset-lg: 12px;
+  --ssm-stack-md: 12px; --ssm-stack-xl: 20px;
+  --ssm-section-md: 24px;
+  --ssm-layout-xs: 24px;            /* screen gutter (spacing.layout.sm) */
+  /* size · elevation · motion */
+  --ssm-radius-2xl: 24px;
   --ssm-elev-modal: 0 24px 60px -12px var(--ssm-c-black-20), 0 6px 16px -6px var(--ssm-c-black-10);
-  --ssm-elev-brand-subtle: 0 8px 24px -10px var(--ssm-c-brand-500-op18);
-  --ssm-elev-brand-raised: 0 6px 14px -4px var(--ssm-c-brand-500-op45);
-  --ssm-elev-brand-lifted: 0 16px 40px -12px var(--ssm-c-brand-500-op40);
-  --ssm-elev-focus: 0 0 0 4px var(--ssm-c-brand-500-op10);
-  --ssm-elev-field-focus: 0 0 0 3px var(--ssm-c-brand-500-op18);   /* A.01 Input focus ring — same as the login flow */
-
-  /* motion */
   --ssm-ease-out: cubic-bezier(.22,1,.36,1);
-  --ssm-dur-fast: 150ms; --ssm-dur: 250ms; --ssm-dur-slow: 320ms;
+  --ssm-dur: 250ms; --ssm-dur-slow: 320ms;
 }
 
 /* ── Overlay (scrim) ───────────────────────────────────────────────── */
 .ssm {
   position: fixed; inset: 0; z-index: 9997;
   display: none; flex-direction: column; align-items: center;
-  /* card anchors to the TOP so the on-screen keyboard never covers the fields */
-  justify-content: flex-start;
-  padding: max(var(--ssm-stack-md), env(safe-area-inset-top)) var(--ssm-layout-xs) var(--ssm-layout-xs);   /* 12 from the top, 24 at the sides — like the JSRP floating nav */
+  justify-content: flex-start;      /* the card anchors to the TOP so the on-screen keyboard never covers the fields */
+  padding: max(var(--ssm-stack-md), env(safe-area-inset-top)) var(--ssm-layout-xs) var(--ssm-layout-xs);   /* 12 from the top, 24 at the sides */
   background: var(--ssm-surface-scrim);
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   opacity: 0; transition: opacity var(--ssm-dur) ease;
@@ -3744,22 +3920,19 @@ html, body, .view-jsrp-m { overflow-x: clip !important; }   /* was hidden — th
 .ssm.is-open { opacity: 1; }
 html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 
-/* ── Dialog = card + the alert that floats below it ────────────────── */
-.ssm-dialog { position: relative; width: 100%; max-width: 480px; flex: none; }
-
 /* ── Card ──────────────────────────────────────────────────────────── */
+.ssm-dialog { position: relative; width: 100%; max-width: 480px; flex: none; }
 .ssm-card {
   position: relative; width: 100%;
   background: var(--ssm-surface-raised);
   border-radius: var(--ssm-radius-2xl);
-  padding: var(--ssm-section-md);   /* 24 all round — the JSRP sheets' padding */
+  padding: var(--ssm-section-md);   /* 24 all round */
   box-shadow: var(--ssm-elev-modal);
   transform: translateY(calc(-1 * var(--ssm-inset-md)));
   transition: transform var(--ssm-dur-slow) var(--ssm-ease-out);
 }
 .ssm.is-open .ssm-card { transform: none; }
-/* brand glow in the top-right corner */
-.ssm-card::before {
+.ssm-card::before {                 /* brand glow in the top-right corner */
   content: ""; position: absolute; top: 0; right: 0; width: 160px; height: 130px; pointer-events: none;
   border-top-right-radius: var(--ssm-radius-2xl);
   background: radial-gradient(ellipse at top right, var(--ssm-c-brand-500-op12), transparent 65%);
@@ -3767,155 +3940,24 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 @keyframes ssm-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 50%{transform:translateX(6px)} 75%{transform:translateX(-3px)} }
 .ssm-dialog.is-shaking { animation: ssm-shake 360ms ease; }
 
-/* Close — circular, warm well (Button · icon-only, compact) */
-.ssm-close {
-  position: absolute; top: var(--ssm-inset-xl); right: var(--ssm-inset-xl); z-index: 2;   /* 16 / 16 — JSRP sheet close disc */
-  width: var(--ssm-control-close); height: var(--ssm-control-close); padding: 0;
-  display: grid; place-items: center; border-radius: var(--ssm-radius-full);
-  background: var(--ssm-surface-base); color: var(--ssm-content-muted);
-  border: var(--ssm-stroke-thin) solid var(--ssm-stroke-muted);
-  cursor: pointer; transition: background var(--ssm-dur-fast), color var(--ssm-dur-fast), border-color var(--ssm-dur-fast);
-}
-.ssm-close svg { width: var(--ssm-icon-xs); height: var(--ssm-icon-xs); }
-.ssm-close:active { background: var(--ssm-c-cn-100); }
-.ssm-close:focus-visible { outline: var(--ssm-stroke-default) solid var(--ssm-stroke-focus); box-shadow: var(--ssm-elev-focus); }
-
-/* Eyebrow + heading */
-.ssm-eyebrow {
-  position: relative; display: inline-flex; align-items: center; gap: var(--ssm-inline-md);
-  margin: 0 0 var(--ssm-inset-sm);
-  font-size: var(--ssm-eyebrow-sm-size); line-height: var(--ssm-eyebrow-sm-lh); letter-spacing: var(--ssm-eyebrow-sm-ls);
-  font-weight: var(--ssm-w-bold); text-transform: uppercase; color: var(--ssm-content-brand);
-}
-.ssm-eyebrow-dot { width: 6px; height: 6px; border-radius: var(--ssm-radius-full); background: var(--ssm-surface-brand);
-  box-shadow: 0 0 0 3px var(--ssm-c-brand-500-op18); flex: none; }
+/* ── Placing the atoms (their look is theirs) ─────────────────────── */
+.ssm-close { position: absolute; top: var(--ssm-inset-lg); right: var(--ssm-inset-lg); z-index: 2; }   /* buttons atom · 40 disc, 12 from the corner */
+.ssm-eyebrow { position: relative; display: flex; margin: 0 0 var(--ssm-inset-md); }                /* badges atom */
 .ssm-title {
-  position: relative; margin: 0 0 calc(var(--ssm-stack-xl) + var(--ssm-inset-md));   /* heading → content 28, as JSRP sheets; full width — the close disc sits on the eyebrow row */
+  position: relative; margin: 0 0 calc(var(--ssm-stack-xl) + var(--ssm-inset-md));                 /* heading → fields 28 */
   font-size: var(--ssm-heading-lg-size); line-height: var(--ssm-heading-lg-lh); letter-spacing: var(--ssm-heading-lg-ls);
-  font-weight: var(--ssm-w-extrabold); color: var(--ssm-content-base);
+  font-weight: 800; color: var(--ssm-content-base);
 }
 .ssm-title .ssm-accent { color: var(--ssm-content-brand); }
-
 .ssm-form { position: relative; }
-/* ── Fields (A.01 Input · search + select variants · md 44 — same spec as the login flow) ── */
-.ssm-fields { position: relative; display: flex; flex-direction: column; gap: var(--ssm-stack-md); }
-.ssm-field {
-  position: relative; min-width: 0;
-  display: flex; align-items: center; gap: var(--ssm-inline-md);
-  height: var(--ssm-control-md); padding: 0 var(--ssm-inset-lg);
-  background: var(--ssm-surface-raised);
-  border: var(--ssm-stroke-thin) solid var(--ssm-stroke-base);
-  border-radius: var(--ssm-radius-lg);
-  cursor: text;
-  transition: background var(--ssm-dur-fast) ease, border-color var(--ssm-dur-fast) ease, box-shadow var(--ssm-dur-fast) ease;
-}
-.ssm-field:focus-within, .ssm-field.is-open {
-  border-color: var(--ssm-content-brand); box-shadow: var(--ssm-elev-field-focus);
-}
-.ssm-field-icon { display: inline-flex; flex: none; color: var(--ssm-content-faded); transition: color var(--ssm-dur-fast); }
-.ssm-field:focus-within .ssm-field-icon, .ssm-field.is-open .ssm-field-icon { color: var(--ssm-content-base); }
-.ssm-field-icon svg { width: var(--ssm-icon-md); height: var(--ssm-icon-md); }
-.ssm-input, .ssm-value {
-  flex: 1; min-width: 0; margin: 0; padding: 0; border: 0; outline: 0; background: transparent;
-  font-family: var(--ssm-font); font-size: var(--ssm-body-md-size); line-height: var(--ssm-body-md-lh);
-  font-weight: var(--ssm-w-medium); color: var(--ssm-content-base);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  -webkit-appearance: none; appearance: none;
-}
-.ssm-input::placeholder { color: var(--ssm-content-faded); font-weight: var(--ssm-w-medium); opacity: 1; }
-.ssm-value.is-empty { color: var(--ssm-content-faded); }
-.ssm-field--select { cursor: pointer; -webkit-user-select: none; user-select: none; }
-.ssm-field--select:focus-visible { outline: none; }
-.ssm-caret { display: inline-flex; flex: none; color: var(--ssm-content-faded); transition: transform 200ms ease; }
-.ssm-caret svg { width: var(--ssm-icon-sm); height: var(--ssm-icon-sm); }
-.ssm-field.is-open .ssm-caret { transform: rotate(180deg); }
-
-/* Suggestion dropdown — reads as an extension of its field */
-.ssm-dropdown {
-  position: absolute; top: calc(100% + var(--ssm-inset-sm)); left: calc(-1 * var(--ssm-stroke-thin)); right: calc(-1 * var(--ssm-stroke-thin)); z-index: 5;   /* same edges as the field */
-  max-height: var(--ssm-dropdown-max); overflow-y: auto; overscroll-behavior: contain;
-  padding: var(--ssm-inset-sm);
-  background: var(--ssm-surface-raised);
-  border: var(--ssm-stroke-thin) solid var(--ssm-stroke-muted);
-  border-radius: var(--ssm-radius-lg);
-  box-shadow: var(--ssm-elev-overlay);
-  opacity: 0; transform: translateY(calc(-1 * var(--ssm-inset-xs))); pointer-events: none; visibility: hidden;
-  transition: opacity 180ms ease, transform 180ms ease, visibility 0s linear 180ms;
-}
-.ssm-field.is-open .ssm-dropdown { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
-.ssm-dropdown-eyebrow {
-  display: block; padding: var(--ssm-inset-md) var(--ssm-inset-sm) var(--ssm-inset-xs);   /* starts on the field icon's edge */
-  font-size: var(--ssm-eyebrow-sm-size); line-height: var(--ssm-eyebrow-sm-lh); letter-spacing: var(--ssm-eyebrow-sm-ls);
-  font-weight: var(--ssm-w-bold); text-transform: uppercase; color: var(--ssm-content-faded);
-}
-.ssm-option {
-  display: flex; align-items: center; gap: var(--ssm-inline-md);   /* icon + text sit exactly under the field's icon + text */
-  min-height: var(--ssm-control-sm); padding: 0 var(--ssm-inset-sm);
-  border-radius: var(--ssm-radius-md); cursor: pointer;
-  font-size: var(--ssm-body-md-size); line-height: var(--ssm-body-md-lh); font-weight: var(--ssm-w-medium); color: var(--ssm-content-base);
-  transition: background var(--ssm-dur-fast) ease;
-}
-.ssm-option:active, .ssm-option.is-active { background: var(--ssm-surface-base); }
-@media (hover: hover) { .ssm-option:hover { background: var(--ssm-surface-base); } }
-.ssm-option[aria-selected="true"] { color: var(--ssm-content-brand); font-weight: var(--ssm-w-semibold); }
-.ssm-option[aria-selected="true"] .ssm-option-icon { color: var(--ssm-content-brand); }
-.ssm-option b { color: var(--ssm-content-brand); font-weight: var(--ssm-w-bold); }
-.ssm-option-icon { display: inline-flex; flex: none; width: var(--ssm-icon-md); justify-content: center; color: var(--ssm-content-faded); }
-.ssm-option-icon svg { width: var(--ssm-icon-sm); height: var(--ssm-icon-sm); }
-.ssm-option-empty { padding: var(--ssm-inset-xl) var(--ssm-inset-lg); text-align: center;
-  font-size: var(--ssm-body-sm-size); line-height: var(--ssm-body-sm-lh); color: var(--ssm-content-faded); }
-.ssm-option-empty b { color: var(--ssm-content-base); font-weight: var(--ssm-w-bold); }
-
-/* ── Error (A.07 Alert · negative) — floats 12px below the card, outside it (v1.2.0) ──
-   solid fill + overlay shadow so it reads clearly on the dimmed, blurred scrim */
-.ssm-error-wrap {
-  margin-top: var(--ssm-stack-md); pointer-events: none;
-  opacity: 0; visibility: hidden; transform: translateY(calc(-1 * var(--ssm-inset-sm)));
-  transition: opacity 200ms ease, transform 260ms var(--ssm-ease-out), visibility 0s linear 260ms;
-}
-.ssm-error-wrap.is-shown { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
-.ssm-error {
-  display: flex; align-items: center; gap: var(--ssm-inline-md); margin: 0;
-  padding: var(--ssm-inset-lg);   /* 12 all round — the app alerts' (notify) inset */
-  background: var(--ssm-surface-negative-subtle); border: var(--ssm-stroke-thin) solid var(--ssm-stroke-negative);
-  border-radius: var(--ssm-radius-lg); color: var(--ssm-content-negative); box-shadow: var(--ssm-elev-overlay);
-  font-size: var(--ssm-body-md-size); line-height: var(--ssm-body-md-lh); font-weight: var(--ssm-w-semibold);
-}
-.ssm-error svg { width: var(--ssm-icon-md); height: var(--ssm-icon-md); flex: none; }
-
-/* ── Submit (A.02 Button · Primary · Brand · lg 48 · block) ─────────── */
-.ssm-submit {
-  display: inline-flex; align-items: center; justify-content: center; gap: var(--ssm-inline-md);
-  width: 100%; height: var(--ssm-control-lg); margin-top: var(--ssm-section-md); padding: 0 var(--ssm-inset-xl);   /* content → CTA 24, as JSRP sheets */
-  border: 0; border-radius: var(--ssm-radius-lg); cursor: pointer;
-  background: var(--ssm-surface-brand); color: var(--ssm-content-on-fill-dark);
-  font-family: var(--ssm-font); font-size: var(--ssm-label-lg-size); line-height: var(--ssm-label-lg-lh); font-weight: var(--ssm-w-bold);
-  box-shadow: var(--ssm-elev-brand-raised);
-  transition: background var(--ssm-dur-fast) ease, box-shadow var(--ssm-dur-fast) ease, transform var(--ssm-dur-fast) ease;
-}
-.ssm-submit svg { width: var(--ssm-icon-md); height: var(--ssm-icon-md); }
-.ssm-submit:active { background: var(--ssm-surface-brand-pressed); box-shadow: var(--ssm-elev-brand-subtle); transform: scale(.99); }
-.ssm-submit:focus-visible { outline: var(--ssm-stroke-default) solid var(--ssm-stroke-focus); outline-offset: 2px; }
-@media (hover: hover) { .ssm-submit:hover { background: var(--ssm-surface-brand-hover); box-shadow: var(--ssm-elev-brand-lifted); } }
-
-/* visually-hidden labels (fields are labelled for screen readers; the icon + placeholder carry it visually) */
-.ssm-sr { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-
-/* ── Toast (A.09) — default confirmation when the host page doesn't handle submit ── */
-.ssm-toast {
-  position: fixed; left: 50%; bottom: max(32px, env(safe-area-inset-bottom)); z-index: 9998;
-  display: inline-flex; align-items: center; gap: var(--ssm-inline-md); max-width: calc(100% - 2 * var(--ssm-layout-xs));
-  padding: var(--ssm-inset-md) var(--ssm-inset-xl); border-radius: var(--ssm-radius-full);
-  background: var(--ssm-surface-inverse); color: var(--ssm-content-on-fill-dark); box-shadow: var(--ssm-elev-overlay);
-  font-family: var(--ssm-font); font-size: var(--ssm-body-md-size); line-height: var(--ssm-body-md-lh); font-weight: var(--ssm-w-semibold);
-  opacity: 0; transform: translate(-50%, 12px); pointer-events: none; transition: opacity 200ms ease, transform 260ms var(--ssm-ease-out);
-}
-.ssm-toast svg { width: var(--ssm-icon-md); height: var(--ssm-icon-md); flex: none; color: var(--ssm-c-green-300); }
-.ssm-toast span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ssm-toast.is-shown { opacity: 1; transform: translate(-50%, 0); }
+.ssm-fields { position: relative; display: flex; flex-direction: column; gap: var(--ssm-stack-md); }   /* input fields · 12 apart */
+.ssm-fields .field { position: relative; }                                                         /* the inline dropdown hangs from its field */
+.ssm-alert { margin-top: var(--ssm-stack-md); }                                                     /* alert component */
+.ssm-alert[hidden] { display: none; }
+.ssm-submit { margin-top: var(--ssm-section-md); }                                                  /* buttons atom · fields → Search Jobs 24 */
 
 @media (prefers-reduced-motion: reduce) {
-  .ssm, .ssm-card, .ssm-dropdown, .ssm-error-wrap, .ssm-toast { transition: none !important; }
+  .ssm, .ssm-card { transition: none !important; }
   .ssm-dialog.is-shaking { animation: none; }
 }
 </style>
@@ -6634,48 +6676,639 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
     })();
 
   </script>
-<script>
+<!-- ▼ COMPONENT · field-base v3.3.0 · verbatim copy of App-components/atoms/input-fields/field-base/field-base.js — do not edit here -->
+<script data-component="field-base">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · SEARCH MODAL  (app component)                       v1.3.0
-   Pair with search-modal.css. Zero dependencies, no build step.
+   SHINE · INPUT FIELDS · FIELD BASE  (app component · App-login · atoms/input-fields/)      v3.3.0
+   Pair with field-base.css. The shared engine under the five components — load it FIRST, then the script of each
+   component the page uses: normal-field.js · password-field.js · otp-field.js · combo-box.js · multi-input.js.
+   No dependencies (combo-box.js also uses the bottom sheet for its sheet mode).
+
+   One way to write any field:  <div class="field field--md" data-field="email"> … </div>
+     data-field   text · email · phone · email phone (either) · amount (v3.3.0)   → normal-field.js
+                  password (data-password="current | new | confirm")  → password-field.js
+                  otp      (maxlength 6 | 4 on the input)        → otp-field.js
+                  combo    (data-combo="inline | sheet | auto")   → combo-box.js
+                  date · experience  (a <fieldset>)              → multi-input.js
+
+   What every field shares:
+     Messages     ShineField.set(input | field, 'invalid' | 'valid' | 'helper' | 'positive' | null, text) — the one slot under the
+                  field: icon + text, aria-invalid, aria-describedby; text may hold one link ("Register instead")
+     The API      ShineField.get(field | input) → the component's api: { el, input, type, value(), set(v), clear(),
+                  check(submit) → '' or the error text }
+     Submit       ShineField.validate(form | any element) → true / false: checks every field inside, shows each
+                  error, puts the caret in the first one. Empty fields are an error only when the input is
+                  `required` ("Enter your <label>", or data-error-empty).
+     Tap focus    a tap anywhere on a box (padding, +91, a unit) puts the caret in its field
+     Caret        (v3.1.0) focusing a field never selects its text: the caret goes after the last character, thin and
+                  in the focus colour (--fld-caret). A tap in a field that already has the caret moves it as usual.
+     Wiring       fields are wired on load; ShineField.init(root) wires fields a page adds later
+   Events (bubble from the field): `shine:field` { type, value, valid } — every component sends it when its value
+   changes; some send their own as well (shine:otp-complete, shine:combo).
+   ═══════════════════════════════════════════════════════════════════════ */
+(function (global) {
+  'use strict';
+  if (global.ShineField) return;
+  var doc = global.document, IC = {"ic_alert-solid": "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_alert-solid\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M17.9912 9.47563L17.8548 8.43679L17.7358 7.92607L17.5839 7.42449L17.183 6.45704L16.9359 5.99483L16.3538 5.12348L16.0215 4.71893L15.2802 3.97755L14.8756 3.6453L14.0043 3.06319L13.542 2.81606L12.5746 2.41517L12.073 2.26323L11.0452 2.05912L9.99991 1.99048L9.47637 2.00787L8.43752 2.14425L7.9268 2.26323L7.42522 2.41517L6.45777 2.81606L5.55073 3.34052L5.12421 3.6453L4.71966 3.97755L3.97828 4.71893L3.64604 5.12348L3.06392 5.99483L2.81679 6.45704L2.4159 7.42449L2.26396 7.92607L2.05986 8.95392L1.99121 9.99917L2.0086 10.5227L2.14498 11.5616L2.26396 12.0723L2.4159 12.5739L2.81679 13.5413L3.34125 14.4483L3.64604 14.8749L3.97828 15.2794L4.71966 16.0208L5.55073 16.6578L5.99556 16.9352L6.45777 17.1823L7.42522 17.5832L8.43752 17.8541L8.95466 17.9392L9.47637 17.9905H10.5234L11.5623 17.8541L12.073 17.7351L13.0643 17.3983L13.542 17.1823L14.0043 16.9352L14.8756 16.353L15.2802 16.0208L16.0215 15.2794L16.6586 14.4483L16.9359 14.0035L17.183 13.5413L17.5839 12.5739L17.8548 11.5616L17.94 11.0444L18.0086 9.99917L17.9912 9.47563ZM9.17615 10.8229L9.19171 5.81085L9.31528 5.5143L9.54227 5.28732L9.83882 5.16375H10.161L10.4575 5.28732L10.582 5.38983L10.6845 5.5143L10.8081 5.81085V10.984L10.7605 11.1378L10.582 11.405L10.3148 11.5835L9.99991 11.6467L9.68505 11.5835L9.41779 11.405L9.23931 11.1378L9.17615 10.8229ZM10.9609 13.7518L10.8877 14.1198L10.679 14.431L10.3678 14.6396L9.99991 14.7129L9.63196 14.6396L9.32077 14.431L9.11208 14.1198L9.03886 13.7518L9.11208 13.3839L9.32077 13.0727L9.63196 12.864L9.99991 12.7908L10.3678 12.864L10.679 13.0727L10.8877 13.3839L10.9609 13.7518Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" fill=\"currentColor\"/></svg>", "ic_check-circle-solid": "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_check-circle-solid\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M18 9.48516L17.8636 8.44631L17.7446 7.93559L17.5927 7.43401L17.1918 6.46656L16.9447 6.00435L16.3626 5.133L16.0303 4.72845L15.2889 3.98707L14.8844 3.65483L14.013 3.07271L13.5508 2.82558L12.5834 2.42469L12.0818 2.27275L11.0539 2.06865L10.0087 2L9.48516 2.01739L8.44631 2.15377L7.93559 2.27275L7.43401 2.42469L6.46656 2.82558L5.55952 3.35004L5.133 3.65483L4.72845 3.98707L3.98707 4.72845L3.65483 5.133L3.07271 6.00435L2.82558 6.46656L2.42469 7.43401L2.27275 7.93559L2.06865 8.96345L2 10.0087L2.01739 10.5322L2.15377 11.5711L2.27275 12.0818L2.42469 12.5834L2.82558 13.5508L3.35004 14.4579L3.65483 14.8844L3.98707 15.2889L4.72845 16.0303L5.55952 16.6674L6.00435 16.9447L6.46656 17.1918L7.43401 17.5927L8.44631 17.8636L8.96345 17.9487L9.48516 18H10.5322L11.5711 17.8636L12.0818 17.7446L13.073 17.4078L13.5508 17.1918L14.013 16.9447L14.8844 16.3626L15.2889 16.0303L16.0303 15.2889L16.6674 14.4579L16.9447 14.013L17.1918 13.5508L17.5927 12.5834L17.8636 11.5711L17.9487 11.0539L18.0174 10.0087L18 9.48516ZM8.41336 13.2149L5.85058 10.7016L5.72427 10.4059L5.70688 10.2458L5.76637 9.92998L5.84143 9.78628L6.06659 9.55746L6.36222 9.43115L6.68348 9.42841L6.98187 9.54831L7.10726 9.64899L8.85636 11.3633L13.0712 7.12923L13.3678 7.00475L13.689 7.00292L13.9865 7.12465L14.1119 7.22716L14.2922 7.49351L14.3398 7.64727L14.3416 7.96854L14.2949 8.12322L14.1174 8.3914L9.44946 13.1051L9.18494 13.2845L9.03118 13.3321L8.71083 13.3348L8.41336 13.2149Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" fill=\"currentColor\"/></svg>"}, uid = 0, types = {};
+
+  function fieldOf(el) { return el && el.closest ? el.closest('.field[data-field], .field') : null; }
+  function idOf(el, pre) { if (!el.id) el.id = (pre || 'fld') + '-' + (++uid); return el.id; }
+  function describe(input, id, on) {
+    var ids = (input.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean), i = ids.indexOf(id);
+    if (on && i < 0) ids.unshift(id); if (!on && i >= 0) ids.splice(i, 1);
+    if (ids.length) input.setAttribute('aria-describedby', ids.join(' ')); else input.removeAttribute('aria-describedby');
+  }
+  function inputsOf(f) { return [].slice.call(f.querySelectorAll('.field-input, .field-otp-input')).filter(function (i) { return fieldOf(i) === f; }); }
+  function slot(f) {                                       // the one message slot under the box (helper or message)
+    var m = f.querySelector(':scope > .field-message, :scope > .field-helper');
+    if (!m) {
+      m = doc.createElement('p'); m.className = 'field-message'; m.hidden = true;
+      var after = f.querySelector(':scope > .field-control, :scope > .field-otp-wrap, :scope > .field-multi-boxes');
+      if (after && after.nextSibling) f.insertBefore(m, after.nextSibling); else f.appendChild(m);
+    }
+    idOf(m, 'fld-msg'); return m;
+  }
+
+  /* ── messages ─────────────────────────────────────────────────────── */
+  function set(target, state, html) {
+    var f = target.classList && target.classList.contains('field') ? target : fieldOf(target); if (!f) return;
+    var ins = target === f ? inputsOf(f) : [target], m = slot(f);
+    f.classList.toggle('field--invalid', state === 'invalid');
+    f.classList.toggle('field--valid', state === 'valid');
+    ins.forEach(function (i) { if (state === 'invalid') i.setAttribute('aria-invalid', 'true'); else i.removeAttribute('aria-invalid'); });
+    if ((state === 'invalid' || state === 'valid') && html) {
+      m.className = 'field-message'; m.innerHTML = (state === 'valid' ? IC['ic_check-circle-solid'] : IC['ic_alert-solid']) + '<span>' + html + '</span>';
+      m.hidden = false; m.setAttribute('role', state === 'invalid' ? 'alert' : 'status');
+    } else if ((state === 'helper' || state === 'positive') && html) {      // v3.3.0 · 'positive' = the helper in the positive colour
+      m.className = state === 'positive' ? 'field-helper field-helper--positive' : 'field-helper'; m.innerHTML = html; m.hidden = false; m.removeAttribute('role');
+    } else { m.hidden = true; m.innerHTML = ''; m.removeAttribute('role'); }
+    ins.forEach(function (i) { describe(i, m.id, !m.hidden); });
+  }
+  function isInvalid(el) { var f = fieldOf(el); return !!f && f.classList.contains('field--invalid'); }
+
+  /* the field's name, for "Enter your …" — the label (or legend) without its * / (optional) */
+  function nameOf(f) {
+    var l = f.querySelector(':scope > .field-label'); if (!l) return 'this';
+    var c = l.cloneNode(true); [].forEach.call(c.querySelectorAll('.required, .optional'), function (x) { x.remove(); });
+    var t = c.textContent.replace(/\s+/g, ' ').trim(); return t ? t.charAt(0).toLowerCase() + t.slice(1) : 'this';
+  }
+  function emptyText(f) { return f.getAttribute('data-error-empty') || 'Enter your ' + nameOf(f); }
+  function required(f) { return inputsOf(f).some(function (i) { return i.required || i.getAttribute('aria-required') === 'true'; }) || f.hasAttribute('data-required'); }
+  function emit(f, name, detail) { try { f.dispatchEvent(new CustomEvent(name, { bubbles: true, detail: detail })); } catch (e) {} }
+
+  // a tap anywhere on a box (padding, +91, a unit) puts the caret in its field
+  doc.addEventListener('click', function (e) {
+    var c = e.target.closest && e.target.closest('.field-control'); if (!c || e.target.closest('button, a, input')) return;
+    var i = c.querySelector('.field-input'); if (i && !i.disabled) i.focus();
+  });
+
+  /* v3.1.0 · caret at the end (user: "the whole value got selected … too bold on the user's face"). Focusing a field — a
+     tap, Tab, a script — never selects its text: the caret lands after the last character. Whoever selected it on focus
+     (a browser, a component, iOS placing the caret at the tap) is overruled once, right after the focus settles; a tap
+     inside a field that ALREADY has the caret is left alone, so people can still place it mid-word to fix a letter. */
+  function caretEnd(i) {
+    if (doc.activeElement !== i || i.readOnly) return;
+    var n = i.value.length; if (!n) return;
+    try { if (i.selectionStart !== n || i.selectionEnd !== n) i.setSelectionRange(n, n); } catch (e) { return; }   // email / number inputs have no selection API
+    i.scrollLeft = i.scrollWidth;                          // a long value shows its end
+  }
+  function isFieldInput(t) { return t && t.classList && t.classList.contains('field-input') && t.tagName !== 'SELECT'; }
+  var justFocused = null;
+  doc.addEventListener('focusin', function (e) {
+    var i = e.target; if (!isFieldInput(i)) return;
+    justFocused = i; setTimeout(function () { caretEnd(i); }, 0);
+    setTimeout(function () { if (justFocused === i) justFocused = null; }, 700);
+  });
+  // iOS / Android place the caret at the finger AFTER focus (on touchend / mouseup) — put it back at the end, once
+  ['mouseup', 'touchend'].forEach(function (n) {
+    doc.addEventListener(n, function (e) {
+      var i = e.target && e.target.closest && e.target.closest('.field-input');
+      if (i && i === justFocused) setTimeout(function () { caretEnd(i); justFocused = null; }, 0);
+    }, true);
+  });
+
+  /* ── components register here; every .field[data-field] is wired once ── */
+  function tokenOf(f) { return (f.getAttribute('data-field') || '').trim().split(/\s+/)[0]; }
+  function wire(f) {
+    if (f.__fld) return f.__fld;
+    var t = types[tokenOf(f)]; if (!t) return null;
+    var api = t(f) || {}; api.el = f; api.type = api.type || tokenOf(f);
+    if (!api.input) api.input = inputsOf(f)[0] || null;
+    f.__fld = api; return api;
+  }
+  function init(root) {
+    root = root || doc;
+    if (root.matches && root.matches('.field[data-field]')) wire(root);
+    [].forEach.call(root.querySelectorAll('.field[data-field]'), wire);
+  }
+  var ready = doc.readyState !== 'loading';
+  function add(names, setup) {
+    (Array.isArray(names) ? names : [names]).forEach(function (n) { types[n] = setup; });
+    if (ready) init();
+  }
+  if (!ready) doc.addEventListener('DOMContentLoaded', function () { ready = true; init(); });
+  function get(el) { var f = el && (el.__fld ? el : fieldOf(el)); return f ? (f.__fld || wire(f)) : null; }
+
+  /* ── submit: check every field inside root ──────────────────────────── */
+  function validate(root) {
+    root = root || doc; var ok = true, first = null, list = [];
+    if (root.matches && root.matches('.field[data-field]')) list.push(root);
+    [].push.apply(list, root.querySelectorAll('.field[data-field]'));
+    list.forEach(function (f) {
+      var api = get(f); if (!api || !api.check) return;
+      var ins = inputsOf(f); if (ins.length && ins.every(function (i) { return i.disabled; })) return;
+      var msg = api.check(true);
+      if (msg) { ok = false; if (api.showError) api.showError(msg); else set(f, 'invalid', msg); if (!first) first = api; }
+    });
+    if (first) { var t = first.focusTarget ? first.focusTarget() : first.input; if (t) try { t.focus(); } catch (e) {} }
+    return ok;
+  }
+
+  global.ShineField = { version: '3.3.0', set: set, isInvalid: isInvalid, get: get, validate: validate, add: add, init: init,
+    types: function () { return Object.keys(types); }, icons: IC,
+    _: { fieldOf: fieldOf, idOf: idOf, describe: describe, inputsOf: inputsOf, emptyText: emptyText, nameOf: nameOf, required: required, emit: emit } };
+})(window);
+</script>
+<!-- ▲ COMPONENT · field-base -->
+<!-- ▼ COMPONENT · inline-dropdown v1.6.0 · verbatim copy of App-components/Modals/inline-dropdown/inline-dropdown.js — do not edit here -->
+<script data-component="inline-dropdown">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · INLINE DROPDOWN  (app component · App-login · app-components/inline-dropdown/)      v1.6.0
+   Pair with inline-dropdown.css. Zero dependencies, no build step. Global: ShineDropdown.
+
+   The list under a field. One pick at a time, two ways to use it (mode):
+     select   pick only — the field doesn’t take typing (social platform). Type-ahead jumps.
+     search   type to narrow, then pick one (job role, current city). Optional free row: keep what you typed.
+   A field that collects several values (key skills, preferred cities, languages) still picks one at a time: search
+   with fillInput: 'clear' — the page adds the chip — and dd.added(values) marks what’s in already (“Added”).
+
+   ① From a script (how the combo box and pages use it)
+     var dd = ShineDropdown.create({
+       input:   el,                // the element that has focus: an <input> (search) or the field’s box / a button (select)
+       anchor:  el,                // what the panel sits under and takes its width from (default: input.closest('.field-control') || input)
+       mode:    'search',          // 'select' | 'search'
+       options: [ 'Pune', { value: 'ncr', label: 'Delhi NCR', hint: 'Delhi · Gurugram · Noida', icon: '<svg…>', group: 'Popular', added: false, disabled: false } ],
+                                  // added: true → can’t be picked, an “Added” badge on the right · disabled + reason → can’t be picked, the reason as the hint
+       source:  function (q) { return fetch(…).then(r => r.json()); },   // optional server search (after minChars, 200 ms debounce)
+       minChars: 2,
+       free:    'Use “{q}”',       // search: a last row that keeps the typed words ({q}); omit for none
+       heading: 'Popular cities',  // a heading over the list before anything is typed
+       value:   'Pune',            // what is chosen now (value or label)
+       empty:   'No matches for “{q}”',
+       size:    'sm',              // the list’s own size, by device — never the field’s: 'sm' phone & mobile view (default: 38 rows, 12 text, 14 icons, 3½ rows) · 'md' tablet & computer (44, 4½ rows)
+       addedText: 'Added',         // the badge on rows that are already added
+       placement: 'auto',          // 'auto' (under; above when there is no room) · 'below' · 'above'
+       openOnFocus: true,          // search (select opens on tap / ↓ / Enter / Space)
+       fillInput:   true,          // the picked label goes into the field · 'clear': the input empties (a chips field adds the pick)
+       onPick:  function (opt, state) {}
+     });
+     dd.open() · dd.close() · dd.toggle() · dd.isOpen() · dd.options(list) · dd.source(fn) · dd.value(v?) ·
+     dd.added(values) · dd.enable(on) · dd.selected() · dd.refresh() · dd.destroy() · dd.el (the panel) · dd.list
+
+   ② Declarative (pages without a script of their own)
+     <div class="field field--md" data-dropdown="select" data-dropdown-heading="…" data-dropdown-free="Use “{q}”">
+       <label class="field-label" for="x">Social platform</label>
+       <div class="field-control"><input class="field-input" id="x" readonly placeholder="Select platform"></div>
+       <ul data-dropdown-options hidden><li data-value="in" data-hint="…" data-group="…" data-added>LinkedIn</li> …</ul>   (data-dropdown-size="sm|md|lg" on the field)
+     </div>
+     ShineDropdown.init(root) runs on load; ShineDropdown.get(el) → the controller.
+
+   Events (on the input, bubbling)
+     shine:dropdown-open · shine:dropdown-close
+     shine:dropdown-pick  detail { value, label, option, free }
+
+   Behaviour (WAI-ARIA combobox + listbox): role="combobox", aria-expanded, aria-controls, aria-activedescendant,
+   listbox / option, a polite count of results · ↑ ↓ move (wrap), Home / End and
+   Page Up / Down in select, Enter picks, Escape closes (and doesn’t close the sheet behind), Tab leaves, letters
+   jump in select · tap picks, a tap outside or leaving the field closes · under the field, or above it when there
+   is no room (the keyboard — measured on the visible area) · inside a scrolling sheet the field scrolls up first so
+   the list fits under it · Small shows 3½ rows, Medium 4½ — the half row says there is more · the panel never takes focus (the caret stays in the field) · reduced motion respected.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function (global) {
+  'use strict';
+  if (global.ShineDropdown) return;
+  var doc = global.document, uid = 0, all = [];
+  var IC = {"ic_check-outline": "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_check-outline\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M7.071 15.244L7.364 15.435L7.708 15.5L8.05 15.429L8.34 15.233L17.24 6.23295L17.433 5.93995L17.5 5.59495L17.43 5.25095L17.233 4.95995L16.94 4.76695L16.595 4.69995L16.251 4.76995L15.96 4.96695L7.689 13.331L3.891 9.64595L3.565 9.51495L3.214 9.51895L2.891 9.65795L2.756 9.77095L2.565 10.065L2.5 10.411L2.573 10.754L2.658 10.909L7.071 15.244Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" fill=\"currentColor\"/></svg>", "ic_plus-outline": "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_plus-outline\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M17 10C17 10.2228 16.9115 10.4364 16.754 10.594C16.5964 10.7515 16.3828 10.84 16.16 10.84H10.84V16.16C10.84 16.3828 10.7515 16.5964 10.594 16.754C10.4364 16.9115 10.2228 17 10 17C9.77722 17 9.56356 16.9115 9.40603 16.754C9.2485 16.5964 9.16 16.3828 9.16 16.16V10.84H3.84C3.61722 10.84 3.40356 10.7515 3.24603 10.594C3.0885 10.4364 3 10.2228 3 10C3 9.77722 3.0885 9.56356 3.24603 9.40603C3.40356 9.2485 3.61722 9.16 3.84 9.16H9.16V3.84C9.16 3.61722 9.2485 3.40356 9.40603 3.24603C9.56356 3.0885 9.77722 3 10 3C10.2228 3 10.4364 3.0885 10.594 3.24603C10.7515 3.40356 10.84 3.61722 10.84 3.84V9.16H16.16C16.3828 9.16 16.5964 9.2485 16.754 9.40603C16.9115 9.56356 17 9.77722 17 10Z\" fill=\"currentColor\"/></svg>"};                                   // atoms/icons: ic_check-outline · ic_plus-outline (verbatim)
+  var reduced = global.matchMedia ? global.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+
+  function low(s) { return String(s == null ? '' : s).toLowerCase(); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function emit(el, name, detail) {
+    var ev; try { ev = new CustomEvent(name, { bubbles: true, detail: detail || {} }); }
+    catch (e) { ev = doc.createEvent('CustomEvent'); ev.initCustomEvent(name, true, false, detail || {}); }
+    el.dispatchEvent(ev);
+  }
+  function toOpt(o) {
+    if (o == null) return null;
+    if (typeof o !== 'object') return { value: String(o), label: String(o), hint: '' };
+    var l = o.label != null ? o.label : o.value;
+    return { value: String(o.value != null ? o.value : l), label: String(l), hint: o.hint || '', icon: o.icon || '', group: o.group || '',
+             added: !!o.added, disabled: !!o.disabled || !!o.added, __dis: !!o.disabled, reason: o.reason || '' };
+  }
+  // starts with → a word starts with → anywhere → in the hint
+  function score(o, q) {
+    var l = low(o.label), i = l.indexOf(q);
+    if (i === 0) return 0;
+    if (i > 0) return /[\s\-(\/,.&]/.test(l.charAt(i - 1)) ? 1 : 2;
+    return o.hint && low(o.hint).indexOf(q) > -1 ? 3 : -1;
+  }
+  function mark(label, q) {
+    var i = q ? low(label).indexOf(q) : -1; if (i < 0) return esc(label);
+    return esc(label.slice(0, i)) + '<mark>' + esc(label.slice(i, i + q.length)) + '</mark>' + esc(label.slice(i + q.length));
+  }
+  function scroller(el) {                               // the nearest scrolling ancestor (a sheet’s body, a page area)
+    for (var n = el.parentElement; n && n !== doc.body; n = n.parentElement) {
+      var o = getComputedStyle(n).overflowY;
+      if (o === 'auto' || o === 'scroll') return n;
+    }
+    return null;
+  }
+  function clipBox(el) {                                // the part of the screen the panel can show in: the visible area ∩ every clipping ancestor
+    var vv = global.visualViewport, t = vv ? vv.offsetTop : 0, b = t + (vv ? vv.height : global.innerHeight);
+    for (var n = el.parentElement; n && n !== doc.body && n !== doc.documentElement; n = n.parentElement) {
+      if (getComputedStyle(n).overflowY !== 'visible') { var r = n.getBoundingClientRect(); t = Math.max(t, r.top); b = Math.min(b, r.bottom); }
+    }
+    return { top: t, bottom: b };
+  }
+
+  function create(cfg) {
+    cfg = cfg || {};
+    var input = cfg.input; if (!input) throw new Error('ShineDropdown: input is required');
+    if (input.__dd) return input.__dd;
+    var mode = cfg.mode === 'select' ? 'select' : 'search';   // one pick at a time (v1.3.0: no multi-pick mode)
+    var typing = mode !== 'select' && input.tagName === 'INPUT' && !input.readOnly;
+    var anchor = cfg.anchor || (input.closest && input.closest('.field-control')) || input;
+    var host = anchor.parentNode;
+    var n = ++uid, opts = [], remote = cfg.source || null, minQ = cfg.minChars || 2, token = 0, tm = 0, state = null;
+    var off = false, dirty = false, lastQ = null, sel = [], open = false, active = -1, shown = [], persist = !!cfg.persist, buf = '', bufT = 0, rvT = 0, spacer = 0;
+    var openOnFocus = cfg.openOnFocus != null ? !!cfg.openOnFocus : typing;
+    var fillInput = cfg.fillInput === 'clear' ? 'clear' : cfg.fillInput !== false;
+
+    // the panel — after the anchor, inside its parent (which must position it: set relative if static)
+    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+    var panel = doc.createElement('div'); panel.className = 'dropdown'; panel.hidden = true;
+    var size = cfg.size === 'md' || cfg.size === 'lg' ? 'md' : 'sm';   // two sizes (v1.5.0: no Large — 'lg' falls back to Medium)   // the list’s own size (by device), independent of the field’s — Small by default (v1.4.0)
+    panel.classList.add('dropdown--' + size);
+    var list = doc.createElement('ul'); list.className = 'dropdown-list'; list.id = 'dropdown-' + n; list.setAttribute('role', 'listbox');
+    var label = cfg.label || (function () { var l = input.id && doc.querySelector('label[for="' + input.id + '"]'); return l ? l.textContent.trim() : (input.getAttribute('aria-label') || 'Options'); })();
+    list.setAttribute('aria-label', label);
+    panel.appendChild(list);
+    var live = doc.createElement('span'); live.className = 'dropdown-sr'; live.setAttribute('aria-live', 'polite'); panel.appendChild(live);
+    host.insertBefore(panel, anchor.nextSibling);
+
+    // the trigger: ARIA combobox (an editable one, or the select-only pattern)
+    input.setAttribute('role', 'combobox'); input.setAttribute('aria-expanded', 'false'); input.setAttribute('aria-controls', list.id);
+    input.setAttribute('aria-haspopup', 'listbox');
+    if (typing) { input.setAttribute('aria-autocomplete', 'list'); input.setAttribute('autocomplete', 'off'); input.setAttribute('spellcheck', 'false'); }
+    if (!typing && input.tabIndex < 0 && input.tagName !== 'INPUT' && input.tagName !== 'BUTTON') input.tabIndex = 0;
+
+    function setOptions(lst) { opts = (lst || []).map(toOpt).filter(Boolean); if (open) render(); }
+    function isSel(o) { return sel.indexOf(o.value) > -1; }
+    function find(v) { var s = low(String(v)); for (var i = 0; i < opts.length; i++) if (opts[i].value === String(v) || low(opts[i].label) === s) return opts[i]; return null; }
+    function setValue(v) {
+      var vs = v == null || v === '' ? [] : [Array.isArray(v) ? v[0] : v];
+      sel = vs.map(function (x) { var o = find(x); return o ? o.value : String(x); });
+      if (open) render();
+    }
+    function write(t) {                                 // the chosen label into the field (an <input>, or [data-dropdown-label] inside a button)
+      if (input.tagName === 'INPUT') input.value = t;
+      else { var l = input.querySelector('[data-dropdown-label]'); if (l) l.textContent = t; }
+    }
+    function query() { return typing && dirty ? input.value : ''; }   // until they type, the whole list (the chosen row ticked)
+
+    /* ── the list ─────────────────────────────────────────────────── */
+    function filtered(q) {
+      if (!q) return opts.slice(0, 200);
+      return opts.map(function (o, i) { return { o: o, i: i, s: score(o, q) }; }).filter(function (x) { return x.s > -1; })
+        .sort(function (a, b) { return a.s - b.s || a.i - b.i; }).slice(0, 100).map(function (x) { return x.o; });
+    }
+    function render(lst, st) {
+      var raw = query(), q = low(raw.trim()), h = '', k = 0, grp = null;
+      var keep = q === lastQ && active > -1 && shown[active] ? shown[active].value : null; lastQ = q;   // same search again (refresh): the grey row stays
+      if (lst === undefined) lst = remote && q ? (state && state.q === q ? state.list : []) : filtered(q);
+      st = st || (remote && q && q.length < minQ ? 'short' : null);
+      shown = [];
+      if (st === 'loading') h += '<li class="dropdown-note" role="presentation"><span class="dropdown-spin" aria-hidden="true"></span>Searching…</li>';
+      else if (st === 'short') h += '<li class="dropdown-note" role="presentation">Type ' + minQ + ' letters to search</li>';
+      else if (st === 'error') h += '<li class="dropdown-note dropdown-note--error" role="presentation">Couldn’t load the list<button class="dropdown-retry" type="button" tabindex="-1" data-dd-retry>Try again</button></li>';
+      if (!q && cfg.heading && lst.length) h += '<li class="dropdown-head" role="presentation">' + esc(cfg.heading) + '</li>';
+      lst.forEach(function (o) {
+        if (!q && o.group && o.group !== grp) { if (grp !== null) h += '<li class="dropdown-sep" role="presentation"></li>'; h += '<li class="dropdown-head" role="presentation">' + esc(o.group) + '</li>'; grp = o.group; }
+        var on = isSel(o), dis = o.disabled, hint = o.disabled && !o.added && o.reason ? o.reason : o.hint;
+        h += '<li class="dropdown-option" role="option" id="' + list.id + '-' + k + '" data-k="' + k + '" aria-selected="' + on + '"' + (dis ? ' aria-disabled="true"' : '') + '>' +
+             (o.icon ? '<span class="dropdown-lead" aria-hidden="true">' + o.icon + '</span>' : '') +
+             '<span class="dropdown-text"><span>' + mark(o.label, q) + '</span>' + (hint ? '<span class="dropdown-hint">' + esc(hint) + '</span>' : '') + '</span>' +
+             (o.added ? '<span class="badge badge--sm badge--neutral dropdown-badge">' + esc(cfg.addedText || 'Added') + '</span>' : '<span class="dropdown-check" aria-hidden="true">' + IC['ic_check-outline'] + '</span>') + '</li>';
+        shown.push(o); k++;
+      });
+      var t = raw.trim();
+      if (cfg.free && typing && t && !st && !lst.some(function (o) { return low(o.label) === low(t); })) {
+        h += '<li class="dropdown-option dropdown-option--free" role="option" id="' + list.id + '-' + k + '" data-k="' + k + '" aria-selected="false">' +
+             '<span class="dropdown-lead" aria-hidden="true">' + IC['ic_plus-outline'] + '</span><span class="dropdown-text"><span>' + esc(cfg.free.replace(/\{q\}/g, t)) + '</span></span></li>';
+        shown.push({ value: t, label: t, hint: '', free: true }); k++;
+      }
+      if (!lst.length && !st && q && !(cfg.free && typing)) h += '<li class="dropdown-note" role="presentation">' + esc((cfg.empty || 'No matches for “{q}”').replace(/\{q\}/g, t)) + '</li>';
+      list.innerHTML = h;
+      panel.hidden = !h;
+      live.textContent = st === 'loading' ? 'Searching' : shown.length ? shown.length + (shown.length === 1 ? ' result' : ' results') : (q ? 'No matches' : '');
+      var s = -1;
+      if (keep != null) shown.forEach(function (o, i) { if (s < 0 && o.value === keep && pickable(i)) s = i; });
+      if (s < 0 && !q) shown.forEach(function (o, i) { if (s < 0 && isSel(o)) s = i; });
+      setActive(s > -1 ? s : q ? firstPickable(0, 1) : -1, true);
+      place(); more();
+    }
+    function update() {
+      if (!remote) return render();
+      var q = low(query().trim());
+      clearTimeout(tm); var my = ++token;
+      if (!q) return render(filtered(''));
+      if (q.length < minQ) return render([], 'short');
+      if (state && state.q === q) return render(state.list);
+      render([], 'loading');
+      tm = setTimeout(function () {
+        Promise.resolve().then(function () { return remote(query().trim()); }).then(function (res) {
+          if (my !== token || !open) return; state = { q: q, list: (res || []).map(toOpt).filter(Boolean) }; render(state.list);
+        }, function () { if (my === token && open) render([], 'error'); });
+      }, 200);
+    }
+    function pickable(i) { var li = list.querySelector('[data-k="' + i + '"]'); return !!li && li.getAttribute('aria-disabled') !== 'true'; }
+    function firstPickable(from, dir) {
+      if (!shown.length) return -1;
+      for (var c = 0, i = from; c < shown.length; c++, i = (i + dir + shown.length) % shown.length) if (pickable(i)) return i;
+      return -1;
+    }
+    function setActive(k, quiet) {
+      [].forEach.call(list.querySelectorAll('.dropdown-option.is-active'), function (x) { x.classList.remove('is-active'); });
+      active = k < 0 || k >= shown.length ? -1 : k;
+      var li = active > -1 ? list.querySelector('[data-k="' + active + '"]') : null;
+      if (li) { li.classList.add('is-active'); input.setAttribute('aria-activedescendant', li.id); keepInView(li, quiet); }
+      else input.removeAttribute('aria-activedescendant');
+    }
+    function keepInView(li, center) {
+      var r = li.getBoundingClientRect(), b = panel.getBoundingClientRect();
+      if (center && (r.top < b.top || r.bottom > b.bottom)) panel.scrollTop += r.top - b.top - (b.height - r.height) / 2;
+      else if (r.top < b.top) panel.scrollTop -= b.top - r.top + 4;
+      else if (r.bottom > b.bottom) panel.scrollTop += r.bottom - b.bottom + 4;
+    }
+    function capH() {                                   // Small: 3½ options show (ends halfway down the 4th) · Medium: 4½ (the 5th) — the half row says there is more
+      var o = list.querySelectorAll('.dropdown-option'), n = size === 'sm' ? 3 : 4;
+      if (o.length > n + 1) return Math.round(o[n].offsetTop + o[n].offsetHeight / 2);
+      return panel.scrollHeight + 2;
+    }
+    function more() { panel.classList.toggle('is-more', panel.scrollHeight - panel.scrollTop - panel.clientHeight > 2); }
+
+    /* ── where it sits: under the anchor, or above it when there is no room (the keyboard) ── */
+    function place() {
+      if (!open) return;
+      var a = anchor.getBoundingClientRect(), box = clipBox(host);
+      var gap = parseFloat(getComputedStyle(panel).getPropertyValue('--dd-gap')) || 4, mx = capH();
+      panel.style.setProperty('--dd-max', mx + 'px');
+      var below = box.bottom - a.bottom - gap - 8, above = a.top - box.top - gap - 8, want = mx;
+      var anchored = !!(host.closest && host.closest('.bs-body--anchored'));   // v1.5.1: the sheet is gliding this field up to the top — the list goes under it
+      var up = cfg.placement === 'above' ? true : cfg.placement === 'below' || anchored ? false : below < Math.min(want, 180) && above > below, room = persist ? mx : Math.max(120, Math.min(mx, up ? above : below));   // persist (held open in a guideline): full height
+      panel.style.setProperty('--dd-room', room + 'px');
+      panel.style.left = anchor.offsetLeft + 'px'; panel.style.width = anchor.offsetWidth + 'px';
+      if (up) { panel.style.top = 'auto'; panel.style.bottom = (host.clientHeight - anchor.offsetTop + gap) + 'px'; }
+      else { panel.style.bottom = 'auto'; panel.style.top = (anchor.offsetTop + anchor.offsetHeight + gap) + 'px'; }
+      panel.classList.toggle('dropdown--up', up);
+    }
+    // inside a scrolling area (a full-screen form): scroll the field up until the list fits above the keyboard
+    function reveal() {
+      if (!open || persist) return;
+      var sc = scroller(host); if (!sc || sc.classList.contains('bs-body--anchored')) return;   // v1.5.1: the bottom sheet's focus anchor already makes the room
+      var vv = global.visualViewport, vb = vv ? vv.offsetTop + vv.height : global.innerHeight;
+      var b = sc.getBoundingClientRect(), a = anchor.getBoundingClientRect(), top = host.getBoundingClientRect().top;
+      var gap = parseFloat(getComputedStyle(panel).getPropertyValue('--dd-gap')) || 4, mx = capH();
+      var want = mx + gap + 12, room = Math.min(b.bottom, vb) - a.bottom;
+      if (room >= want) return;
+      var d = Math.min(want - room, top - b.top - 8); if (d <= 1) return;
+      var spare = sc.scrollHeight - sc.clientHeight - sc.scrollTop;   // the last fields of a form: make the room to scroll into
+      if (spare < d) { spacer += Math.ceil(d - spare + 4); host.style.marginBottom = spacer + 'px'; }
+      sc.scrollTop += d; place();
+    }
+    function revealSoon() { clearTimeout(rvT); rvT = setTimeout(reveal, 60); }
+
+    /* ── open / close / pick ──────────────────────────────────────── */
+    function openIt() {
+      if (off || open || input.disabled || input.getAttribute('aria-disabled') === 'true') return;
+      all.forEach(function (d) { if (d !== api && d.isOpen() && !d.__persist) d.close(); });
+      open = true; dirty = !!input.value && !(sel[0] && (function (o) { return o && o.label === input.value; })(find(sel[0]) || { label: sel[0] }));
+      input.setAttribute('aria-expanded', 'true');
+      var f = input.closest && input.closest('.field'); if (f) f.classList.add('field--open');
+      panel.hidden = false;
+      if (!reduced.matches && !persist) { panel.classList.add('is-entering'); requestAnimationFrame(function () { requestAnimationFrame(function () { panel.classList.remove('is-entering'); }); }); }
+      update(); revealSoon(); setTimeout(reveal, 420);     // again once the keyboard has slid up
+      emit(input, 'shine:dropdown-open', {});
+    }
+    function closeIt() {
+      if (!open || persist) return;
+      open = false; clearTimeout(tm); token++; lastQ = null;
+      panel.hidden = true; input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant');
+      var f = input.closest && input.closest('.field'); if (f) f.classList.remove('field--open');
+      if (spacer) { spacer = 0; host.style.marginBottom = ''; }
+      emit(input, 'shine:dropdown-close', {});
+    }
+    function pick(o) {
+      if (!o) return;
+      if (fillInput === 'clear') { sel = []; write(''); dirty = false; }     // a chips field: the page adds the pick, the input empties
+      else { sel = [o.value]; if (fillInput) write(o.label); }
+      var detail = { value: o.value, label: o.label, option: o.free ? null : o, free: !!o.free };
+      if (cfg.onPick) cfg.onPick(o, detail);
+      emit(input, 'shine:dropdown-pick', detail);
+      closeIt();
+    }
+
+    /* ── keys ─────────────────────────────────────────────────────── */
+    function step(d) {
+      if (!shown.length) return;
+      var k = active < 0 ? (d > 0 ? 0 : shown.length - 1) : (active + d + shown.length) % shown.length;
+      setActive(firstPickable(k, d > 0 ? 1 : -1));
+    }
+    function jump(ch) {                                   // select: typing letters jumps to the next row that starts with them
+      clearTimeout(bufT); buf += low(ch); bufT = setTimeout(function () { buf = ''; }, 600);
+      var from = active + (buf.length === 1 ? 1 : 0);
+      for (var c = 0; c < shown.length; c++) { var i = (from + c) % shown.length; if (low(shown[i].label).indexOf(buf) === 0 && pickable(i)) { setActive(i); return; } }
+    }
+    function onKey(e) {
+      if (off) return;
+      var k = e.key;
+      if (k === 'ArrowDown' || k === 'ArrowUp') { e.preventDefault(); if (!open) { openIt(); return; } step(k === 'ArrowDown' ? 1 : -1); }
+      else if (open && !typing && (k === 'Home' || k === 'End')) { e.preventDefault(); setActive(firstPickable(k === 'Home' ? 0 : shown.length - 1, k === 'Home' ? 1 : -1)); }
+      else if (open && (k === 'PageDown' || k === 'PageUp')) { e.preventDefault(); var t = Math.max(0, Math.min(shown.length - 1, (active < 0 ? 0 : active) + (k === 'PageDown' ? 5 : -5))); setActive(firstPickable(t, k === 'PageDown' ? 1 : -1)); }
+      else if (k === 'Enter') { if (open && active > -1) { e.preventDefault(); if (pickable(active)) pick(shown[active]); } else if (!open && !typing) { e.preventDefault(); openIt(); } }
+      else if (k === ' ' && !typing) { e.preventDefault(); if (!open) openIt(); else if (active > -1 && pickable(active)) pick(shown[active]); }
+      else if (k === 'Escape') { if (open && !persist) { e.preventDefault(); e.stopPropagation(); closeIt(); } }
+      else if (k === 'Tab') { if (!persist) closeIt(); }
+      else if (!typing && open && k.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) jump(k);
+    }
+
+    /* ── wiring ───────────────────────────────────────────────────── */
+    input.addEventListener('keydown', onKey);
+    function onInput() { if (off) return; dirty = true; if (!open) openIt(); else update(); revealSoon(); }
+    function onFocus() { if (openOnFocus) openIt(); }
+    function onBlur() { setTimeout(function () { if (!persist && doc.activeElement !== input && !panel.contains(doc.activeElement)) closeIt(); }, 0); }
+    function onTap(e) { if (e.target.closest('.field-trailing') && typing) return; if (open && !typing) closeIt(); else openIt(); }
+    if (typing) input.addEventListener('input', onInput);
+    input.addEventListener('focus', onFocus);
+    input.addEventListener('blur', onBlur);
+    var tapEl = anchor === input ? input : anchor;
+    tapEl.addEventListener('click', onTap);
+    panel.addEventListener('mousedown', function (e) { e.preventDefault(); });   // the caret stays in the field
+    panel.addEventListener('click', function (e) {
+      if (e.target.closest('[data-dd-retry]')) { state = null; update(); return; }
+      var li = e.target.closest('.dropdown-option'); if (!li || li.getAttribute('aria-disabled') === 'true') return;
+      pick(shown[+li.getAttribute('data-k')]);
+      if (typing && doc.activeElement !== input) try { input.focus({ preventScroll: true }); } catch (x) {}
+    });
+    panel.addEventListener('scroll', more, { passive: true });
+    function outside(e) { if (open && !persist && !panel.contains(e.target) && !anchor.contains(e.target) && e.target !== input) closeIt(); }
+    doc.addEventListener('pointerdown', outside, true);
+    function re() { place(); }
+    function onScroll(e) { if (open && e.target !== panel && !panel.contains(e.target)) place(); }
+    global.addEventListener('resize', re, { passive: true });
+    global.addEventListener('scroll', onScroll, { passive: true, capture: true });
+    function onVv() { place(); revealSoon(); }
+    if (global.visualViewport) { global.visualViewport.addEventListener('resize', onVv); global.visualViewport.addEventListener('scroll', re); }
+
+    var api = {
+      el: panel, list: list, input: input, mode: mode,
+      open: openIt, close: closeIt, toggle: function () { open ? closeIt() : openIt(); }, isOpen: function () { return open; },
+      options: function (lst) { if (!lst) return opts.slice(); setOptions(lst); return api; },
+      source: function (fn) { remote = typeof fn === 'function' ? fn : null; state = null; if (open) update(); return api; },
+      value: function (v) { if (v === undefined) return sel[0] || ''; setValue(v); return api; },
+      added: function (vals) {                          // mark what a chips field holds already: those rows get “Added” and can’t be picked
+        var on = (vals || []).map(function (x) { return low(String(x)); });
+        opts.forEach(function (o) { var a = on.indexOf(low(o.value)) > -1 || on.indexOf(low(o.label)) > -1; if (a !== o.added) { o.added = a; o.disabled = a || o.__dis; } });
+        if (open) render(); return api;
+      },
+      selected: function () { return sel.map(function (v) { return find(v) || { value: v, label: v, free: true }; }); },
+      refresh: function () { if (open) update(); place(); return api; },
+      persist: function (on) { persist = !!on; api.__persist = persist; return api; },
+      enable: function (on) { off = on === false; if (off) { var p = persist; persist = false; closeIt(); persist = p; } return api; },   // off: it never opens (a combo box in its sheet mode)
+      destroy: function () {
+        persist = false; closeIt(); panel.remove(); input.removeEventListener('keydown', onKey);
+        input.removeEventListener('input', onInput); input.removeEventListener('focus', onFocus); input.removeEventListener('blur', onBlur); tapEl.removeEventListener('click', onTap);
+        doc.removeEventListener('pointerdown', outside, true); global.removeEventListener('resize', re); global.removeEventListener('scroll', onScroll, true);
+        if (global.visualViewport) { global.visualViewport.removeEventListener('resize', onVv); global.visualViewport.removeEventListener('scroll', re); }
+        all.splice(all.indexOf(api), 1); delete input.__dd;
+      }
+    };
+    api.__persist = persist;
+    setOptions(cfg.options || []);
+    if (cfg.value != null) { setValue(cfg.value); if (fillInput === true && sel[0] && !(input.tagName === 'INPUT' && input.value)) { var o0 = find(sel[0]); write(o0 ? o0.label : sel[0]); } }
+    input.__dd = api; all.push(api);
+    return api;
+  }
+
+  /* ── declarative: [data-dropdown] ───────────────────────────────── */
+  function fromMarkup(el) {
+    if (el.__ddHost) return el.__ddHost;
+    var input = el.querySelector('[data-dropdown-trigger]') || el.querySelector('input, button, [role="combobox"]'); if (!input) return null;
+    var src = el.querySelector('[data-dropdown-options]');
+    var options = src ? [].map.call(src.querySelectorAll('li'), function (li) {
+      var t = li.textContent.replace(/\s+/g, ' ').trim();
+      return { value: li.getAttribute('data-value') || t, label: t, hint: li.getAttribute('data-hint') || '', group: li.getAttribute('data-group') || '',
+               disabled: li.hasAttribute('data-disabled'), added: li.hasAttribute('data-added'), reason: li.getAttribute('data-reason') || '', icon: li.querySelector('svg') ? li.querySelector('svg').outerHTML : '' };
+    }) : [];
+    if (src) src.hidden = true;
+    var g = function (a) { return el.getAttribute('data-dropdown-' + a); };
+    var d = create({ input: input, mode: el.getAttribute('data-dropdown') || 'search', options: options, free: g('free') || '', heading: g('heading') || '',
+                     empty: g('empty') || '', size: g('size') || 'sm', value: g('value') || null });
+    el.__ddHost = d; return d;
+  }
+  function init(root) { [].forEach.call((root || doc).querySelectorAll('[data-dropdown]'), fromMarkup); }
+  function get(el) { if (!el) return null; if (el.__dd) return el.__dd; if (el.__ddHost) return el.__ddHost; var h = el.closest && el.closest('[data-dropdown]'); return h ? fromMarkup(h) : null; }
+  if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', function () { init(); }); else init();
+
+  global.ShineDropdown = { create: create, init: init, get: get, version: '1.5.1' };
+})(window);
+</script>
+<!-- ▲ COMPONENT · inline-dropdown -->
+<!-- ▼ COMPONENT · alert v1.2.0 · verbatim copy of App-components/alert/alert.js — do not edit here -->
+<script data-component="alert">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · ALERT  (app component · App-login)                     v1.2.0
+   Pair with alert.css. Renders the design-system A.07 Alert.
+
+   ShineAlert.html({
+     intent: 'neutral' | 'info' | 'positive' | 'notice' | 'negative',   // default 'neutral'
+     title?:  'Profile incomplete',            // Body / md bold, intent colour
+     text?:   'Add 2 more skills…',            // Body / sm medium, always neutral muted — required unless a title is given
+                                               // (v1.2.0: title only = one short line, .alert--title-only)
+     icon?:   an icons-atom name — 'ic_info-solid' | 'ic_check-circle-solid' | 'ic_alert-solid' | 'ic_alert-outline' |
+              'ic_info-outline' | 'ic_clock-outline' | 'ic_bookmark-solid' — or '<svg…>' (any other atom icon) | false,   // default per intent
+     dismissible?: true,                       // adds the 44 close column
+     id?:     'profile-alert',                 // reported in the event
+     live?:   true                             // role="status" (role="alert" for negative) when injected after load
+   })
+   Event: 'shine:alert' bubbles from the alert when it is dismissed, detail { action: 'dismiss', id, alert }.
+   Cancelable: call preventDefault() to keep it on screen; otherwise it is removed.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function (global) {
+  'use strict';
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var ICONS = {   // icons atom (atoms/icons/icons.json v2.1.0, verbatim) — A.07: a filled icon that echoes the content; any other atom icon: pass its svg
+    'ic_info-solid': '<svg aria-hidden="true" focusable="false" data-icon="ic_info-solid" viewBox="0 0 20 20" fill="none"><path d="M10 2C8.41775 2 6.87103 2.46919 5.55544 3.34824C4.23985 4.22729 3.21447 5.47672 2.60897 6.93853C2.00347 8.40034 1.84504 10.0089 2.15372 11.5607C2.4624 13.1126 3.22433 14.538 4.34315 15.6569C5.46197 16.7757 6.88743 17.5376 8.43928 17.8463C9.99113 18.155 11.5997 17.9965 13.0615 17.391C14.5233 16.7855 15.7727 15.7602 16.6518 14.4446C17.5308 13.129 18 11.5822 18 10C17.9978 7.87895 17.1542 5.84542 15.6544 4.34562C14.1546 2.84581 12.121 2.00224 10 2ZM9.69231 5.69231C9.87488 5.69231 10.0533 5.74644 10.2051 5.84787C10.3569 5.9493 10.4753 6.09347 10.5451 6.26214C10.615 6.43081 10.6333 6.61641 10.5976 6.79547C10.562 6.97453 10.4741 7.139 10.345 7.2681C10.2159 7.39719 10.0515 7.48511 9.87239 7.52072C9.69333 7.55634 9.50773 7.53806 9.33906 7.46819C9.17039 7.39833 9.02623 7.28002 8.9248 7.12822C8.82337 6.97642 8.76923 6.79795 8.76923 6.61538C8.76923 6.37057 8.86649 6.13578 9.0396 5.96267C9.21271 5.78956 9.44749 5.69231 9.69231 5.69231ZM10.6154 14.3077C10.289 14.3077 9.97591 14.178 9.7451 13.9472C9.51429 13.7164 9.38462 13.4033 9.38462 13.0769V10C9.22141 10 9.06488 9.93516 8.94947 9.81976C8.83407 9.70435 8.76923 9.54782 8.76923 9.38461C8.76923 9.2214 8.83407 9.06488 8.94947 8.94947C9.06488 8.83406 9.22141 8.76923 9.38462 8.76923C9.71104 8.76923 10.0241 8.8989 10.2549 9.12971C10.4857 9.36053 10.6154 9.67358 10.6154 10V13.0769C10.7786 13.0769 10.9351 13.1418 11.0505 13.2572C11.1659 13.3726 11.2308 13.5291 11.2308 13.6923C11.2308 13.8555 11.1659 14.012 11.0505 14.1274C10.9351 14.2429 10.7786 14.3077 10.6154 14.3077Z" fill="currentColor"/></svg>',
+    'ic_check-circle-solid': '<svg aria-hidden="true" focusable="false" data-icon="ic_check-circle-solid" viewBox="0 0 20 20" fill="none"><path d="M18 9.48516L17.8636 8.44631L17.7446 7.93559L17.5927 7.43401L17.1918 6.46656L16.9447 6.00435L16.3626 5.133L16.0303 4.72845L15.2889 3.98707L14.8844 3.65483L14.013 3.07271L13.5508 2.82558L12.5834 2.42469L12.0818 2.27275L11.0539 2.06865L10.0087 2L9.48516 2.01739L8.44631 2.15377L7.93559 2.27275L7.43401 2.42469L6.46656 2.82558L5.55952 3.35004L5.133 3.65483L4.72845 3.98707L3.98707 4.72845L3.65483 5.133L3.07271 6.00435L2.82558 6.46656L2.42469 7.43401L2.27275 7.93559L2.06865 8.96345L2 10.0087L2.01739 10.5322L2.15377 11.5711L2.27275 12.0818L2.42469 12.5834L2.82558 13.5508L3.35004 14.4579L3.65483 14.8844L3.98707 15.2889L4.72845 16.0303L5.55952 16.6674L6.00435 16.9447L6.46656 17.1918L7.43401 17.5927L8.44631 17.8636L8.96345 17.9487L9.48516 18H10.5322L11.5711 17.8636L12.0818 17.7446L13.073 17.4078L13.5508 17.1918L14.013 16.9447L14.8844 16.3626L15.2889 16.0303L16.0303 15.2889L16.6674 14.4579L16.9447 14.013L17.1918 13.5508L17.5927 12.5834L17.8636 11.5711L17.9487 11.0539L18.0174 10.0087L18 9.48516ZM8.41336 13.2149L5.85058 10.7016L5.72427 10.4059L5.70688 10.2458L5.76637 9.92998L5.84143 9.78628L6.06659 9.55746L6.36222 9.43115L6.68348 9.42841L6.98187 9.54831L7.10726 9.64899L8.85636 11.3633L13.0712 7.12923L13.3678 7.00475L13.689 7.00292L13.9865 7.12465L14.1119 7.22716L14.2922 7.49351L14.3398 7.64727L14.3416 7.96854L14.2949 8.12322L14.1174 8.3914L9.44946 13.1051L9.18494 13.2845L9.03118 13.3321L8.71083 13.3348L8.41336 13.2149Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg>',
+    'ic_alert-solid': '<svg aria-hidden="true" focusable="false" data-icon="ic_alert-solid" viewBox="0 0 20 20" fill="none"><path d="M17.9912 9.47563L17.8548 8.43679L17.7358 7.92607L17.5839 7.42449L17.183 6.45704L16.9359 5.99483L16.3538 5.12348L16.0215 4.71893L15.2802 3.97755L14.8756 3.6453L14.0043 3.06319L13.542 2.81606L12.5746 2.41517L12.073 2.26323L11.0452 2.05912L9.99991 1.99048L9.47637 2.00787L8.43752 2.14425L7.9268 2.26323L7.42522 2.41517L6.45777 2.81606L5.55073 3.34052L5.12421 3.6453L4.71966 3.97755L3.97828 4.71893L3.64604 5.12348L3.06392 5.99483L2.81679 6.45704L2.4159 7.42449L2.26396 7.92607L2.05986 8.95392L1.99121 9.99917L2.0086 10.5227L2.14498 11.5616L2.26396 12.0723L2.4159 12.5739L2.81679 13.5413L3.34125 14.4483L3.64604 14.8749L3.97828 15.2794L4.71966 16.0208L5.55073 16.6578L5.99556 16.9352L6.45777 17.1823L7.42522 17.5832L8.43752 17.8541L8.95466 17.9392L9.47637 17.9905H10.5234L11.5623 17.8541L12.073 17.7351L13.0643 17.3983L13.542 17.1823L14.0043 16.9352L14.8756 16.353L15.2802 16.0208L16.0215 15.2794L16.6586 14.4483L16.9359 14.0035L17.183 13.5413L17.5839 12.5739L17.8548 11.5616L17.94 11.0444L18.0086 9.99917L17.9912 9.47563ZM9.17615 10.8229L9.19171 5.81085L9.31528 5.5143L9.54227 5.28732L9.83882 5.16375H10.161L10.4575 5.28732L10.582 5.38983L10.6845 5.5143L10.8081 5.81085V10.984L10.7605 11.1378L10.582 11.405L10.3148 11.5835L9.99991 11.6467L9.68505 11.5835L9.41779 11.405L9.23931 11.1378L9.17615 10.8229ZM10.9609 13.7518L10.8877 14.1198L10.679 14.431L10.3678 14.6396L9.99991 14.7129L9.63196 14.6396L9.32077 14.431L9.11208 14.1198L9.03886 13.7518L9.11208 13.3839L9.32077 13.0727L9.63196 12.864L9.99991 12.7908L10.3678 12.864L10.679 13.0727L10.8877 13.3839L10.9609 13.7518Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg>',
+    'ic_alert-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_alert-outline" viewBox="0 0 20 20" fill="none"><path d="M10.0001 12.3029C10.2733 12.3029 10.5351 12.4119 10.7283 12.605C10.9215 12.7982 11.0304 13.06 11.0304 13.3332C11.0304 13.5368 10.9701 13.7358 10.8571 13.9052C10.7439 14.0745 10.5822 14.2069 10.394 14.2849C10.206 14.3626 9.99893 14.3833 9.79935 14.3436C9.59965 14.3038 9.41588 14.2054 9.27189 14.0614C9.12792 13.9174 9.02943 13.7337 8.9897 13.534C8.95005 13.3343 8.9706 13.1273 9.04841 12.9393C9.12634 12.7511 9.25885 12.5894 9.42814 12.4762C9.59735 12.3633 9.79666 12.303 10.0001 12.3029Z" fill="currentColor"/><path d="M10.0001 5.63632C10.1929 5.63632 10.3779 5.71313 10.5143 5.84939C10.6507 5.98578 10.7274 6.1707 10.7274 6.36359V10.606C10.7274 10.7988 10.6507 10.9838 10.5143 11.1202C10.3779 11.2564 10.1929 11.3332 10.0001 11.3332C9.80738 11.3331 9.62219 11.2564 9.4859 11.1202C9.34965 10.9838 9.27284 10.7987 9.27284 10.606V6.36359C9.27284 6.17081 9.34965 5.98575 9.4859 5.84939C9.62219 5.7131 9.80738 5.63644 10.0001 5.63632Z" fill="currentColor"/><path d="M10.3969 2.01042C12.3733 2.11045 14.2484 2.93974 15.6544 4.34562C17.1542 5.84538 17.9978 7.87892 18 9.99991L17.9943 10.2963C17.9395 11.7746 17.4755 13.2107 16.6515 14.444C15.7725 15.7595 14.5233 16.7855 13.0616 17.3909C11.6 17.9963 9.99116 18.155 8.43951 17.8464C6.88785 17.5377 5.46168 16.7757 4.34297 15.657C3.22428 14.5383 2.46226 13.1122 2.1536 11.5605C1.845 10.0088 2.00368 8.40006 2.60909 6.93839C3.21454 5.47673 4.2406 4.22749 5.55602 3.34847C6.87144 2.46959 8.4181 2.00009 10.0001 2L10.3969 2.01042ZM12.5048 3.95263C11.3091 3.45745 9.99298 3.32806 8.7236 3.58047C7.45408 3.83308 6.28666 4.45589 5.37137 5.37117C4.4561 6.28653 3.8332 7.45383 3.58067 8.72341C3.32826 9.99284 3.45758 11.3088 3.95282 12.5046C4.44818 13.7005 5.28754 14.7229 6.36378 15.4421C7.44004 16.1612 8.70571 16.5452 10.0001 16.5453L10.324 16.5368C11.9412 16.4549 13.4755 15.7762 14.626 14.6258C15.8531 13.3987 16.5435 11.7352 16.5455 9.99991L16.5407 9.75749C16.4959 8.54787 16.1165 7.37266 15.4423 6.36359C14.7231 5.2873 13.7007 4.448 12.5048 3.95263Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg>',
+    'ic_info-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_info-outline" viewBox="0 0 20 20" fill="none"><path d="M9.39422 8.66504C9.7481 8.66516 10.0883 8.80543 10.3386 9.05566C10.5888 9.30598 10.7282 9.64607 10.7282 10V12.918C10.8758 12.9433 11.0135 13.0128 11.1208 13.1201C11.2575 13.2568 11.3347 13.4424 11.3347 13.6357C11.3346 13.829 11.2574 14.0147 11.1208 14.1514C10.9841 14.2879 10.7983 14.3643 10.6052 14.3643C10.2513 14.3641 9.91107 14.2229 9.66082 13.9727C9.41117 13.7226 9.27135 13.3837 9.27117 13.0303V10.1104C9.12365 10.085 8.98588 10.0164 8.8786 9.90918C8.7421 9.77259 8.66484 9.58763 8.66473 9.39453C8.66473 9.20119 8.74188 9.01562 8.8786 8.87891C9.01531 8.7422 9.20089 8.66504 9.39422 8.66504Z" fill="currentColor"/><path d="M9.89813 5.65625C10.0981 5.69611 10.2823 5.79335 10.4264 5.9375C10.5708 6.08182 10.6698 6.26662 10.7097 6.4668C10.7492 6.66668 10.728 6.87422 10.6501 7.0625C10.572 7.25093 10.4398 7.41303 10.2702 7.52637C10.1006 7.63957 9.90084 7.69917 9.69696 7.69922C9.42346 7.69922 9.16095 7.59073 8.96746 7.39746C8.77396 7.20394 8.66473 6.94067 8.66473 6.66699C8.66482 6.46311 8.72629 6.26427 8.83953 6.09473C8.95281 5.92526 9.11318 5.79296 9.30145 5.71484C9.48995 5.63676 9.69801 5.61648 9.89813 5.65625Z" fill="currentColor"/><path d="M10.3972 2.01074C12.3734 2.11094 14.2491 2.93887 15.655 4.34473C17.1547 5.84451 17.9974 7.87899 17.9997 10C17.9997 11.5821 17.5309 13.1288 16.652 14.4443C15.773 15.7599 14.523 16.7861 13.0612 17.3916C11.5995 17.997 9.99091 18.1543 8.43914 17.8457C6.88731 17.537 5.46127 16.776 4.34246 15.6572C3.22365 14.5384 2.46267 13.1124 2.15399 11.5605C1.84534 10.0088 2.00265 8.40022 2.60809 6.93848C3.21359 5.47667 4.23976 4.22671 5.55535 3.34766C6.87085 2.4688 8.41761 2 9.99969 2L10.3972 2.01074ZM12.5036 3.95605C11.3083 3.46095 9.99225 3.33164 8.72332 3.58398C7.45447 3.83646 6.28853 4.45922 5.37371 5.37402C4.45891 6.28883 3.83616 7.45479 3.58367 8.72363C3.33133 9.99256 3.46064 11.3086 3.95574 12.5039C4.45089 13.6991 5.28928 14.7207 6.36492 15.4395C7.44075 16.1583 8.7058 16.542 9.99969 16.542L10.3239 16.5332C11.9402 16.4513 13.4739 15.7738 14.6237 14.624C15.8501 13.3976 16.5397 11.7344 16.5417 10C16.5417 8.70612 16.158 7.44106 15.4391 6.36523C14.7204 5.2896 13.6988 4.4512 12.5036 3.95605Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg>',
+    'ic_clock-outline': '<svg aria-hidden="true" focusable="false" data-icon="ic_clock-outline" viewBox="0 0 20 20" fill="none"><path d="M9.72865 6.04408C10.0933 6.04427 10.3892 6.33994 10.3892 6.70462V9.71402C10.3893 9.80308 10.4246 9.94758 10.513 10.1028C10.6017 10.2581 10.708 10.3621 10.784 10.4072L10.7865 10.409L10.7883 10.4098L13.0614 11.7662C13.3746 11.9531 13.4772 12.3595 13.2902 12.6727C13.1032 12.9856 12.6977 13.0874 12.3846 12.9006L10.1105 11.5443C9.83078 11.3783 9.60151 11.1308 9.43364 10.87L9.36569 10.7573C9.19401 10.4563 9.06825 10.0872 9.06811 9.71402V6.70462C9.06811 6.33982 9.36384 6.04408 9.72865 6.04408Z" fill="currentColor"/><path d="M9.99957 2C14.4156 2 17.9998 5.58359 18 9.99957C17.9999 14.4156 14.4156 18 9.99957 18C5.58368 17.9999 2.00012 14.4155 2 9.99957C2.00015 5.58368 5.5837 2.00014 9.99957 2ZM9.99957 3.32108C6.31331 3.32122 3.32123 6.31329 3.32108 9.99957C3.32119 13.6859 6.31329 16.6788 9.99957 16.6789C13.686 16.6789 16.6788 13.686 16.6789 9.99957C16.6788 6.31321 13.686 3.32108 9.99957 3.32108Z" fill-rule="evenodd" clip-rule="evenodd" fill="currentColor"/></svg>',
+    'ic_bookmark-solid': '<svg aria-hidden="true" focusable="false" data-icon="ic_bookmark-solid" viewBox="0 0 20 20" fill="none"><path d="M14.6002 3H6.20002C5.88176 3 5.57653 3.12643 5.35148 3.35148C5.12643 3.57653 5 3.88176 5 4.20002V17.4003C5.00005 17.5074 5.02876 17.6125 5.08314 17.7047C5.13753 17.797 5.21561 17.873 5.30928 17.9249C5.40295 17.9767 5.50879 18.0026 5.61584 17.9998C5.72288 17.997 5.82721 17.9655 5.91802 17.9088L10.4001 15.1075L14.8829 17.9088C14.9737 17.9654 15.078 17.9966 15.1849 17.9993C15.2919 18.0021 15.3976 17.9762 15.4911 17.9243C15.5847 17.8724 15.6627 17.7965 15.717 17.7044C15.7713 17.6122 15.8001 17.5073 15.8002 17.4003V4.20002C15.8002 3.88176 15.6738 3.57653 15.4487 3.35148C15.2237 3.12643 14.9185 3 14.6002 3Z" fill="currentColor"/></svg>'
+  };
+  var DEFAULT = { neutral: 'ic_info-solid', info: 'ic_info-solid', positive: 'ic_check-circle-solid', notice: 'ic_alert-solid', negative: 'ic_alert-solid' };
+  var CLOSE = '<svg aria-hidden="true" focusable="false" data-icon="ic_close-outline" viewBox="0 0 20 20" fill="none"><path d="M16.2528 3.00257L16.3599 3.01371L16.3814 3.01543L16.4028 3.02228L16.5056 3.05313L16.5253 3.05999L16.5433 3.06942L16.6582 3.12941L16.6753 3.14398L16.7584 3.21254L16.7747 3.22625L16.7884 3.24253L16.857 3.32566L16.8716 3.3428L16.9316 3.45764L16.941 3.47564L16.947 3.49535L16.9787 3.59819L16.9855 3.61876L16.9873 3.64104L16.9984 3.74816L17.0001 3.76959L16.9984 3.79101L16.9873 3.89814L16.9855 3.92042L16.9787 3.94099L16.947 4.04383L16.941 4.06354L16.9316 4.08154L16.8716 4.19638L16.857 4.21352L16.7884 4.29665L16.7816 4.30522L11.0859 10L16.7816 15.6956L16.7884 15.7042L16.857 15.7873L16.8716 15.8045L16.9316 15.9193L16.941 15.9373L16.947 15.957L16.9787 16.0599L16.9855 16.0804L16.9873 16.1027L16.9984 16.2098L17.0001 16.2313L16.9984 16.2527L16.9873 16.3598L16.9855 16.3812L16.9787 16.4027L16.947 16.5055L16.941 16.5252L16.9316 16.5432L16.8716 16.6581L16.857 16.6752L16.7884 16.7583L16.7747 16.7746L16.7584 16.7883L16.6753 16.8569L16.6582 16.8714L16.5433 16.9314L16.5253 16.9409L16.5056 16.9469L16.4028 16.9786L16.3814 16.9854L16.3599 16.9871L16.2528 16.9983L16.2314 17L16.21 16.9983L16.1028 16.9871L16.0806 16.9854L16.06 16.9786L15.9571 16.9469L15.9374 16.9409L15.9194 16.9314L15.8046 16.8714L15.7875 16.8569L15.7043 16.7883L15.6958 16.7815L10.0001 11.0858L4.30534 16.7815L4.29676 16.7883L4.21364 16.8569L4.1965 16.8714L4.08166 16.9314L4.06366 16.9409L4.04395 16.9469L3.94111 16.9786L3.92054 16.9854L3.89826 16.9871L3.79113 16.9983L3.76971 17L3.74828 16.9983L3.64116 16.9871L3.61888 16.9854L3.59831 16.9786L3.49547 16.9469L3.47576 16.9409L3.45776 16.9314L3.34292 16.8714L3.32578 16.8569L3.24265 16.7883L3.22637 16.7746L3.21266 16.7583L3.1441 16.6752L3.12953 16.6581L3.06954 16.5432L3.06011 16.5252L3.05325 16.5055L3.0224 16.4027L3.01555 16.3812L3.01383 16.3598L3.00269 16.2527L3.00098 16.2313L3.00269 16.2098L3.01383 16.1027L3.01555 16.0804L3.0224 16.0599L3.05325 15.957L3.06011 15.9373L3.06954 15.9193L3.12953 15.8045L3.1441 15.7873L3.21266 15.7042L3.21951 15.6956L3.22637 15.6879L8.91344 10L3.21866 4.30522L3.21266 4.29665L3.1441 4.21352L3.12953 4.19638L3.06954 4.08154L3.06011 4.06354L3.05325 4.04383L3.0224 3.94099L3.01555 3.92042L3.01383 3.89814L3.00269 3.79101L3.00098 3.76959L3.00269 3.74816L3.01383 3.64104L3.01555 3.61876L3.0224 3.59819L3.05325 3.49535L3.06011 3.47564L3.06954 3.45764L3.12953 3.3428L3.1441 3.32566L3.21266 3.24253L3.22637 3.22625L3.24265 3.21254L3.32578 3.14398L3.34292 3.12941L3.45776 3.06942L3.47576 3.05999L3.49547 3.05313L3.59831 3.02228L3.61888 3.01543L3.64116 3.01371L3.74828 3.00257L3.76971 3L3.79113 3.00257L3.89826 3.01371L3.92054 3.01543L3.94111 3.02228L4.04395 3.05313L4.06366 3.05999L4.08166 3.06942L4.1965 3.12941L4.21364 3.14398L4.29676 3.21254L4.30534 3.21854L10.0001 8.91332L15.688 3.22625L15.6958 3.21939L15.7043 3.21254L15.7875 3.14398L15.8046 3.12941L15.9194 3.06942L15.9374 3.05999L15.9571 3.05313L16.06 3.02228L16.0806 3.01543L16.1028 3.01371L16.21 3.00257L16.2314 3L16.2528 3.00257Z" fill="currentColor"/></svg>';   // icons atom
+
+  function html(o) {
+    o = o || {};
+    var intent = DEFAULT[o.intent] ? o.intent : 'neutral';
+    var ic = o.icon === false ? '' : (o.icon && o.icon.charAt(0) === '<' ? o.icon : ICONS[o.icon || DEFAULT[intent]] || '');
+    var body = o.text != null && o.text !== '';
+    var role = o.live ? (intent === 'negative' ? ' role="alert"' : ' role="status"') : (o.title ? '' : ' role="note"');
+    return '<div class="alert alert--' + intent + (o.title ? (body ? '' : ' alert--title-only') : ' alert--text-only') + '"' + (o.id ? ' data-alert-id="' + esc(o.id) + '"' : '') + role + '>' +
+      '<div class="alert-main">' + (ic ? '<span class="alert-icon" aria-hidden="true">' + ic + '</span>' : '') +
+        '<div class="alert-body">' + (o.title ? '<p class="alert-title">' + esc(o.title) + '</p>' : '') + (body ? '<p class="alert-text">' + esc(o.text) + '</p>' : '') + '</div></div>' +
+      (o.dismissible ? '<button class="alert-close-col" type="button" data-alert-close aria-label="Dismiss' + (o.title ? ' ' + esc(o.title) : '') + '">' + CLOSE + '</button>' : '') +
+    '</div>';
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-alert-close]'); if (!b) return;
+    var al = b.closest('.alert'); if (!al) return;
+    var ev = new CustomEvent('shine:alert', { bubbles: true, cancelable: true, detail: { action: 'dismiss', id: al.getAttribute('data-alert-id'), alert: al } });
+    if (al.dispatchEvent(ev)) al.remove();
+  });
+  global.ShineAlert = { version: '1.2.0', html: html, icons: ICONS };
+})(window);
+</script>
+<!-- ▲ COMPONENT · alert -->
+<!-- ▼ COMPONENT · search-modal v2.0.0 · verbatim copy of App-components/Modals/search-modal/search-modal.js — do not edit here -->
+<script data-component="search-modal">
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · SEARCH MODAL  (app component · App-components/Modals/)    v2.0.0
+   Pair with search-modal.css. Built ONLY from App-components (v2.0.0, user 2026-11-19):
+     buttons atom (close · Search Jobs) · badges atom (eyebrow) · input fields / field-base (3 fields, Small) ·
+     inline dropdown (ShineDropdown: role · city suggestions, experience list) · alert (ShineAlert: validation) ·
+     notify (ShineNotify: the toast) · icons atom (every glyph).
+   Needs on the page, before this script: field-base.js · inline-dropdown.js · alert.js (+ notify.js for toasts).
 
    Open it from anywhere — three equivalent ways:
-
-   1. Declarative (no JS on the page):
-        <button data-shine-search>Explore jobs</button>                    → fresh search
-        <button data-shine-search="edit"
-                data-ssm-keyword-from="#heroQuery"
-                data-ssm-location-from="#heroLocation">Edit search</button>  → prefilled from the page
-        <a data-shine-search data-ssm-location="Pune" data-ssm-source="city-page">Search jobs</a>
-
-   2. Programmatic:
-        ShineSearch.open({ keyword:'Product Manager', location:'India', source:'jsrp' })
-        ShineSearch.close()
-        ShineSearch.configure({ resultsUrl:'jsrp.html' })   // app-wide defaults
-
-   3. Drop-in for the existing JSRP contract:
-        openSearchOverlay({ keyword, location, experience })              → same as open(), edit mode
-
-   Listen for the result on any page:
-        document.addEventListener('shine:search', e => e.detail)
-          detail = { keywords:[…], locations:[…], experience, query, location, mode, source }
-        Call e.preventDefault() to take over (no default toast / navigation).
+   1. Declarative:   <button data-shine-search>Explore jobs</button>                     → fresh search
+                     <button data-shine-search="edit" data-ssm-keyword-from="#q">…</button>  → prefilled from the page
+   2. Programmatic:  ShineSearch.open({ keyword:'Product Manager', location:'India', source:'jsrp' })
+                     ShineSearch.close() · ShineSearch.configure({ resultsUrl:'jsrp.html' }) · ShineSearch.isOpen()
+   3. JSRP drop-in:  openSearchOverlay({ keyword, location, experience })              → open(), edit mode
+   Result: document.addEventListener('shine:search', e => e.detail)
+             detail = { keywords:[…], locations:[…], experience, query, location, mode, source }
+           e.preventDefault() takes over (no default navigation / toast).
    ═══════════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
   if (global.ShineSearch) return;
   var doc = global.document;
 
-  /* ── Icons (24-grid, stroke = currentColor) ───────────────────────── */
-  var I = {
-    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>',
-    pin:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>',
-    clock:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
-    caret:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
-    close:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>',
-    alert:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>',
-    check:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>'
-  };
+  /* ── Icons — the icons atom (atoms/icons, verbatim) ───────────────── */
+  var I = { close: "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_close-outline\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M16.2528 3.00257L16.3599 3.01371L16.3814 3.01543L16.4028 3.02228L16.5056 3.05313L16.5253 3.05999L16.5433 3.06942L16.6582 3.12941L16.6753 3.14398L16.7584 3.21254L16.7747 3.22625L16.7884 3.24253L16.857 3.32566L16.8716 3.3428L16.9316 3.45764L16.941 3.47564L16.947 3.49535L16.9787 3.59819L16.9855 3.61876L16.9873 3.64104L16.9984 3.74816L17.0001 3.76959L16.9984 3.79101L16.9873 3.89814L16.9855 3.92042L16.9787 3.94099L16.947 4.04383L16.941 4.06354L16.9316 4.08154L16.8716 4.19638L16.857 4.21352L16.7884 4.29665L16.7816 4.30522L11.0859 10L16.7816 15.6956L16.7884 15.7042L16.857 15.7873L16.8716 15.8045L16.9316 15.9193L16.941 15.9373L16.947 15.957L16.9787 16.0599L16.9855 16.0804L16.9873 16.1027L16.9984 16.2098L17.0001 16.2313L16.9984 16.2527L16.9873 16.3598L16.9855 16.3812L16.9787 16.4027L16.947 16.5055L16.941 16.5252L16.9316 16.5432L16.8716 16.6581L16.857 16.6752L16.7884 16.7583L16.7747 16.7746L16.7584 16.7883L16.6753 16.8569L16.6582 16.8714L16.5433 16.9314L16.5253 16.9409L16.5056 16.9469L16.4028 16.9786L16.3814 16.9854L16.3599 16.9871L16.2528 16.9983L16.2314 17L16.21 16.9983L16.1028 16.9871L16.0806 16.9854L16.06 16.9786L15.9571 16.9469L15.9374 16.9409L15.9194 16.9314L15.8046 16.8714L15.7875 16.8569L15.7043 16.7883L15.6958 16.7815L10.0001 11.0858L4.30534 16.7815L4.29676 16.7883L4.21364 16.8569L4.1965 16.8714L4.08166 16.9314L4.06366 16.9409L4.04395 16.9469L3.94111 16.9786L3.92054 16.9854L3.89826 16.9871L3.79113 16.9983L3.76971 17L3.74828 16.9983L3.64116 16.9871L3.61888 16.9854L3.59831 16.9786L3.49547 16.9469L3.47576 16.9409L3.45776 16.9314L3.34292 16.8714L3.32578 16.8569L3.24265 16.7883L3.22637 16.7746L3.21266 16.7583L3.1441 16.6752L3.12953 16.6581L3.06954 16.5432L3.06011 16.5252L3.05325 16.5055L3.0224 16.4027L3.01555 16.3812L3.01383 16.3598L3.00269 16.2527L3.00098 16.2313L3.00269 16.2098L3.01383 16.1027L3.01555 16.0804L3.0224 16.0599L3.05325 15.957L3.06011 15.9373L3.06954 15.9193L3.12953 15.8045L3.1441 15.7873L3.21266 15.7042L3.21951 15.6956L3.22637 15.6879L8.91344 10L3.21866 4.30522L3.21266 4.29665L3.1441 4.21352L3.12953 4.19638L3.06954 4.08154L3.06011 4.06354L3.05325 4.04383L3.0224 3.94099L3.01555 3.92042L3.01383 3.89814L3.00269 3.79101L3.00098 3.76959L3.00269 3.74816L3.01383 3.64104L3.01555 3.61876L3.0224 3.59819L3.05325 3.49535L3.06011 3.47564L3.06954 3.45764L3.12953 3.3428L3.1441 3.32566L3.21266 3.24253L3.22637 3.22625L3.24265 3.21254L3.32578 3.14398L3.34292 3.12941L3.45776 3.06942L3.47576 3.05999L3.49547 3.05313L3.59831 3.02228L3.61888 3.01543L3.64116 3.01371L3.74828 3.00257L3.76971 3L3.79113 3.00257L3.89826 3.01371L3.92054 3.01543L3.94111 3.02228L4.04395 3.05313L4.06366 3.05999L4.08166 3.06942L4.1965 3.12941L4.21364 3.14398L4.29676 3.21254L4.30534 3.21854L10.0001 8.91332L15.688 3.22625L15.6958 3.21939L15.7043 3.21254L15.7875 3.14398L15.8046 3.12941L15.9194 3.06942L15.9374 3.05999L15.9571 3.05313L16.06 3.02228L16.0806 3.01543L16.1028 3.01371L16.21 3.00257L16.2314 3L16.2528 3.00257Z\" fill=\"currentColor\"/></svg>", search: "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_search-outline\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M15.5652 7.68295L15.3862 6.78195L15.2522 6.34195L15.0902 5.91195L14.6842 5.08795L14.1732 4.32295L13.8822 3.96795L13.2322 3.31795L12.8772 3.02695L12.5032 2.75895L11.7072 2.29895L11.2882 2.10995L10.4182 1.81395L9.9712 1.70995L9.0592 1.58995L8.6002 1.57495L7.6832 1.63495L7.2292 1.70995L6.3422 1.94795L5.9122 2.10995L5.0882 2.51595L4.6972 2.75895L3.9682 3.31795L3.6332 3.63295L3.0272 4.32295L2.5162 5.08695L2.2992 5.49295L2.1102 5.91195L1.8142 6.78195L1.7102 7.22895L1.5902 8.14095L1.5752 8.59995L1.6352 9.51695L1.7102 9.97095L1.9482 10.858L2.2992 11.707L2.7592 12.503L3.3182 13.232L3.9682 13.882L4.3232 14.173L5.0872 14.684L5.9122 15.09L6.7822 15.386L7.6832 15.565L8.1412 15.61H9.0592L9.9712 15.49L10.4182 15.386L11.2882 15.09L12.1122 14.684L12.8902 14.163L16.9642 18.236L17.2562 18.431L17.4242 18.483H17.7762L18.1002 18.3479L18.3482 18.1L18.4312 17.944L18.4832 17.7759V17.424L18.3482 17.1L14.1632 12.89L14.4412 12.503L14.9012 11.707L15.0902 11.288L15.3862 10.418L15.5652 9.51695L15.6102 9.05895L15.6252 8.59995L15.5652 7.68295ZM14.3632 8.97795L14.2642 9.72695L14.0692 10.456L13.9352 10.81L13.6012 11.488L13.4022 11.808L12.9422 12.408L12.4082 12.942L12.1162 13.182L11.4872 13.601L11.1542 13.779L10.4562 14.069L10.0952 14.178L9.7272 14.264L8.9782 14.363H8.2222L7.8462 14.326L7.1052 14.178L6.74419 14.069L6.0462 13.779L5.7122 13.601L5.3922 13.402L4.7922 12.942L4.5162 12.684L4.0182 12.116L3.7982 11.808L3.4212 11.154L3.2652 10.81L3.0222 10.095L2.8742 9.35395L2.8372 8.97795L2.8252 8.59995L2.8742 7.84595L2.9362 7.47295L3.1312 6.74395L3.4212 6.04595L3.5992 5.71195L4.0182 5.08395L4.2582 4.79195L4.5162 4.51595L5.0842 4.01795L5.3922 3.79795L6.0462 3.42095L6.74419 3.13095L7.1052 3.02195L7.8462 2.87395L8.2222 2.83695L8.6002 2.82495L9.3542 2.87395L9.7272 2.93595L10.4562 3.13095L11.1542 3.42095L11.4882 3.59895L12.1162 4.01795L12.4082 4.25795L12.9422 4.79195L13.1822 5.08395L13.6012 5.71295L13.7792 6.04595L14.0692 6.74395L14.1782 7.10495L14.3262 7.84595L14.3632 8.22195V8.97795Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" fill=\"currentColor\"/></svg>", pin: "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_location-outline\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M10.0026 2.29163C7.15535 2.2897 4.37046 3.94189 3.62611 7.21322C2.74522 11.1051 5.15666 14.4801 7.42508 16.6664C8.86717 18.0508 11.1338 18.0491 12.5659 16.667L12.567 16.6659C14.8436 14.4796 17.2546 11.1128 16.3737 7.22129C15.6332 3.94975 12.8501 2.29355 10.0026 2.29163ZM17.5928 6.9453C16.6999 3.0002 13.3206 1.04387 10.0035 1.04163C6.68628 1.03939 3.3046 2.99124 2.40716 6.93633C1.37157 11.5109 4.22642 15.3197 6.55788 17.5667L6.55867 17.5674C8.48316 19.4157 11.5159 19.4173 13.4336 17.5667C15.7735 15.3195 18.6284 11.5199 17.5928 6.9453ZM9.99992 6.61663C8.90916 6.61663 8.02492 7.50087 8.02492 8.59163C8.02492 9.68239 8.90916 10.5667 9.99992 10.5667C11.0907 10.5667 11.9749 9.68239 11.9749 8.59163C11.9749 7.50087 11.0907 6.61663 9.99992 6.61663ZM6.77492 8.59163C6.77492 6.81051 8.21881 5.36663 9.99992 5.36663C11.781 5.36663 13.2249 6.81051 13.2249 8.59163C13.2249 10.3728 11.781 11.8167 9.99992 11.8167C8.21881 11.8167 6.77492 10.3728 6.77492 8.59163Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" fill=\"currentColor\"/></svg>",
+            clock: "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_clock-outline\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M9.72865 6.04408C10.0933 6.04427 10.3892 6.33994 10.3892 6.70462V9.71402C10.3893 9.80308 10.4246 9.94758 10.513 10.1028C10.6017 10.2581 10.708 10.3621 10.784 10.4072L10.7865 10.409L10.7883 10.4098L13.0614 11.7662C13.3746 11.9531 13.4772 12.3595 13.2902 12.6727C13.1032 12.9856 12.6977 13.0874 12.3846 12.9006L10.1105 11.5443C9.83078 11.3783 9.60151 11.1308 9.43364 10.87L9.36569 10.7573C9.19401 10.4563 9.06825 10.0872 9.06811 9.71402V6.70462C9.06811 6.33982 9.36384 6.04408 9.72865 6.04408Z\" fill=\"currentColor\"/><path d=\"M9.99957 2C14.4156 2 17.9998 5.58359 18 9.99957C17.9999 14.4156 14.4156 18 9.99957 18C5.58368 17.9999 2.00012 14.4155 2 9.99957C2.00015 5.58368 5.5837 2.00014 9.99957 2ZM9.99957 3.32108C6.31331 3.32122 3.32123 6.31329 3.32108 9.99957C3.32119 13.6859 6.31329 16.6788 9.99957 16.6789C13.686 16.6789 16.6788 13.686 16.6789 9.99957C16.6788 6.31321 13.686 3.32108 9.99957 3.32108Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" fill=\"currentColor\"/></svg>", caret: "<svg aria-hidden=\"true\" focusable=\"false\" data-icon=\"ic_caret-down-outline\" viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M16.0006 5.95728C16.2657 5.95733 16.5198 6.0625 16.7073 6.24999C16.8947 6.43747 16.9999 6.69157 17 6.95673C17 7.22196 16.8948 7.47688 16.7073 7.66443L16.6957 7.67598H16.6938L10.7067 13.664C10.614 13.757 10.5036 13.8313 10.3823 13.8816C10.2609 13.9321 10.1305 13.9577 9.99904 13.9577C9.86783 13.9577 9.73799 13.9319 9.61678 13.8816C9.49536 13.8313 9.38504 13.757 9.2923 13.664L3.29271 7.66443C3.10524 7.47689 3 7.22285 3 6.95769C3.00001 6.69251 3.10523 6.43848 3.29271 6.25095C3.4802 6.06345 3.7343 5.95734 3.99945 5.95728C4.26469 5.95728 4.5196 6.06339 4.70715 6.25095L9.99904 11.5428L15.2928 6.24999C15.4804 6.06243 15.7353 5.95728 16.0006 5.95728Z\" fill=\"currentColor\"/></svg>" };
 
   /* ── App-wide defaults (override with ShineSearch.configure or window.ShineSearchConfig) ── */
   var DEFAULTS = {
@@ -6686,39 +7319,27 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
     locations: ['Bangalore','Mumbai','Delhi NCR','Hyderabad','Chennai','Pune','Kolkata','Ahmedabad','Gurgaon','Noida',
       'Jaipur','Indore','Remote','Hybrid','Work From Home'],
     experienceOptions: ['Fresher','0–1 years','1–3 years','3–5 years','5–7 years','7–10 years','10–15 years','15+ years'],
-    minChars: 2,                       // suggestions open after this many typed characters
+    minChars: 2,                       // letters before the role / city suggestions open
     eyebrow: 'Find your next role',
-    title: "What's next for",          // plain text …
-    titleAccent: 'you?',               // … + brand-coloured tail
+    title: "What's next for", titleAccent: 'you?',
     submitLabel: 'Search Jobs',
     errorText: 'Add a role, city or experience to search.',
     placeholders: { keyword: 'Job title, skill, or keyword', location: 'Location', experience: 'Experience' },
-    resultsUrl: null,                  // set to navigate on submit: url?q=…&loc=…&exp=…
-    toast: true,                       // confirmation toast when nothing else handles submit
-    autofocus: true,                   // focus the keyword field once the modal settles
+    resultsUrl: null, toast: true, autofocus: true,
     onSubmit: null, onOpen: null, onClose: null
   };
   var cfg = merge({}, DEFAULTS, global.ShineSearchConfig || {});
-  var session = cfg;                   // per-open options layered on cfg
-  var root, card, dialog, els = {}, lastFocus = null, closeTimer = null, toastTimer = null;
-  var SEP = ', ';
+  var session = cfg;
+  var root, card, dialog, els = {}, dd = {}, lastFocus = null, closeTimer = null;
 
   function merge(t) {
     for (var i = 1; i < arguments.length; i++) {
       var s = arguments[i]; if (!s) continue;
-      for (var k in s) if (Object.prototype.hasOwnProperty.call(s, k)) {
-        t[k] = (k === 'placeholders' && t[k]) ? merge({}, t[k], s[k]) : s[k];
-      }
+      for (var k in s) if (Object.prototype.hasOwnProperty.call(s, k)) t[k] = (k === 'placeholders' && t[k]) ? merge({}, t[k], s[k]) : s[k];
     }
     return t;
   }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
-  function hl(text, q) {
-    if (!q) return esc(text);
-    var i = text.toLowerCase().indexOf(q.toLowerCase());
-    if (i < 0) return esc(text);
-    return esc(text.slice(0, i)) + '<b>' + esc(text.slice(i, i + q.length)) + '</b>' + esc(text.slice(i + q.length));
-  }
   function emit(name, detail, cancelable) {
     var ev;
     try { ev = new CustomEvent(name, { detail: detail, cancelable: !!cancelable }); }
@@ -6729,240 +7350,116 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
   function list(v) { return (Array.isArray(v) ? v : String(v || '').split(',')).map(function (s) { return String(s).trim(); }).filter(Boolean); }
 
   /* ── Markup — injected once, on first use ─────────────────────────── */
+  function field(name, icon, label, extra) {     // input fields · field-base · Small (40) · leading icon
+    return '<div class="field field--sm" data-ssm-field="' + name + '">' +
+      '<label class="field-label field-label--hidden" for="ssm-in-' + name + '">' + label + '</label>' +
+      '<div class="field-control"><span class="field-icon" aria-hidden="true">' + icon + '</span>' +
+      '<input class="field-input" id="ssm-in-' + name + '" type="text" autocomplete="off" spellcheck="false"' + (extra || '') + '>' +
+      (name === 'experience' ? '<span class="field-trailing" aria-hidden="true">' + I.caret + '</span>' : '') +
+      '</div></div>';
+  }
   function mount() {
     if (root) return;
     root = doc.createElement('div');
     root.className = 'ssm';
     root.setAttribute('aria-hidden', 'true');
     root.innerHTML =
-      '<div class="ssm-dialog" role="dialog" aria-modal="true" aria-labelledby="ssm-title">' +
-      '<div class="ssm-card">' +
-        '<button class="ssm-close" type="button" aria-label="Close search">' + I.close + '</button>' +
-        '<p class="ssm-eyebrow"><span class="ssm-eyebrow-dot" aria-hidden="true"></span><span data-ssm="eyebrow"></span></p>' +
+      '<div class="ssm-dialog" role="dialog" aria-modal="true" aria-labelledby="ssm-title"><div class="ssm-card">' +
+        '<button class="btn btn--muted btn--sm btn--icon btn--pill ssm-close" type="button" aria-label="Close search">' + I.close + '</button>' +
+        '<p class="ssm-eyebrow"><span class="badge badge--sm badge--brand"><span class="badge-dot" aria-hidden="true"></span><span data-ssm="eyebrow"></span></span></p>' +
         '<h2 class="ssm-title" id="ssm-title"></h2>' +
         '<div class="ssm-form" role="search"><div class="ssm-fields">' +
-          combo('keyword', I.search) +
-          combo('location', I.pin) +
-          '<div class="ssm-field ssm-field--select" data-field="experience" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="ssm-list-experience" aria-labelledby="ssm-lbl-experience ssm-val-experience">' +
-            '<span class="ssm-sr" id="ssm-lbl-experience">Experience</span>' +
-            '<span class="ssm-field-icon" aria-hidden="true">' + I.clock + '</span>' +
-            '<span class="ssm-value is-empty" id="ssm-val-experience"></span>' +
-            '<span class="ssm-caret" aria-hidden="true">' + I.caret + '</span>' +
-            '<div class="ssm-dropdown" id="ssm-list-experience" role="listbox" aria-label="Total experience"></div>' +
-          '</div>' +
+          field('keyword', I.search, 'Job title, skill, or keyword', ' autocapitalize="words" enterkeyhint="search"') +
+          field('location', I.pin, 'Location', ' autocapitalize="words" enterkeyhint="search"') +
+          field('experience', I.clock, 'Experience', ' readonly') +
         '</div>' +
-          '<button class="ssm-submit" type="button">' + I.search + '<span data-ssm="submit"></span></button>' +
+        '<div class="ssm-alert" hidden></div>' +
+        '<button class="btn btn--primary btn--accent btn--lg btn--block ssm-submit" type="button">' + I.search + '<span data-ssm="submit"></span></button>' +
         '</div>' +
-      '</div>' +
-      // validation alert floats just below the card (v1.2.0), still inside the dialog for screen readers
-      '<div class="ssm-error-wrap" aria-live="assertive"><div><p class="ssm-error" role="alert">' + I.alert + '<span data-ssm="error"></span></p></div></div>' +
-      '</div>';
+      '</div></div>';
     doc.body.appendChild(root);
     card = root.querySelector('.ssm-card'); dialog = root.querySelector('.ssm-dialog');
     els = {
-      close: root.querySelector('.ssm-close'),
-      eyebrow: root.querySelector('[data-ssm="eyebrow"]'),
-      title: root.querySelector('.ssm-title'),
-      keyword: root.querySelector('#ssm-in-keyword'),
-      location: root.querySelector('#ssm-in-location'),
-      expField: root.querySelector('[data-field="experience"]'),
-      expValue: root.querySelector('#ssm-val-experience'),
-      expList: root.querySelector('#ssm-list-experience'),
-      errWrap: root.querySelector('.ssm-error-wrap'),
-      errText: root.querySelector('[data-ssm="error"]'),
-      submit: root.querySelector('.ssm-submit'),
-      submitText: root.querySelector('[data-ssm="submit"]')
+      close: root.querySelector('.ssm-close'), eyebrow: root.querySelector('[data-ssm="eyebrow"]'), title: root.querySelector('.ssm-title'),
+      keyword: root.querySelector('#ssm-in-keyword'), location: root.querySelector('#ssm-in-location'), experience: root.querySelector('#ssm-in-experience'),
+      alert: root.querySelector('.ssm-alert'), submit: root.querySelector('.ssm-submit'), submitText: root.querySelector('[data-ssm="submit"]')
     };
+    if (global.ShineField && global.ShineField.init) global.ShineField.init(root);
     wire();
-  }
-  function combo(name, icon) {
-    var label = name === 'keyword' ? 'Job title, skill, or keyword' : 'Location';
-    return '<div class="ssm-field" data-field="' + name + '">' +
-      '<label class="ssm-sr" for="ssm-in-' + name + '">' + label + '</label>' +
-      '<span class="ssm-field-icon" aria-hidden="true">' + icon + '</span>' +
-      '<input class="ssm-input" id="ssm-in-' + name + '" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="search"' +
-        ' role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ssm-list-' + name + '" />' +
-      '<div class="ssm-dropdown" id="ssm-list-' + name + '" role="listbox" aria-label="' + label + ' suggestions"></div>' +
-    '</div>';
   }
 
   /* ── Behaviour ────────────────────────────────────────────────────── */
-  function fields() { return root.querySelectorAll('.ssm-field'); }
-  function closeDropdowns(except) {
-    Array.prototype.forEach.call(fields(), function (f) {
-      if (f === except) return;
-      f.classList.remove('is-open');
-      var ctl = f.querySelector('[role="combobox"]') || f;
-      ctl.setAttribute('aria-expanded', 'false');
-      ctl.removeAttribute('aria-activedescendant');
-    });
-  }
-  function closeField(f) {
-    f.classList.remove('is-open');
-    var ctl = f.querySelector('[role="combobox"]') || f;
-    ctl.setAttribute('aria-expanded', 'false'); ctl.removeAttribute('aria-activedescendant');
-  }
-  function openDropdown(f) {
-    closeDropdowns(f);
-    f.classList.add('is-open');
-    (f.querySelector('[role="combobox"]') || f).setAttribute('aria-expanded', 'true');
-  }
   function showError() {
-    els.errWrap.classList.add('is-shown');
+    els.alert.innerHTML = global.ShineAlert ? global.ShineAlert.html({ intent: 'negative', text: session.errorText, live: true }) : '';
+    els.alert.hidden = false;
     dialog.classList.remove('is-shaking'); void dialog.offsetWidth; dialog.classList.add('is-shaking');
     setTimeout(function () { dialog.classList.remove('is-shaking'); }, 400);
   }
-  function hideError() { els.errWrap.classList.remove('is-shown'); }
+  function hideError() { if (!els.alert.hidden) { els.alert.hidden = true; els.alert.innerHTML = ''; } }
+  function anyOpen() { return Object.keys(dd).some(function (k) { return dd[k] && dd[k].isOpen(); }); }
+  function closeLists() { Object.keys(dd).forEach(function (k) { if (dd[k]) dd[k].close(); }); }
+  function opts(arr, icon) { return arr.map(function (o) { return { value: o, label: o, icon: icon }; }); }
 
-  // keyboard highlight inside an open list
-  function move(listEl, ctl, dir) {
-    var opts = listEl.querySelectorAll('.ssm-option'); if (!opts.length) return;
-    var cur = listEl.querySelector('.ssm-option.is-active'), i = Array.prototype.indexOf.call(opts, cur);
-    if (cur) cur.classList.remove('is-active');
-    i = i < 0 ? (dir > 0 ? 0 : opts.length - 1) : (i + dir + opts.length) % opts.length;
-    opts[i].classList.add('is-active'); opts[i].scrollIntoView({ block: 'nearest' });
-    ctl.setAttribute('aria-activedescendant', opts[i].id);
-  }
-
-  function setupCombo(name, getOptions, icon) {
-    var input = els[name], field = input.closest('.ssm-field'), dd = field.querySelector('.ssm-dropdown');
-    function term() { var p = input.value.split(SEP); return (p[p.length - 1] || '').trim(); }
-    function committed() { return input.value.split(SEP).slice(0, -1).map(function (p) { return p.trim(); }).filter(Boolean); }
-    function commit(v) {
-      v = (v || '').trim(); if (!v) return;
-      var c = committed();
-      if (!c.some(function (x) { return x.toLowerCase() === v.toLowerCase(); })) c.push(v);
-      input.value = c.join(SEP) + SEP;
-      setTimeout(function () { input.focus(); input.setSelectionRange(input.value.length, input.value.length); }, 0);
-      closeDropdowns(); hideError();
-    }
-    function render(q) {
-      var taken = committed().map(function (t) { return t.toLowerCase(); });
-      var opts = getOptions().filter(function (o) { return o.toLowerCase().indexOf(q.toLowerCase()) > -1 && taken.indexOf(o.toLowerCase()) < 0; });
-      dd.innerHTML = opts.length
-        ? opts.map(function (o, i) {
-            return '<div class="ssm-option" role="option" id="ssm-opt-' + name + '-' + i + '" data-value="' + esc(o) + '">' +
-              '<span class="ssm-option-icon" aria-hidden="true">' + icon + '</span><span>' + hl(o, q) + '</span></div>';
-          }).join('')
-        : '<div class="ssm-option-empty">No matches. Press <b>Enter</b> to add “<b>' + esc(q) + '</b>”.</div>';
-    }
-    function maybeOpen() {
-      var t = term();
-      if (t.length >= session.minChars) { render(t); openDropdown(field); }
-      else closeDropdowns();
-    }
-    // mousedown keeps focus in the input (no blur → no keyboard flicker on mobile)
-    dd.addEventListener('mousedown', function (e) {
-      var o = e.target.closest('.ssm-option'); if (!o) return;
-      e.preventDefault(); commit(o.getAttribute('data-value'));
+  function dropdowns() {                       // inline dropdown component — one per field
+    if (!global.ShineDropdown) { if (global.console) console.warn('ShineSearch: inline-dropdown.js is missing'); return; }
+    ['keyword', 'location'].forEach(function (name) {
+      dd[name] = global.ShineDropdown.create({
+        input: els[name], mode: 'search', size: 'sm',
+        options: opts(name === 'keyword' ? session.roles : session.locations, name === 'keyword' ? I.search : I.pin),
+        minChars: session.minChars, openOnFocus: false,          // suggestions once they type (a tap shows the list)
+        free: 'Use “{q}”', label: name === 'keyword' ? 'Job title, skill, or keyword' : 'Location',
+        onPick: function () { hideError(); }
+      });
     });
-    input.addEventListener('focus', function () { setTimeout(function () { input.setSelectionRange(input.value.length, input.value.length); }, 0); });
-    input.addEventListener('input', function () { hideError(); maybeOpen(); });
-    input.addEventListener('blur', function () {
-      setTimeout(function () { if (doc.activeElement !== input) closeField(field); }, 120);   // only this field — another may be opening
-      input.value = input.value.replace(/(?:,\s*)+$/, '');
-    });
-    input.addEventListener('keydown', function (e) {
-      var open = field.classList.contains('is-open');
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        if (!open) { var t = term(); if (t.length < session.minChars) return; render(t); openDropdown(field); }
-        e.preventDefault(); move(dd, input, e.key === 'ArrowDown' ? 1 : -1);
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        var act = open && dd.querySelector('.ssm-option.is-active');
-        if (act) commit(act.getAttribute('data-value'));
-        else if (term()) commit(term());
-        else submit();                          // nothing left to commit → keyboard "Search" submits
-      } else if (e.key === 'Escape' && open) {
-        e.stopPropagation(); closeDropdowns();
-      }
-    });
-    // tap on the field chrome (icon / padding) → continue the list with a fresh term
-    field.addEventListener('click', function (e) {
-      if (e.target === input || e.target.closest('.ssm-dropdown')) return;
-      if (input.value.trim() && !/(?:,\s*)$/.test(input.value)) input.value = input.value.trim() + SEP;
-      input.focus();
-    });
-    input.ssmValues = function () { return list(input.value); };
-  }
-
-  function setupExperience() {
-    var f = els.expField, dd = els.expList;
-    function render() {
-      var cur = f.getAttribute('data-value') || '';
-      dd.innerHTML = '<span class="ssm-dropdown-eyebrow" aria-hidden="true">Total experience</span>' +
-        session.experienceOptions.map(function (o, i) {
-          return '<div class="ssm-option" role="option" id="ssm-opt-exp-' + i + '" data-value="' + esc(o) + '" aria-selected="' + (o === cur) + '">' +
-            '<span class="ssm-option-icon" aria-hidden="true">' + I.clock + '</span><span>' + esc(o) + '</span></div>';
-        }).join('');
-    }
-    function toggle(force) {
-      var open = typeof force === 'boolean' ? force : !f.classList.contains('is-open');
-      if (open) {
-        render(); openDropdown(f);
-        var sel = dd.querySelector('[aria-selected="true"]');
-        if (sel) { sel.classList.add('is-active'); f.setAttribute('aria-activedescendant', sel.id); sel.scrollIntoView({ block: 'nearest' }); }
-      } else closeDropdowns();
-    }
-    dd.addEventListener('click', function (e) {
-      var o = e.target.closest('.ssm-option'); if (!o) return;
-      e.stopPropagation(); setExperience(o.getAttribute('data-value')); toggle(false); f.focus(); hideError();
-    });
-    f.addEventListener('click', function (e) { if (!e.target.closest('.ssm-dropdown')) toggle(); });
-    f.addEventListener('keydown', function (e) {
-      var open = f.classList.contains('is-open');
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        var act = open && dd.querySelector('.ssm-option.is-active');
-        if (act) { setExperience(act.getAttribute('data-value')); toggle(false); hideError(); } else toggle();
-      } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        e.preventDefault(); if (!open) toggle(true); move(dd, f, e.key === 'ArrowDown' ? 1 : -1);
-      } else if (e.key === 'Escape' && open) { e.stopPropagation(); toggle(false); }
+    dd.experience = global.ShineDropdown.create({
+      input: els.experience, mode: 'select', size: 'sm', heading: 'Total experience',
+      options: opts(session.experienceOptions, I.clock), label: 'Experience',
+      onPick: function () { hideError(); }
     });
   }
-  function setExperience(v) {
-    v = (v || '').trim();
-    if (v) { els.expField.setAttribute('data-value', v); els.expValue.textContent = v; els.expValue.classList.remove('is-empty'); }
-    else { els.expField.removeAttribute('data-value'); els.expValue.textContent = session.placeholders.experience; els.expValue.classList.add('is-empty'); }
+  function wire() {
+    dropdowns();
+    ['keyword', 'location'].forEach(function (name) {
+      els[name].addEventListener('input', hideError);
+      els[name].addEventListener('keydown', function (e) {        // after the list's own keys: Enter with no list open = Search
+        if (e.key === 'Enter' && !e.defaultPrevented && !(dd[name] && dd[name].isOpen())) { e.preventDefault(); submit(); }
+      });
+      els[name].addEventListener('blur', function () { var v = els[name].value, t = v.replace(/(?:,\s*)+$/, '').trim(); if (t !== v) els[name].value = t; });   // trailing commas go
+    });
+    els.close.addEventListener('click', function () { close('close-button'); });
+    els.submit.addEventListener('click', submit);
+    root.addEventListener('keydown', trapFocus);
+    doc.addEventListener('keydown', function (e) { if (e.key === 'Escape' && isOpen() && !anyOpen()) close('escape'); });
+    // backdrop tap does NOT close — users lose typed input too easily on mobile (✕ or Escape close it)
   }
-
   function trapFocus(e) {
     if (e.key !== 'Tab') return;
-    var f = Array.prototype.filter.call(card.querySelectorAll('button, input, [tabindex="0"]'), function (el) { return el.offsetParent !== null; });
+    var f = Array.prototype.filter.call(card.querySelectorAll('button:not([tabindex="-1"]), input'), function (el) { return el.offsetParent !== null; });
     if (!f.length) return;
     var first = f[0], last = f[f.length - 1];
     if (e.shiftKey && doc.activeElement === first) { e.preventDefault(); last.focus(); }
     else if (!e.shiftKey && doc.activeElement === last) { e.preventDefault(); first.focus(); }
   }
-
-  function wire() {
-    setupCombo('keyword', function () { return session.roles; }, I.search);
-    setupCombo('location', function () { return session.locations; }, I.pin);
-    setupExperience();
-    els.close.addEventListener('click', function () { close('close-button'); });
-    els.submit.addEventListener('click', submit);
-    // backdrop tap does NOT close — matches JSRP (users lose typed input too easily on mobile)
-    root.addEventListener('click', function (e) { if (!e.target.closest('.ssm-field')) closeDropdowns(); });
-    root.addEventListener('keydown', trapFocus);
-    doc.addEventListener('keydown', function (e) { if (e.key === 'Escape' && isOpen()) close('escape'); });
+  function expValue() { var v = (els.experience.value || '').trim(); return session.experienceOptions.indexOf(v) > -1 ? v : ''; }
+  function setExperience(v) {
+    v = v && session.experienceOptions.indexOf(v) > -1 ? v : '';
+    els.experience.value = v;
+    if (dd.experience) dd.experience.value(v || null);
   }
 
   /* ── Submit ───────────────────────────────────────────────────────── */
   function submit() {
-    var keywords = els.keyword.ssmValues(), locations = els.location.ssmValues(), exp = els.expField.getAttribute('data-value') || '';
-    if (!keywords.length && !locations.length && !exp) { showError(); els.keyword.focus(); return; }
-    var detail = {
-      keywords: keywords, locations: locations, experience: exp,
-      query: keywords.join(', '), location: locations.join(', '),
-      mode: root.getAttribute('data-mode'), source: root.getAttribute('data-source') || ''
-    };
-    if (typeof session.onSubmit === 'function') {                 // caller owns the outcome
-      if (session.onSubmit(detail) === false) return;                // …and may veto (modal stays open)
+    var keywords = list(els.keyword.value), locations = list(els.location.value), exp = expValue();
+    if (!keywords.length && !locations.length && !exp) { closeLists(); showError(); els.keyword.focus(); return; }
+    var detail = { keywords: keywords, locations: locations, experience: exp, query: keywords.join(', '), location: locations.join(', '),
+                   mode: root.getAttribute('data-mode'), source: root.getAttribute('data-source') || '' };
+    if (typeof session.onSubmit === 'function') {
+      if (session.onSubmit(detail) === false) return;
       close('submit'); emit('shine:search', detail, false); return;
     }
     var ev = emit('shine:search', detail, true);
     close('submit');
-    if (ev.defaultPrevented) return;                                 // a page listener handled it
+    if (ev.defaultPrevented) return;
     if (session.resultsUrl) {
       var p = [];
       if (detail.query) p.push('q=' + encodeURIComponent(detail.query));
@@ -6973,64 +7470,45 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
     }
     if (session.toast) toast('Searching ' + (detail.query || 'jobs') + (detail.location ? ' in ' + detail.location : '') + (exp ? ' · ' + exp : ''));
   }
-
-  function toast(msg, tone) {
-    // v1.3.0: the app-wide notify component owns toasts when it is on the page (same pill everywhere)
+  function toast(msg, tone) {                  // notify component (the page's) — the one toast in the app
     if (global.ShineNotify) return global.ShineNotify.toast(msg, { tone: tone || 'neutral' });
-    var t = doc.querySelector('.ssm-toast');
-    if (!t) { t = doc.createElement('div'); t.className = 'ssm-toast'; t.setAttribute('role', 'status'); doc.body.appendChild(t); }
-    t.innerHTML = I.check + '<span>' + esc(msg) + '</span>';
-    requestAnimationFrame(function () { t.classList.add('is-shown'); });
-    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('is-shown'); }, 3000);
   }
 
   /* ── Public API ───────────────────────────────────────────────────── */
   function isOpen() { return !!root && root.classList.contains('is-open'); }
-
-  /**
-   * open(options?)
-   *   keyword, location     string | string[]   prefill (comma-separated or array)
-   *   experience            string              must be one of `experienceOptions` to preselect
-   *   mode                  'new' | 'edit'      default 'new'; 'edit' = refining an existing search (JSRP)
-   *   source                string              where it was opened from (e.g. 'home', 'jsrp') — echoed in the result
-   *   + any default (title, titleAccent, eyebrow, submitLabel, resultsUrl, onSubmit, autofocus…) for this open only
-   */
-  function open(opts) {
-    opts = opts || {};
+  function open(o) {
+    o = o || {};
     mount();
     clearTimeout(closeTimer);
-    var o = {};                                   // per-open overrides only — prefill keys are state, not config
-    for (var k in opts) if (['keyword','location','experience','mode','source','trigger'].indexOf(k) < 0) o[k] = opts[k];
-    session = merge({}, cfg, o);
-    root.setAttribute('data-mode', opts.mode === 'edit' ? 'edit' : 'new');   // edit only when the caller says so (e.g. JSRP)
-    root.setAttribute('data-source', opts.source || '');
-    // copy
+    var x = {};
+    for (var k in o) if (['keyword','location','experience','mode','source','trigger'].indexOf(k) < 0) x[k] = o[k];
+    session = merge({}, cfg, x);
+    root.setAttribute('data-mode', o.mode === 'edit' ? 'edit' : 'new');
+    root.setAttribute('data-source', o.source || '');
     els.eyebrow.textContent = session.eyebrow;
     els.title.innerHTML = esc(session.title) + (session.titleAccent ? ' <span class="ssm-accent">' + esc(session.titleAccent) + '</span>' : '');
     els.submitText.textContent = session.submitLabel;
-    els.errText.textContent = session.errorText;
     els.keyword.placeholder = session.placeholders.keyword;
     els.location.placeholder = session.placeholders.location;
-    // state — always start clean (JSRP left the last dropdown open between opens)
-    closeDropdowns(); hideError(); dialog.classList.remove('is-shaking');
-    els.keyword.value = list(opts.keyword).join(SEP);
-    els.location.value = list(opts.location).join(SEP);
-    setExperience(opts.experience && session.experienceOptions.indexOf(opts.experience) > -1 ? opts.experience : '');
-    // show
-    lastFocus = opts.trigger || doc.activeElement;
+    els.experience.placeholder = session.placeholders.experience;
+    if (dd.keyword) { dd.keyword.options(opts(session.roles, I.search)); dd.location.options(opts(session.locations, I.pin)); dd.experience.options(opts(session.experienceOptions, I.clock)); }
+    closeLists(); hideError(); dialog.classList.remove('is-shaking');
+    els.keyword.value = list(o.keyword).join(', ');
+    els.location.value = list(o.location).join(', ');
+    setExperience(o.experience);
+    lastFocus = o.trigger || doc.activeElement;
     doc.documentElement.classList.add('ssm-lock');
     root.setAttribute('aria-hidden', 'false');
     root.classList.add('is-mounted');
     void root.offsetWidth;
     root.classList.add('is-open');
     if (session.autofocus) setTimeout(function () { if (isOpen()) els.keyword.focus(); }, 320);
-    if (typeof session.onOpen === 'function') session.onOpen({ mode: root.getAttribute('data-mode'), source: opts.source || '' });
-    emit('shine:search-open', { mode: root.getAttribute('data-mode'), source: opts.source || '' });
+    if (typeof session.onOpen === 'function') session.onOpen({ mode: root.getAttribute('data-mode'), source: o.source || '' });
+    emit('shine:search-open', { mode: root.getAttribute('data-mode'), source: o.source || '' });
   }
-
   function close(reason) {
     if (!isOpen()) return;
-    closeDropdowns();
+    closeLists();
     root.classList.remove('is-open');
     root.setAttribute('aria-hidden', 'true');
     doc.documentElement.classList.remove('ssm-lock');
@@ -7040,10 +7518,8 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
     if (typeof session.onClose === 'function') session.onClose({ reason: reason || 'api' });
     emit('shine:search-close', { reason: reason || 'api' });
   }
-
   function configure(o) { cfg = merge(cfg, o || {}); if (!isOpen()) session = cfg; return cfg; }
 
-  /* Declarative triggers — any element with [data-shine-search], present now or added later */
   function readFrom(sel) {
     if (!sel) return '';
     var n = doc.querySelector(sel); if (!n) return '';
@@ -7054,26 +7530,20 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
     if (!t) return;
     e.preventDefault();
     var d = t.dataset, mode = (d.shineSearch || '').trim();
-    open({
-      mode: mode === 'edit' || mode === 'new' ? mode : undefined,
-      keyword: d.ssmKeyword || readFrom(d.ssmKeywordFrom),
-      location: d.ssmLocation || readFrom(d.ssmLocationFrom),
-      experience: d.ssmExperience || readFrom(d.ssmExperienceFrom),
-      source: d.ssmSource || '',
-      trigger: t
-    });
+    open({ mode: mode === 'edit' || mode === 'new' ? mode : undefined,
+      keyword: d.ssmKeyword || readFrom(d.ssmKeywordFrom), location: d.ssmLocation || readFrom(d.ssmLocationFrom),
+      experience: d.ssmExperience || readFrom(d.ssmExperienceFrom), source: d.ssmSource || '', trigger: t });
   });
 
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', mount); else mount();
 
-  global.ShineSearch = { open: open, close: close, configure: configure, isOpen: isOpen, toast: toast, version: '1.3.0' };
-  // drop-in for pages already calling the JSRP overlay API
+  global.ShineSearch = { open: open, close: close, configure: configure, isOpen: isOpen, toast: toast, version: '2.0.0' };
   if (typeof global.openSearchOverlay !== 'function') {
     global.openSearchOverlay = function (prefill) { open(prefill ? merge({ mode: 'edit', source: 'jsrp' }, prefill) : {}); };
   }
 })(window);
-
 </script>
+<!-- ▲ COMPONENT · search-modal -->
 <!-- ▼ PAGE · share-sheet — same block on My Jobs, Docket and the JD page -->
 <script data-page="share-sheet">
 /* Share sheet · page script — same block on My Jobs, Docket and the JD page.

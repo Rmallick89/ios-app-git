@@ -1,0 +1,142 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   SHINE · INLINE DROPDOWN  (app component · App-login · app-components/inline-dropdown/)      v1.6.0
+   The list that opens right under a field, inside the page or sheet — for the combo input (type to narrow, then
+   pick) and the dropdown input (pick only). One look, one behaviour, everywhere a field shows options inline.
+   Built on design-system tokens only (DESIGN-SYSTEM.md §2), light and dark. Pair with inline-dropdown.js.
+
+     [ Current location                       ⌄ ]   the field (input fields · field-base) — not part of this component
+     ┌──────────────────────────────────────────┐   .dropdown           the panel: 4 under the field, its width
+     │ POPULAR CITIES                           │   .dropdown-head      an optional heading (a group's name)
+     │ ◎ Gurugram, Haryana                   ✓  │   .dropdown-option    a row: lead icon · label (+ hint) · tick
+     │ ◎ Bengaluru, Karnataka         (Added)   │                       [aria-selected] chosen · .is-active under the finger / keys
+     │   Delhi NCR                              │   .dropdown-badge     “Added” — already added, can't be picked (the BADGES ATOM · Small · neutral, v1.6.0)
+     │   Delhi · Gurugram · Noida               │   .dropdown-hint      the second line
+     │ ＋ Use “Gurgaon”                          │   .dropdown-option--free   keep what you typed
+     └──────────────────────────────────────────┘   .dropdown-note      searching · no matches · type more · couldn’t load
+   Small shows 3½ rows, Medium 4½, then the list scrolls (the half row says there is more). Its size is its own — by device,
+   never the field's: .dropdown--sm phone & mobile view (default: rows 38, text 12, icons 14) · --md tablet & computer (44 · 14 · 16). It opens above the field when
+   there is no room below (the keyboard), and inside a scrolling sheet it scrolls the field up first so it fits.
+
+   ▶ BEFORE BUILDING WITH IT: read README.md and inline-dropdown-spec.html (the guideline) in this folder.
+   ▶ Pages never restyle it. Icons in rows come from atoms/icons (passed in by the page) — never drawn here.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.dropdown {
+  /* COLOUR — §2.2 (light) */
+  --dd-bg: #FFFFFF;                          /* surface.neutral.raised — the panel */
+  --dd-edge: #E4E7EC;                        /* stroke.neutral.base */
+  --dd-sh: 0 16px 36px -10px rgba(13, 17, 23, .30), 0 4px 10px -2px rgba(13, 17, 23, .10);   /* elevation.neutral.overlay — "dropdowns, popovers" */
+  --dd-text: #0D1117;                        /* content.neutral.base — a row */
+  --dd-muted: #344054;                       /* content.neutral.muted — a row's icon */
+  --dd-faded: #667085;                       /* content.neutral.faded — hint · heading · notes */
+  --dd-dis: rgba(13, 17, 23, .36);           /* content.neutral.disabled — a row that can't be picked */
+  --dd-active: #EEF1F5;                      /* surface.neutral-state.hover — under the finger / arrow keys */
+  --dd-pressed: #E4E7EC;                     /* surface.neutral-state.pressed — finger down */
+  --dd-selected: #F0F5FF;                    /* surface.neutral-state.selected — the chosen row */
+  --dd-check: #0B3FCC;                       /* content.neutral.brand — its tick · the free row's plus */
+  --dd-line: #EEF1F5;                        /* stroke.neutral.muted — between groups */
+  --dd-neg: #B42318;                         /* content.status.negative — couldn’t load */
+  /* SIZE · SPACE · TYPE — §2.1 / §2.3 / §2.4 */
+  --dd-gap: 4px;                             /* spacing.stack.xxs — field → panel */
+  --dd-pad: 4px;                             /* spacing.inset.xs — panel padding */
+  --dd-radius: 12px;                         /* size.radius.lg — "modals, popovers" (= the field's corners) */
+  --dd-row: 44px;                            /* size.control.md — a row (a finger-size target) */
+  --dd-show: 4.5;                            /* rows that show before it scrolls: Medium 4½ · Small 3½ */
+  --dd-max: calc(var(--dd-pad) + (var(--dd-row) + var(--dd-gap-rows, 4px)) * var(--dd-show));   /* the script sets it from the real rows (halfway down the 4th / 5th) */
+  --dd-row-px: 8px;                          /* spacing.inset.md — row text lines up with the field's text (4 + 8 = 12) */
+  --dd-row-py: 8px;                          /* spacing.inset.md */
+  --dd-row-radius: 8px;                      /* size.radius.md */
+  --dd-row-gap: 8px;                         /* spacing.inline.md — icon · text · tick */
+  --dd-gap-rows: 4px;                        /* spacing.stack.xxs — between two rows (every size) */
+  --dd-ic: 16px;                             /* size.icon.md — lead icon · tick */
+  --dd-fs: 14px; --dd-lh: 20px;              /* Body / md — a row */
+  --dd-sm-fs: 12px; --dd-sm-lh: 18px;        /* Body / sm — hint · heading · notes */
+  --dd-font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;   /* typeface.family.brand */
+  --dd-head-pt: 10px;                        /* room above a heading */
+  --dd-dur: 120ms;                           /* motion — PROPOSED (motion.popover.in) */
+
+  position: absolute; z-index: 60; left: 0; top: 100%;   /* top / bottom / left / width: set by the script from the anchor */
+  box-sizing: border-box; padding: var(--dd-pad);
+  border: 1px solid var(--dd-edge); border-radius: var(--dd-radius); background: var(--dd-bg); box-shadow: var(--dd-sh);
+  max-height: var(--dd-room, var(--dd-max)); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin; scroll-padding: var(--dd-pad);
+  color: var(--dd-text); font-family: var(--dd-font); -webkit-font-smoothing: antialiased; text-align: left;
+  opacity: 1; transform: none; transition: opacity var(--dd-dur) ease, transform var(--dd-dur) ease;
+}
+.dropdown[hidden] { display: none !important; }
+.dropdown.is-entering { opacity: 0; transform: translateY(-4px); }
+.dropdown.dropdown--up.is-entering { transform: translateY(4px); }
+.dropdown *, .dropdown *::before, .dropdown *::after { box-sizing: border-box; }
+
+.dropdown-list { margin: 0; padding: 0; list-style: none; outline: none; }
+.dropdown-option {
+  display: flex; align-items: center; gap: var(--dd-row-gap); min-height: var(--dd-row); padding: var(--dd-row-py) var(--dd-row-px);
+  border-radius: var(--dd-row-radius); color: var(--dd-text); cursor: pointer;
+  font: 500 var(--dd-fs)/var(--dd-lh) var(--dd-font);                         /* Body / md */
+  -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+}
+.dropdown-lead { flex: none; display: grid; place-items: center; width: var(--dd-ic); height: var(--dd-ic); color: var(--dd-muted); }
+.dropdown-lead svg { display: block; width: var(--dd-ic); height: var(--dd-ic); }
+.dropdown-text { flex: 1; min-width: 0; display: grid; overflow-wrap: anywhere; }
+.dropdown-text mark { background: none; color: inherit; font-weight: 700; }   /* the letters that match what was typed */
+.dropdown-hint { color: var(--dd-faded); font: 500 var(--dd-sm-fs)/var(--dd-sm-lh) var(--dd-font); }   /* Body / sm */
+/* already added (v1.6.0): the badges atom — badge badge--sm badge--neutral (atoms/badges/badges.css, loaded before this file);
+   the list only keeps it on the right */
+.dropdown-badge { flex: none; }
+.dropdown-check { flex: none; display: grid; place-items: center; width: var(--dd-ic); height: var(--dd-ic); color: var(--dd-check); visibility: hidden; }
+.dropdown-check svg { display: block; width: var(--dd-ic); height: var(--dd-ic); }
+
+.dropdown-option + .dropdown-option { margin-top: var(--dd-gap-rows); }   /* a little air between rows, so two tinted rows never touch */
+.dropdown-option.is-active { background: var(--dd-active); }
+@media (hover: hover) { .dropdown-option:not([aria-disabled="true"]):hover { background: var(--dd-active); } }
+.dropdown-option:not([aria-disabled="true"]):active { background: var(--dd-pressed); }
+.dropdown-option[aria-selected="true"] { background: var(--dd-selected); font-weight: 600; }
+.dropdown-option[aria-selected="true"] .dropdown-check { visibility: visible; }
+.dropdown-option[aria-selected="true"].is-active { background: var(--dd-active); }
+.dropdown-option[aria-disabled="true"] { color: var(--dd-dis); cursor: default; }
+.dropdown-option[aria-disabled="true"] .dropdown-lead, .dropdown-option[aria-disabled="true"] .dropdown-hint { color: var(--dd-dis); }   /* the badge keeps its colours */
+.dropdown-option--free { font-weight: 600; }
+.dropdown-option--free .dropdown-lead { color: var(--dd-check); }
+
+.dropdown-head {
+  padding: var(--dd-head-pt) var(--dd-row-px) 4px; color: var(--dd-faded); cursor: default;
+  font: 600 var(--dd-sm-fs)/var(--dd-sm-lh) var(--dd-font);                  /* Body / sm semibold */
+}
+.dropdown-sep { height: 1px; margin: 4px var(--dd-row-px); background: var(--dd-line); }   /* A.11 separator between groups */
+.dropdown-note {
+  display: flex; align-items: center; gap: var(--dd-row-gap); padding: 12px var(--dd-row-px);
+  color: var(--dd-faded); cursor: default; font: 500 var(--dd-sm-fs)/var(--dd-sm-lh) var(--dd-font);
+}
+.dropdown-note--error { color: var(--dd-neg); }
+.dropdown-retry { margin-left: auto; padding: 0; border: 0; background: none; color: var(--dd-check); font: 600 var(--dd-sm-fs)/var(--dd-sm-lh) var(--dd-font); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.dropdown-spin { flex: none; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 1024px; animation: ddSpin .7s linear infinite; }   /* size.icon.sm */
+@keyframes ddSpin { to { transform: rotate(360deg); } }
+.dropdown-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* SIZE — the list's own, by the device it shows on (never the field's): create({ size }) · data-dropdown-size */
+.dropdown--sm {                                                                     /* phone & mobile view — the default (v1.4.0): everything a step smaller */
+  --dd-row: 38px; --dd-row-py: 10px;                                                 /* row 38 · padding 10 × 8 (v1.4.1: more room for a finger; the text stays 12) */
+  --dd-fs: 12px; --dd-lh: 18px;                                                      /* Body / sm — row text */
+  --dd-ic: 14px; --dd-row-gap: 6px;                                                  /* size.icon.sm · spacing.inline.sm (desktop) */
+  --dd-head-pt: 8px;
+  --dd-show: 3.5;                                                                    /* 3½ rows, then it scrolls (v1.5.0) */
+}
+.dropdown--md { --dd-row: 44px; --dd-show: 4.5; }                                    /* tablet & computer: size.control.md · 4½ rows */
+
+/* dark column of §2.2 — set data-theme="dark" on any ancestor (the input fields do the same) */
+[data-theme="dark"] .dropdown {
+  --dd-bg: #232A38;                          /* surface.neutral.raised · cool-800 */
+  --dd-edge: #4A5260;                        /* stroke.neutral.base · cool-600 */
+  --dd-sh: 0 16px 36px -10px rgba(13, 17, 23, .70), 0 4px 10px -2px rgba(13, 17, 23, .40);   /* elevation.neutral.overlay (dark α) */
+  --dd-text: #F7F9FB;                        /* content.neutral.base · cool-50 */
+  --dd-muted: #C8CED7;                       /* content.neutral.muted · cool-300 */
+  --dd-faded: #98A2B3;                       /* content.neutral.faded · cool-400 */
+  --dd-dis: rgba(255, 255, 255, .36);        /* content.neutral.disabled · white-75 */
+  --dd-active: #344054;                      /* surface.neutral-state.hover · cool-700 */
+  --dd-pressed: #4A5260;                     /* surface.neutral-state.pressed · cool-600 */
+  --dd-selected: #082478;                    /* surface.neutral-state.selected · brand-800 */
+  --dd-check: #7EA3FF;                       /* content.neutral.brand · brand-300 */
+  --dd-line: #344054;                        /* stroke.neutral.muted · cool-700 */
+  --dd-neg: #FCA5A0;                         /* content.status.negative (dark) */
+}
+@media (prefers-reduced-motion: reduce) { .dropdown { transition: none; } .dropdown.is-entering { transform: none; } .dropdown-spin { animation-duration: 2s; } }
