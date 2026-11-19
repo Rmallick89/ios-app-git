@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · SEARCH MODAL  (app component · App-components/Modals/)    v2.0.0
+   SHINE · SEARCH MODAL  (app component · App-components/Modals/)    v2.0.1
    Pair with search-modal.css. Built ONLY from App-components (v2.0.0, user 2026-11-19):
      buttons atom (close · Search Jobs) · badges atom (eyebrow) · input fields / field-base (3 fields, Small) ·
      inline dropdown (ShineDropdown: role · city suggestions, experience list) · alert (ShineAlert: validation) ·
@@ -189,6 +189,30 @@
     if (global.ShineNotify) return global.ShineNotify.toast(msg, { tone: tone || 'neutral' });
   }
 
+  /* ── Status bar (v2.0.1) ──────────────────────────────────────────────
+     iOS 26 paints the status bar from html / body's background-color or from a fixed, full-width box at the top
+     edge — never from the scrim's image layer. While the modal is open: html + body take the page colour dimmed by
+     the scrim, and a strip (.ssm-statusbar) on top carries the same colour (Safari re-reads it live; the Android
+     app's bar sampler reads it too). Restored the moment the modal closes. Same technique as bottom-sheet. */
+  var bar = null, tintSaved = null;
+  function rgba(c) { var m = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?/.exec(c || ''); return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null; }
+  function tint(on) {
+    var r = doc.documentElement, b = doc.body; if (!b) return;
+    if (!bar) { bar = doc.createElement('div'); bar.className = 'ssm-statusbar'; bar.setAttribute('aria-hidden', 'true'); b.appendChild(bar); }
+    if (!on) {
+      if (tintSaved) { r.style.backgroundColor = tintSaved[0]; b.style.backgroundColor = tintSaved[1]; tintSaved = null; }
+      bar.classList.remove('is-on'); return;
+    }
+    if (!tintSaved) tintSaved = [r.style.backgroundColor, b.style.backgroundColor];
+    var base = rgba(getComputedStyle(b).backgroundColor);
+    if (!base || base[3] < 0.5) base = rgba(getComputedStyle(r).backgroundColor);
+    if (!base || base[3] < 0.5) base = [250, 249, 246, 1];                       // surface.neutral.base
+    var sc = rgba(getComputedStyle(root).getPropertyValue('--ssm-surface-scrim')) || [13, 17, 23, 0.55];
+    var css = 'rgb(' + [0, 1, 2].map(function (k) { return Math.round(sc[k] * sc[3] + base[k] * (1 - sc[3])); }).join(',') + ')';
+    r.style.backgroundColor = css; b.style.backgroundColor = css;
+    bar.style.backgroundColor = css; bar.classList.add('is-on');
+  }
+
   /* ── Public API ───────────────────────────────────────────────────── */
   function isOpen() { return !!root && root.classList.contains('is-open'); }
   function open(o) {
@@ -213,6 +237,7 @@
     setExperience(o.experience);
     lastFocus = o.trigger || doc.activeElement;
     doc.documentElement.classList.add('ssm-lock');
+    tint(true);
     root.setAttribute('aria-hidden', 'false');
     root.classList.add('is-mounted');
     void root.offsetWidth;
@@ -227,6 +252,7 @@
     root.classList.remove('is-open');
     root.setAttribute('aria-hidden', 'true');
     doc.documentElement.classList.remove('ssm-lock');
+    tint(false);
     if (doc.activeElement && root.contains(doc.activeElement)) doc.activeElement.blur();
     closeTimer = setTimeout(function () { root.classList.remove('is-mounted'); }, 260);
     if (lastFocus && lastFocus.focus && doc.contains(lastFocus)) { try { lastFocus.focus({ preventScroll: true }); } catch (e) {} }
@@ -252,7 +278,7 @@
 
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', mount); else mount();
 
-  global.ShineSearch = { open: open, close: close, configure: configure, isOpen: isOpen, toast: toast, version: '2.0.0' };
+  global.ShineSearch = { open: open, close: close, configure: configure, isOpen: isOpen, toast: toast, version: '2.0.1' };
   if (typeof global.openSearchOverlay !== 'function') {
     global.openSearchOverlay = function (prefill) { open(prefill ? merge({ mode: 'edit', source: 'jsrp' }, prefill) : {}); };
   }

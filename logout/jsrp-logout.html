@@ -3850,10 +3850,10 @@ html, body, .view-jsrp-m { overflow-x: clip !important; }   /* was hidden — th
 @media (prefers-reduced-motion: reduce) { .alert-close-col, .alert-close-col svg { transition: none; } }
 </style>
 <!-- ▲ COMPONENT · alert -->
-<!-- ▼ COMPONENT · search-modal v2.0.0 · verbatim copy of App-components/Modals/search-modal/search-modal.css — do not edit here -->
+<!-- ▼ COMPONENT · search-modal v2.0.1 · verbatim copy of App-components/Modals/search-modal/search-modal.css — do not edit here -->
 <style data-component="search-modal">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · SEARCH MODAL  (app component · App-components/Modals/)    v2.0.0
+   SHINE · SEARCH MODAL  (app component · App-components/Modals/)    v2.0.1
    "What's next for you?" — keyword · location · experience → Search Jobs
    ───────────────────────────────────────────────────────────────────────
    v2.0.0 (user 2026-11-19: "use only reusable components"): this file now
@@ -3872,9 +3872,19 @@ html, body, .view-jsrp-m { overflow-x: clip !important; }   /* was hidden — th
    Load order on a page: buttons.css · badges.css · field-base.css · inline-dropdown.css · alert.css · search-modal.css ·
    (notify.css) — scripts: field-base.js · inline-dropdown.js · alert.js · search-modal.js · (notify.js).
    Every class here is prefixed `ssm-`; values mirror DESIGN-SYSTEM.md (light, mobile column).
+
+   v2.0.1 (user 2026-11-19, iPhone + Android: "the scrim doesn't cover the whole screen"):
+     · the scrim reaches the status bar: it is painted as an image layer (iOS 26 reads a fixed element's
+       background-color for the status bar and freezes a faded one), and while the modal is open the script
+       puts a status-bar strip (.ssm-statusbar) on top, coloured like the page under the scrim — iOS takes the
+       status bar's colour from it, the Android app's bar sampler reads it too. Same technique as bottom-sheet.
+     · the card sits 24 from the top, the same as from the sides (was 12): top = safe area + 24. Inside the
+       Android app the WebView already sits under the status bar, so its safe area counts as 0 there.
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* ── Scoped tokens (only what the modal itself draws) ──────────────── */
+.ssm, .ssm-statusbar { --ssm-safe-top: env(safe-area-inset-top, 0px); }
+html.in-app .ssm, html.in-app .ssm-statusbar { --ssm-safe-top: 0px; }   /* Android app: the WebView sits below the status bar */
 .ssm {
   /* primitives (definitions only) */
   --ssm-c-brand-500-op12: rgba(26,86,255,.12);
@@ -3907,8 +3917,8 @@ html, body, .view-jsrp-m { overflow-x: clip !important; }   /* was hidden — th
   position: fixed; inset: 0; z-index: 9997;
   display: none; flex-direction: column; align-items: center;
   justify-content: flex-start;      /* the card anchors to the TOP so the on-screen keyboard never covers the fields */
-  padding: max(var(--ssm-stack-md), env(safe-area-inset-top)) var(--ssm-layout-xs) var(--ssm-layout-xs);   /* 12 from the top, 24 at the sides */
-  background: var(--ssm-surface-scrim);
+  padding: calc(var(--ssm-safe-top) + var(--ssm-layout-xs)) var(--ssm-layout-xs) var(--ssm-layout-xs);   /* v2.0.1: 24 from the top (under the status bar), the same as the sides */
+  background: linear-gradient(var(--ssm-surface-scrim), var(--ssm-surface-scrim));   /* v2.0.1: an image layer, never background-color (iOS status bar) */
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   opacity: 0; transition: opacity var(--ssm-dur) ease;
   font-family: var(--ssm-font); color: var(--ssm-content-base);
@@ -3919,6 +3929,17 @@ html, body, .view-jsrp-m { overflow-x: clip !important; }   /* was hidden — th
 .ssm.is-mounted { display: flex; }
 .ssm.is-open { opacity: 1; }
 html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
+
+/* ── Status-bar strip (v2.0.1, made by the script while the modal is open) ──
+   iOS 26 colours the status bar from the background-color of a fixed, full-width box at the top edge that is more
+   than 10 px tall (it reads it live; opacity is not applied). The script sets this strip's colour = the page colour
+   dimmed by the scrim, so the status bar goes dark with the screen. 12 % opacity: what shows is the colour of what
+   is under it anyway. It ends 8 px above the card. */
+.ssm-statusbar {
+  display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9998; pointer-events: none;
+  height: calc(var(--ssm-safe-top) + 16px); opacity: .12;
+}
+.ssm-statusbar.is-on { display: block; }
 
 /* ── Card ──────────────────────────────────────────────────────────── */
 .ssm-dialog { position: relative; width: 100%; max-width: 480px; flex: none; }
@@ -7281,10 +7302,10 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 })(window);
 </script>
 <!-- ▲ COMPONENT · alert -->
-<!-- ▼ COMPONENT · search-modal v2.0.0 · verbatim copy of App-components/Modals/search-modal/search-modal.js — do not edit here -->
+<!-- ▼ COMPONENT · search-modal v2.0.1 · verbatim copy of App-components/Modals/search-modal/search-modal.js — do not edit here -->
 <script data-component="search-modal">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · SEARCH MODAL  (app component · App-components/Modals/)    v2.0.0
+   SHINE · SEARCH MODAL  (app component · App-components/Modals/)    v2.0.1
    Pair with search-modal.css. Built ONLY from App-components (v2.0.0, user 2026-11-19):
      buttons atom (close · Search Jobs) · badges atom (eyebrow) · input fields / field-base (3 fields, Small) ·
      inline dropdown (ShineDropdown: role · city suggestions, experience list) · alert (ShineAlert: validation) ·
@@ -7474,6 +7495,30 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
     if (global.ShineNotify) return global.ShineNotify.toast(msg, { tone: tone || 'neutral' });
   }
 
+  /* ── Status bar (v2.0.1) ──────────────────────────────────────────────
+     iOS 26 paints the status bar from html / body's background-color or from a fixed, full-width box at the top
+     edge — never from the scrim's image layer. While the modal is open: html + body take the page colour dimmed by
+     the scrim, and a strip (.ssm-statusbar) on top carries the same colour (Safari re-reads it live; the Android
+     app's bar sampler reads it too). Restored the moment the modal closes. Same technique as bottom-sheet. */
+  var bar = null, tintSaved = null;
+  function rgba(c) { var m = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?/.exec(c || ''); return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null; }
+  function tint(on) {
+    var r = doc.documentElement, b = doc.body; if (!b) return;
+    if (!bar) { bar = doc.createElement('div'); bar.className = 'ssm-statusbar'; bar.setAttribute('aria-hidden', 'true'); b.appendChild(bar); }
+    if (!on) {
+      if (tintSaved) { r.style.backgroundColor = tintSaved[0]; b.style.backgroundColor = tintSaved[1]; tintSaved = null; }
+      bar.classList.remove('is-on'); return;
+    }
+    if (!tintSaved) tintSaved = [r.style.backgroundColor, b.style.backgroundColor];
+    var base = rgba(getComputedStyle(b).backgroundColor);
+    if (!base || base[3] < 0.5) base = rgba(getComputedStyle(r).backgroundColor);
+    if (!base || base[3] < 0.5) base = [250, 249, 246, 1];                       // surface.neutral.base
+    var sc = rgba(getComputedStyle(root).getPropertyValue('--ssm-surface-scrim')) || [13, 17, 23, 0.55];
+    var css = 'rgb(' + [0, 1, 2].map(function (k) { return Math.round(sc[k] * sc[3] + base[k] * (1 - sc[3])); }).join(',') + ')';
+    r.style.backgroundColor = css; b.style.backgroundColor = css;
+    bar.style.backgroundColor = css; bar.classList.add('is-on');
+  }
+
   /* ── Public API ───────────────────────────────────────────────────── */
   function isOpen() { return !!root && root.classList.contains('is-open'); }
   function open(o) {
@@ -7498,6 +7543,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
     setExperience(o.experience);
     lastFocus = o.trigger || doc.activeElement;
     doc.documentElement.classList.add('ssm-lock');
+    tint(true);
     root.setAttribute('aria-hidden', 'false');
     root.classList.add('is-mounted');
     void root.offsetWidth;
@@ -7512,6 +7558,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
     root.classList.remove('is-open');
     root.setAttribute('aria-hidden', 'true');
     doc.documentElement.classList.remove('ssm-lock');
+    tint(false);
     if (doc.activeElement && root.contains(doc.activeElement)) doc.activeElement.blur();
     closeTimer = setTimeout(function () { root.classList.remove('is-mounted'); }, 260);
     if (lastFocus && lastFocus.focus && doc.contains(lastFocus)) { try { lastFocus.focus({ preventScroll: true }); } catch (e) {} }
@@ -7537,7 +7584,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', mount); else mount();
 
-  global.ShineSearch = { open: open, close: close, configure: configure, isOpen: isOpen, toast: toast, version: '2.0.0' };
+  global.ShineSearch = { open: open, close: close, configure: configure, isOpen: isOpen, toast: toast, version: '2.0.1' };
   if (typeof global.openSearchOverlay !== 'function') {
     global.openSearchOverlay = function (prefill) { open(prefill ? merge({ mode: 'edit', source: 'jsrp' }, prefill) : {}); };
   }
