@@ -3344,7 +3344,6 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
               <label class="field-label" for="moNotice">Notice period</label>
               <div class="field-control"><input class="field-input" id="moNotice" placeholder="Select notice period" required></div>
             </div>
-            <fieldset class="field field--sm field-multi" data-field="date" data-parts="dmy" data-pick="sheet" data-pick-my="merged" data-min="today" data-max="today+6m" data-pick-conflict="error" data-required data-error-empty="Select your last working day" data-error-min="Last working day can’t be in the past" data-error-max="Last working day must be within 6 months" data-k="lwd" hidden><legend class="field-label">Last working day</legend></fieldset>
           </div>
           <div class="field field--sm" data-field="combo" data-combo="inline" data-combo-free data-k="loc" data-error-empty="Enter your current location">
             <label class="field-label" for="moLoc">Current location</label>
@@ -6594,46 +6593,117 @@ window.__MO_CFG = {
     welcomeUrl: 'signup-welcome.html'                     // the end: Add your resume (upload or skip) → Welcome to Shine
   };
 </script>
+<!-- ▼ SHEET · Notice period (user 2026-11-25) — exactly the Profile tab's "How soon can you join a new organization?" (App-login ·
+     Profile › job search status, step 2): bottom-sheet component · display Large · × · auto bottom. The six options as chips (Medium);
+     Serving Notice Period shows the Last working day under them — the sign-up's own field (Day ⌄ · Month & year ⌄, picked from a
+     sheet, today … 6 months); Done. Opened by every Notice period field (Almost there · Edit basic details · Basic details). -->
+<style>.field-helper .mo-lwd-d { font-weight: var(--weight-semibold, 600); color: var(--fld-text); }   /* the last working day under Notice period */</style>
+<div class="bs" id="moNoticeSheet" data-bs-cta="auto" hidden>
+  <div class="bs-top"><div class="bs-handle" aria-hidden="true"></div>
+    <div class="bs-head bs-head--display bs-head--lg">
+      <div class="bs-heading"><h2 class="bs-title">How soon can you join a new <span class="accent">organization?</span></h2></div>
+      <button class="bs-close" type="button" data-bs-close aria-label="Close"><svg aria-hidden="true" focusable="false" data-icon="ic_close-outline" viewBox="0 0 20 20" fill="none"><path d="M16.2528 3.00257L16.3599 3.01371L16.3814 3.01543L16.4028 3.02228L16.5056 3.05313L16.5253 3.05999L16.5433 3.06942L16.6582 3.12941L16.6753 3.14398L16.7584 3.21254L16.7747 3.22625L16.7884 3.24253L16.857 3.32566L16.8716 3.3428L16.9316 3.45764L16.941 3.47564L16.947 3.49535L16.9787 3.59819L16.9855 3.61876L16.9873 3.64104L16.9984 3.74816L17.0001 3.76959L16.9984 3.79101L16.9873 3.89814L16.9855 3.92042L16.9787 3.94099L16.947 4.04383L16.941 4.06354L16.9316 4.08154L16.8716 4.19638L16.857 4.21352L16.7884 4.29665L16.7816 4.30522L11.0859 10L16.7816 15.6956L16.7884 15.7042L16.857 15.7873L16.8716 15.8045L16.9316 15.9193L16.941 15.9373L16.947 15.957L16.9787 16.0599L16.9855 16.0804L16.9873 16.1027L16.9984 16.2098L17.0001 16.2313L16.9984 16.2527L16.9873 16.3598L16.9855 16.3812L16.9787 16.4027L16.947 16.5055L16.941 16.5252L16.9316 16.5432L16.8716 16.6581L16.857 16.6752L16.7884 16.7583L16.7747 16.7746L16.7584 16.7883L16.6753 16.8569L16.6582 16.8714L16.5433 16.9314L16.5253 16.9409L16.5056 16.9469L16.4028 16.9786L16.3814 16.9854L16.3599 16.9871L16.2528 16.9983L16.2314 17L16.21 16.9983L16.1028 16.9871L16.0806 16.9854L16.06 16.9786L15.9571 16.9469L15.9374 16.9409L15.9194 16.9314L15.8046 16.8714L15.7875 16.8569L15.7043 16.7883L15.6958 16.7815L10.0001 11.0858L4.30534 16.7815L4.29676 16.7883L4.21364 16.8569L4.1965 16.8714L4.08166 16.9314L4.06366 16.9409L4.04395 16.9469L3.94111 16.9786L3.92054 16.9854L3.89826 16.9871L3.79113 16.9983L3.76971 17L3.74828 16.9983L3.64116 16.9871L3.61888 16.9854L3.59831 16.9786L3.49547 16.9469L3.47576 16.9409L3.45776 16.9314L3.34292 16.8714L3.32578 16.8569L3.24265 16.7883L3.22637 16.7746L3.21266 16.7583L3.1441 16.6752L3.12953 16.6581L3.06954 16.5432L3.06011 16.5252L3.05325 16.5055L3.0224 16.4027L3.01555 16.3812L3.01383 16.3598L3.00269 16.2527L3.00098 16.2313L3.00269 16.2098L3.01383 16.1027L3.01555 16.0804L3.0224 16.0599L3.05325 15.957L3.06011 15.9373L3.06954 15.9193L3.12953 15.8045L3.1441 15.7873L3.21266 15.7042L3.21951 15.6956L3.22637 15.6879L8.91344 10L3.21866 4.30522L3.21266 4.29665L3.1441 4.21352L3.12953 4.19638L3.06954 4.08154L3.06011 4.06354L3.05325 4.04383L3.0224 3.94099L3.01555 3.92042L3.01383 3.89814L3.00269 3.79101L3.00098 3.76959L3.00269 3.74816L3.01383 3.64104L3.01555 3.61876L3.0224 3.59819L3.05325 3.49535L3.06011 3.47564L3.06954 3.45764L3.12953 3.3428L3.1441 3.32566L3.21266 3.24253L3.22637 3.22625L3.24265 3.21254L3.32578 3.14398L3.34292 3.12941L3.45776 3.06942L3.47576 3.05999L3.49547 3.05313L3.59831 3.02228L3.61888 3.01543L3.64116 3.01371L3.74828 3.00257L3.76971 3L3.79113 3.00257L3.89826 3.01371L3.92054 3.01543L3.94111 3.02228L4.04395 3.05313L4.06366 3.05999L4.08166 3.06942L4.1965 3.12941L4.21364 3.14398L4.29676 3.21254L4.30534 3.21854L10.0001 8.91332L15.688 3.22625L15.6958 3.21939L15.7043 3.21254L15.7875 3.14398L15.8046 3.12941L15.9194 3.06942L15.9374 3.05999L15.9571 3.05313L16.06 3.02228L16.0806 3.01543L16.1028 3.01371L16.21 3.00257L16.2314 3L16.2528 3.00257Z" fill="currentColor"/></svg></button>
+    </div>
+  </div>
+  <div class="bs-body bs-body--gutter">
+    <div class="pf-form">
+      <fieldset class="field field--sm pf-choice" data-choice="notice" data-chip-size="md" data-error-empty="Choose your notice period"><legend class="field-label field-label--hidden">Notice period</legend><div class="chips pf-chips" role="radiogroup" aria-label="Notice period"></div></fieldset>
+      <fieldset class="field field--sm field-multi" data-field="date" data-parts="dmy" data-pick="sheet" data-pick-my="merged" data-min="today" data-max="today+6m" data-pick-conflict="error" data-required data-error-empty="Select your last working day" data-error-min="Last working day can’t be in the past" data-error-max="Last working day must be within 6 months" data-k="lwd" data-lwd hidden><legend class="field-label">Last working day</legend></fieldset>
+    </div>
+  </div>
+  <div class="bs-bottom"><div class="bs-actions"><button class="btn btn--primary btn--lg btn--block" type="button" data-act="notice-done">Done</button></div></div>
+</div>
 <script data-page="notice-lwd">
-/* ═══ SHINE APP · SIGN UP — NOTICE PERIOD + LAST WORKING DAY (user 2026-11-02) ═══════════════════════════════
+/* ═══ SHINE APP · SIGN UP — NOTICE PERIOD + LAST WORKING DAY (user 2026-11-02 · sheet 2026-11-25) ═════════════════════
    Shared by signup-manual.html (Basic details) and signup-resume.html (Almost there · Edit basic details).
-   Notice period (combo box · sheet): Immediate Joiner · Serving Notice Period · 15 Days · 1 Month · 2 Months · 3 Months.
-   "Serving notice period" shows the Last working day under it — the multi-input component's picked date
-   (data-pick="sheet", v3.3.0 — the same field as App-login's Profile and apply flow): DD ⌄ · MM ⌄ · YYYY ⌄, a tap opens the
-   day / month / year sheet, today … 6 months from today (user 2026-11-06 — out-of-range values faded; a day the month
-   or year picked after it hasn't got stays, with "April has only 30 days" · "February 2027 has only 28 days"; hidden = cleared). The picker, its range and its messages are the component's; this
-   file only shows / hides the field and reads / writes the pair.
+   v2 (user 2026-11-25): the Notice period field opens #moNoticeSheet — exactly the Profile tab's "How soon can you join
+   a new organization?" (App-login · Profile › job search status): Immediate Joiner · Serving Notice Period · 15 Days ·
+   1 Month · 2 Months · 3 Months as chips; Serving Notice Period shows the Last working day under them (the multi-input
+   component's picked date, Day ⌄ · Month & year ⌄ — today … 6 months; hidden = cleared); Done keeps both, × / the scrim
+   drop the changes. The forms no longer carry a Last working day field: each form keeps its pair here, and its Notice
+   period field reports "Add your last working day" when Serving Notice Period has no date (a resume can give one without
+   the other). v2.1 (user 2026-11-25): once a date is kept, the Notice period field's helper reads "24 Dec 2026 is last
+   working day" → v2.2 "Last working day · 24 Dec 2026" (the date semibold, in the field's text colour).
    → window.MoNotice = { OPTIONS, SERVING, label(code, lwd), attach(root) → { sync(), read(), write(code, lwd) } } */
 (function () {
   'use strict';
   var F = window.ShineField; if (!F) return;
+  var doc = document;
   var OPTIONS = [['Immediate', 'Immediate Joiner'], ['Serving notice', 'Serving Notice Period'], ['15 days', '15 Days'],
                  ['1 month', '1 Month'], ['2 months', '2 Months'], ['3 months', '3 Months']];   // Title Case (user 2026-11-06)
   var SERVING = 'Serving notice';
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
   function label(code, lwd) {                            // what a card shows: "1 month" · "Serving till 15 Dec 2026"
     if (code === SERVING && lwd) { var t = /^(\d{4})-(\d{2})-(\d{2})$/.exec(lwd); if (t) return 'Serving till ' + (+t[3]) + ' ' + MON[+t[2] - 1] + ' ' + t[1]; }
     for (var i = 0; i < OPTIONS.length; i++) if (OPTIONS[i][0] === code) return OPTIONS[i][1];
     return code || '';
   }
+
+  /* ── the sheet (one for the page) ─────────────────────────────────── */
+  var SH = doc.getElementById('moNoticeSheet'), cur = null;      // cur = the form being edited
+  var CH = SH && SH.querySelector('[data-choice="notice"]'), LW = SH && SH.querySelector('[data-k="lwd"]');
+  if (CH) CH.querySelector('.pf-chips').innerHTML = OPTIONS.map(function (o) {
+    return '<button class="chip pf-chip chip--md" type="button" role="radio" aria-checked="false" tabindex="-1" data-value="' + esc(o[0]) + '"><span class="chip-label">' + esc(o[1]) + '</span></button>';
+  }).join('');
+  function chipsOf() { return [].slice.call(CH.querySelectorAll('.pf-chip')); }
+  function picked() { var c = CH.querySelector('.pf-chip[aria-checked="true"]'); return c ? c.getAttribute('data-value') : ''; }
+  function mark(v) {                                     // the chips' state without an event (opening the sheet)
+    var hit = false;
+    chipsOf().forEach(function (c) { var on = c.getAttribute('data-value') === v; hit = hit || on; c.setAttribute('aria-checked', on ? 'true' : 'false'); c.tabIndex = on ? 0 : -1; });
+    if (!hit && chipsOf()[0]) chipsOf()[0].tabIndex = 0;
+  }
+  function showLwd(on, iso) {                            // the date only under Serving Notice Period; hidden = cleared (as Profile)
+    LW.hidden = !on;
+    [].forEach.call(LW.querySelectorAll('.field-input'), function (i) { i.disabled = !on; });
+    if (on) { if (iso !== undefined) { if (iso) F.get(LW).set(iso); else F.get(LW).clear(); } }
+    else { if (F.get(LW).parts().some(Boolean)) F.get(LW).clear(); F.set(LW, null); }
+    if (window.ShineSheet && window.ShineSheet.refresh && !SH.hidden) window.ShineSheet.refresh(SH);
+  }
+  if (SH) {
+    F.get(LW);                                           // the component draws the boxes now
+    SH.addEventListener('pf:choice', function (e) { showLwd(e.detail.value === SERVING); F.set(CH, null); });
+    SH.addEventListener('click', function (e) {
+      if (!e.target.closest('[data-act="notice-done"]') || !cur) return;
+      var code = picked();
+      if (!code) { F.set(CH, 'invalid', CH.getAttribute('data-error-empty')); return; }
+      if (code === SERVING && !F.validate(LW)) return;
+      var f = cur; cur = null;
+      f.done(code, code === SERVING ? (F.get(LW).value() || null) : null);
+      window.ShineSheet.close(SH);
+    });
+  }
+  function openFor(form, trigger) {
+    if (!SH || !window.ShineSheet) return;
+    cur = form; var p = form.read();
+    F.set(CH, null); mark(p.notice || ''); showLwd(p.notice === SERVING, p.lwd || '');
+    window.ShineSheet.open(SH, { trigger: trigger });
+  }
+
+  /* ── a form's Notice period field ──────────────────────────────────── */
   function attach(root) {
-    var n = root.querySelector('[data-k="notice"]'), fs = root.querySelector('[data-k="lwd"]');
-    F.get(n).options(OPTIONS.map(function (o) { return { value: o[0], label: o[1] }; }));
-    F.get(fs);                                           // the component draws the boxes now
-    function sync() {                                    // the date only while "Serving notice period" is picked (and the block is shown)
-      var on = F.get(n).value() === SERVING && !(n.closest('[hidden]'));
-      fs.hidden = !on;
-      [].forEach.call(fs.querySelectorAll('.field-input'), function (i) { i.disabled = !on; });
-      if (!on) F.set(fs, null);
-      if (F.get(n).value() !== SERVING && F.get(fs).parts().some(Boolean)) F.get(fs).clear();   // another option: the date is cleared (user 2026-11-06)
+    var n = root.querySelector('[data-k="notice"]'), api = F.get(n), lwd = null;
+    api.options(OPTIONS.map(function (o) { return { value: o[0], label: o[1] }; }));
+    var input = n.querySelector('.field-input'), ctl = n.querySelector('.field-control');
+    function paint() {                                   // v2.1 (user 2026-11-25): the date under the field · v2.2 (user: "short and crisp"): "Last working day · 24 Dec 2026"
+      var t = api.value() === SERVING && lwd && /^(\d{4})-(\d{2})-(\d{2})$/.exec(lwd);
+      F.set(n, t ? 'helper' : null, t ? '<span>Last working day · <b class="mo-lwd-d">' + (+t[3]) + ' ' + MON[+t[2] - 1] + ' ' + t[1] + '</b></span>' : '');   // v2.2: label · date (the date in the field's text colour)
     }
-    n.addEventListener('shine:combo', function () { setTimeout(sync, 0); });
-    sync();
+    var form = {
+      read: function () { var c = api.value() || null; return { notice: c, lwd: c === SERVING ? lwd : null }; },
+      done: function (code, d) { lwd = d; api.set(code); paint(); }
+    };
+    function open(e) { if (input.disabled) return; if (e) { e.preventDefault(); e.stopImmediatePropagation(); } openFor(form, input); }
+    // the field opens this sheet, never the combo box's own list (capture: before the combo box hears the tap / key)
+    ctl.addEventListener('click', open, true);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') open(e); }, true);
+    var check0 = api.check;                              // Serving Notice Period without a date: the field says so
+    api.check = function (submit) { var m = check0(submit); if (m) return m; return submit && api.value() === SERVING && !lwd ? 'Add your last working day' : ''; };
     return {
-      sync: sync,
-      read: function () { var c = F.get(n).value() || null; return { notice: c, lwd: c === SERVING ? (F.get(fs).value() || null) : null }; },
-      write: function (code, lwd) { if (code) F.get(n).set(code); else F.get(n).clear(); if (lwd) F.get(fs).set(lwd); else F.get(fs).clear(); sync(); }
+      sync: function () {},                              // (v1 showed / hid the form's date field — the sheet does it now)
+      read: form.read,
+      write: function (code, d) { lwd = code === SERVING ? (d || null) : null; if (code) api.set(code); else api.clear(); paint(); setTimeout(paint, 0); }   // again after the page resets the fields' states
     };
   }
   window.MoNotice = { OPTIONS: OPTIONS, SERVING: SERVING, label: label, attach: attach };
