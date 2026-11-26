@@ -1471,10 +1471,11 @@ html.bs-lock .stp-strip { display: none; }                 /* a bottom sheet's s
 }
 </style>
 <!-- ▲ COMPONENT · top-app-bar -->
-<!-- ▼ COMPONENT · bottom-sheet v3.2.0 · verbatim copy of App-components/Modals/bottom-sheet/bottom-sheet.css — do not edit here -->
+<!-- ▼ COMPONENT · bottom-sheet v3.3.0 · verbatim copy of App-components/Modals/bottom-sheet/bottom-sheet.css — do not edit here -->
 <style data-component="bottom-sheet">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · BOTTOM SHEET  (app component · App-login)            v3.2.0
+   SHINE · BOTTOM SHEET  (app component · App-login)            v3.3.0
+   v3.3.0 · every scrim blurs the page behind a little (effect.blur.scrim 3) — strong keeps its 4
    v3.2.0 · the top section can hold the sheet's search box (.bs-search) — title + search are one heading block
    The one container behind every slide-up panel in the logged-in app — in TWO VARIATIONS:
      1 · BOTTOM SHEET  .bs            slides up from the bottom edge, the page shows above it
@@ -1660,6 +1661,7 @@ html.bs-lock .stp-strip { display: none; }                 /* a bottom sheet's s
   --bs-dur-in: 320ms; --bs-dur-out: 260ms; --bs-dur-scrim: 240ms; --bs-dur-kb: 240ms;
   --bs-lift-up: -1px;                                    /* motion.lift.up (proposed in A.02) */
   --bs-blur-overlay: 4px;                                /* PROPOSED effect.blur.overlay      */
+  --bs-blur-scrim: 3px;                                  /* PROPOSED effect.blur.scrim (v3.3.0) — every scrim */
 
   /* stacking — ShineSheet assigns z = --bs-z + 2·depth (+1 for the sheet) */
   --bs-z: 100;
@@ -1727,6 +1729,7 @@ html.in-app .bs, html.in-app .bs-statusbar { --bs-safe: 0px; --bs-safe-top: 0px;
      background-color of a fixed element at the top edge (ignoring its opacity) */
   --bs-scrim-c: var(--bs-surface-neutral-state-overlay-heavy);   /* v3.0.0: 24 % → 72 % (user's reference) */
   background: linear-gradient(var(--bs-scrim-c), var(--bs-scrim-c));
+  -webkit-backdrop-filter: blur(var(--bs-blur-scrim)); backdrop-filter: blur(var(--bs-blur-scrim));   /* v3.3.0 (user 2026-11-26): a small blur — the page behind reads as shapes, not words; strong keeps its 4 */
   opacity: 0; pointer-events: none;
   transition: opacity var(--bs-dur-scrim) ease;
   -webkit-tap-highlight-color: transparent;
@@ -4296,10 +4299,11 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
 
 
 
-<!-- ▼ COMPONENT · bottom-sheet v3.2.0 · verbatim copy of App-components/Modals/bottom-sheet/bottom-sheet.js — do not edit here -->
+<!-- ▼ COMPONENT · bottom-sheet v3.3.0 · verbatim copy of App-components/Modals/bottom-sheet/bottom-sheet.js — do not edit here -->
 <script data-component="bottom-sheet">
 /* ═══════════════════════════════════════════════════════════════════════
-   SHINE · BOTTOM SHEET  (app component · App-login)            v3.2.0
+   SHINE · BOTTOM SHEET  (app component · App-login)            v3.3.0
+   v3.3.0 · every scrim blurs the page behind a little (effect.blur.scrim 3) — strong keeps its 4
    Pair with bottom-sheet.css. Zero dependencies, no build step.
    Engine = App-logout's ShineSheet v1.2.1; v2.0 adds the three-section anatomy;
    v2.1 aligns every value with design-system/DESIGN-SYSTEM.md.
@@ -4348,7 +4352,7 @@ html.ssm-lock, html.ssm-lock body { overflow: hidden !important; }
    Per-sheet options (attributes on .bs):
      data-bs-dismiss="false"   no backdrop / Escape / drag dismissal
      data-bs-drag="false"      no drag-to-dismiss
-     data-bs-scrim="strong"    overlay-strong (36%) + blur (interruptive)  ·  "none" = no scrim
+     data-bs-scrim="strong"    a heavier blur, 4 (interruptive) — every scrim is 72 % + a 3 blur (v3.3.0)  ·  "none" = no scrim
      data-bs-autofocus         on a child → focused on open (default: the sheet)
      data-bs-cta="…"           inline | sticky | auto
      .bs--nested               opens inside its parent .bs and covers it

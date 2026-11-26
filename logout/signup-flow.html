@@ -328,6 +328,7 @@
   --bs-scrim: rgba(13,17,23,.30);
   --bs-scrim-strong: rgba(13,17,23,.45);              /* auth / share nudges      */
   --bs-scrim-strong-blur: 4px;
+  --bs-scrim-blur: 3px;                                  /* v3.3.0 backport: a small blur under every scrim */
   --bs-scrim-nested: rgba(13,17,23,.40);              /* sub-sheet over a sheet   */
 
   /* elevation — proposed `elevation.neutral.sheet` (upward-cast modal) */
@@ -363,6 +364,7 @@
      background-color of a fixed element at the top edge (ignoring its opacity) — see v1.2 note */
   --bs-scrim-c: var(--bs-scrim);
   background: linear-gradient(var(--bs-scrim-c), var(--bs-scrim-c));
+  -webkit-backdrop-filter: blur(var(--bs-scrim-blur)); backdrop-filter: blur(var(--bs-scrim-blur));   /* v3.3.0 (user 2026-11-26): a small blur — the page behind reads as shapes, not words; strong keeps its 4 */
   opacity: 0; pointer-events: none;
   transition: opacity var(--bs-dur-scrim) ease;
   -webkit-tap-highlight-color: transparent;
