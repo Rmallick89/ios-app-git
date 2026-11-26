@@ -3443,9 +3443,9 @@ html.mo-in .sp-dust.d2 { animation-duration: 6.5s; } html.mo-in .sp-dust.d3 { an
           <div class="card mo-entry" id="empCard">
             <div class="mo-entry-head"><p class="mo-eyebrow" data-k="empNo">Job 1</p></div>
             <div class="pf-form" id="fEmp">
-              <div class="field field--sm" data-field="combo" data-combo="inline" data-combo-free data-k="title" data-error-empty="Enter your job title">
+              <div class="field field--sm" data-field="text" data-k="title" data-error-empty="Enter your job title">
                 <label class="field-label" for="moEmTitle">Job title</label>
-                <div class="field-control"><input class="field-input" id="moEmTitle" placeholder="e.g. Product Manager" autocomplete="off" required></div>
+                <div class="field-control"><input class="field-input" id="moEmTitle" placeholder="e.g. Product Manager" autocomplete="organization-title" required></div>
               </div>
               <div class="field field--sm" data-field="text" data-k="company" data-error-empty="Enter the company name">
                 <label class="field-label" for="moEmCompany">Company name</label>
@@ -7209,7 +7209,7 @@ window.__MO_CFG = {
   empType();
   linkDates(MF);
   chips(emCur, [['yes', 'Yes'], ['no', 'No']]);
-  F(k(MF, 'title')).options(D.ROLES);
+  // Job title: a plain text field — no suggestions list (user 2026-11-26)
   F(k(MF, 'dept')).options(D.DEPTS.map(function (d) { return { value: d[0], label: d[1], group: d[2] }; }));   // grouped (combo box v4.4.0)
   F(k(MF, 'ind')).options(D.INDS.map(function (d) { return { value: d[0], label: d[1] }; }));
   show(k(MF, 'end'), false);
@@ -7228,7 +7228,7 @@ window.__MO_CFG = {
     },
     read: function (f) {
       var cur = getChoice(emCur) === 'yes';
-      return { title: F(k(f, 'title')).label() || F(k(f, 'title')).value(), company: F(k(f, 'company')).value(), type: askType() ? F(emType).value() : '', dept: F(k(f, 'dept')).value(), deptLabel: F(k(f, 'dept')).label(),
+      return { title: F(k(f, 'title')).value(), company: F(k(f, 'company')).value(), type: askType() ? F(emType).value() : '', dept: F(k(f, 'dept')).value(), deptLabel: F(k(f, 'dept')).label(),
         ind: F(k(f, 'ind')).value(), indLabel: F(k(f, 'ind')).label(), current: cur, start: F(k(f, 'start')).value(), end: cur ? '' : F(k(f, 'end')).value() };
     },
     write: function (f, it) {
